@@ -45,7 +45,7 @@ class UserController extends Controller
         ]);
 
         //CHECK EMAIL
-        $user = User::where('email', $fields['email'])->first();
+        $user = User::where('email', $fields['email'])->where('status', 'ACTIVE')->first();
 
         //CHECK PASSWORD
         if(!$user || !Hash::check($fields['password'], $user->password)) {

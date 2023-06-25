@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,7 +20,12 @@ Route::post('/users/register', [UserController::class, 'register']);
 Route::post('/users/login', [UserController::class, 'login']);
 
 Route::group(['middleware' => ['auth:sanctum']], function() {
+
     Route::post('/users/logout', [UserController::class, 'logout']);
+
+    Route::get('/patients', [PatientController::class, 'index']);
+    Route::post('/patients/add', [PatientController::class, 'store']);
+
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
