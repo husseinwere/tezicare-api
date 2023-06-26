@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PatientController extends Controller
 {
@@ -39,7 +40,7 @@ class PatientController extends Controller
      */
     public function show(string $id)
     {
-        return Patient::where('id', $id)->get();
+        return Patient::find($id);
     }
 
     /**
@@ -47,7 +48,10 @@ class PatientController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $patient = Patient::find($id);
+        $patient->update($request->all());
+
+        return $patient;
     }
 
     /**
@@ -55,6 +59,26 @@ class PatientController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $patient = Patient::find($id);
+        $patient->status = 'DELETED';
+        $patient->save();
+
+        return $patient;
+    }
+
+    /**
+     * Search the specified resource.
+     */
+    public function searchByName(string $name)
+    {
+        return Patient::where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%');
+    }
+
+    /**
+     * Search the specified resource.
+     */
+    public function searchById(string $id)
+    {
+        return Patient::find($id);
     }
 }
