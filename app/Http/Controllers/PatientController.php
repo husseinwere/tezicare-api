@@ -71,7 +71,7 @@ class PatientController extends Controller
      */
     public function searchByName(string $name)
     {
-        return Patient::where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%');
+        return Patient::where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%')->get();
     }
 
     /**
@@ -79,6 +79,6 @@ class PatientController extends Controller
      */
     public function searchById(string $id)
     {
-        return Patient::find($id);
+        return Patient::where('id', $id)->get();
     }
 }
