@@ -48,8 +48,17 @@ class PatientController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $request->validate([
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'gender' => 'required',
+            'dob' => 'required',
+            'phone' => 'required'
+        ]);
+        $data = $request->all();
+
         $patient = Patient::find($id);
-        $patient->update($request->all());
+        $patient->update($data);
 
         return $patient;
     }
@@ -67,7 +76,7 @@ class PatientController extends Controller
     }
 
     /**
-     * Search the specified resource.
+     * Search the specified resource by name.
      */
     public function searchByName(string $name)
     {
@@ -75,7 +84,7 @@ class PatientController extends Controller
     }
 
     /**
-     * Search the specified resource.
+     * Search the specified resource by id.
      */
     public function searchById(string $id)
     {
