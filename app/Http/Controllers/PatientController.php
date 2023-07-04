@@ -12,9 +12,12 @@ class PatientController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Patient::where('status', 'ACTIVE')->get();
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
+        
+        return Patient::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -78,9 +81,12 @@ class PatientController extends Controller
     /**
      * Search the specified resource by name.
      */
-    public function searchByName(string $name)
+    public function searchByName(Request $request, string $name)
     {
-        return Patient::where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%')->get();
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
+
+        return Patient::where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -88,6 +94,6 @@ class PatientController extends Controller
      */
     public function searchById(string $id)
     {
-        return Patient::where('id', $id)->get();
+        return Patient::where('id', $id)->paginate();
     }
 }
