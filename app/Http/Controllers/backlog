@@ -1,8 +1,7 @@
-direct_service_patients
+direct_service_patients - NOT PRIO
 doctor_queue
 fixed_charges
 inpatients_queue
-insurance_covers
 invoice_additions
 lab_queue
 lab_tests
@@ -15,7 +14,6 @@ patient_conditions
 patient_diagnosis
 patient_drugs
 patient_impressions
-patient_insurance
 patient_prescriptions
 patient_recommendations
 patient_sessions

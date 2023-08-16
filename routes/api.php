@@ -4,6 +4,7 @@ use App\Http\Controllers\InsuranceCoverController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PatientInsuranceController;
 use App\Http\Controllers\UserController;
+use App\Models\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,12 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::put('/patients/delete/{id}', [PatientController::class, 'destroy']);
     Route::get('/patients/search/name/{name}', [PatientController::class, 'searchByName']);
     Route::get('/patients/search/id/{id}', [PatientController::class, 'searchById']);
+
+    Route::get('/sessions/{id}', [PatientSession::class, 'show']);
+    Route::post('/sessions/create', [PatientSession::class, 'store']);
+    Route::put('/sessions/update/{id}', [PatientSession::class, 'update']);
+    Route::put('/sessions/discharge/{id}', [PatientSession::class, 'discharge']);
+    Route::put('/sessions/delete/{id}', [PatientSession::class, 'destroy']);
 
     Route::resource('insurance/patients', PatientInsuranceController::class);
 
