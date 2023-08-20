@@ -25,4 +25,9 @@ pharmacy_queue
 pharmacy_stock
 radiology_queue
 radiology_tests
-reception_queue
+reception_queue -> clearance_queue
+
+
+delete patient in all queues before moving to inpatient
+
+think about the nurse; triage and nurse tasks should be distinguished
