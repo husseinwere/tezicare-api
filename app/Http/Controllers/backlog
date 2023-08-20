@@ -31,3 +31,8 @@ reception_queue -> clearance_queue
 delete patient in all queues before moving to inpatient
 
 think about the nurse; triage and nurse tasks should be distinguished
+
+
+*** TODO
+- Check queue controllers do everything they're supposed to
+- Write migrations and update models
