@@ -16,7 +16,6 @@ patient_drugs
 patient_impressions
 patient_prescriptions
 patient_recommendations
-patient_sessions
 patient_symptoms
 patient_tests
 patient_vitals

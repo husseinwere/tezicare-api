@@ -5,9 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\PatientSession;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PatientSessionController extends Controller
 {
+    public function store(Request $request)
+    {
+        $request->validate([
+            'patient_id' => 'required'
+        ]);
+        $data = $request->all();
+        $data['created_by'] = Auth::id();
+
+        return PatientSession::create($data);
+    }
+
     public function show(string $id)
     {
         return PatientSession::find($id);
