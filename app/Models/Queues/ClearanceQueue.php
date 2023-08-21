@@ -9,6 +9,8 @@ class ClearanceQueue extends Model
 {
     use HasFactory;
 
+    protected $table = 'clearance_queue';
+
     protected $fillable = [
         'session_id',
         'created_by',

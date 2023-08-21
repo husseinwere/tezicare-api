@@ -9,6 +9,8 @@ class PharmacyQueue extends Model
 {
     use HasFactory;
 
+    protected $table = 'pharmacy_queue';
+
     protected $fillable = [
         'session_id',
         'created_by',

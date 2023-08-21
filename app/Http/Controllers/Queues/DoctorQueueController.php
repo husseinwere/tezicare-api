@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Queues;
 
 use App\Http\Controllers\Controller;
 use App\Models\Queues\DoctorQueue;
+use App\Models\Queues\TriageQueue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,11 @@ class DoctorQueueController extends Controller
         $queue = DB::table($this->table)
                     ->join('patient_sessions', $this->table . '.session_id', '=', 'patient_sessions.id')
                     ->join('patients', 'patient_sessions.patient_id', '=', 'patients.id')
-                    ->select('patients.first_name', 'patients.last_name', 'patients.gender', 'patients.dob')
+                    ->join('users', $this->table . '.created_by', '=', 'users.id')
+                    ->select($this->table . '.status', $this->table . '.created_at', 
+                                DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 
+                                DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'),
+                                'patients.gender', 'patients.dob')
                     ->paginate($pageSize, ['*'], 'page', $pageIndex);
         
         return $queue;
@@ -34,13 +39,16 @@ class DoctorQueueController extends Controller
      */
     public function store(Request $request)
     {
+        $data = $request->all();
+
         //DELETE FROM PREVIOUS QUEUE WHERE NECESSARY
+        TriageQueue::where('session_id', $data['session_id'])->delete();
 
         //SAVE
         $request->validate([
             'session_id' => 'required'
         ]);
-        $data = $request->all();
+        
         $data['created_by'] = Auth::id();
 
         return DoctorQueue::create($data);
@@ -52,11 +60,15 @@ class DoctorQueueController extends Controller
     public function show(string $id)
     {
         return DB::table($this->table)
-        ->join('patient_sessions', $this->table . '.session_id', '=', 'patient_sessions.id')
-        ->join('patients', 'patient_sessions.patient_id', '=', 'patients.id')
-        ->where($this->table . '.id', $id)
-        ->select('patients.first_name', 'patients.last_name', 'patients.gender', 'patients.dob')
-        ->first();
+                    ->join('patient_sessions', $this->table . '.session_id', '=', 'patient_sessions.id')
+                    ->join('patients', 'patient_sessions.patient_id', '=', 'patients.id')
+                    ->join('users', $this->table . '.created_by', '=', 'users.id')
+                    ->where($this->table . '.id', $id)
+                    ->select($this->table . '.status', $this->table . '.created_at', 
+                                DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 
+                                DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'),
+                                'patients.gender', 'patients.dob')
+                    ->first();
     }
 
     /**

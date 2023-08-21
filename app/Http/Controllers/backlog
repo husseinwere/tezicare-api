@@ -34,5 +34,6 @@ think about the nurse; triage and nurse tasks should be distinguished
 
 
 *** TODO
-- Check queue controllers do everything they're supposed to
-- Write migrations and update models
+- patient vitals
+
+- queue asc, patients desc
