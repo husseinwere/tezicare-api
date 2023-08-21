@@ -1,14 +1,11 @@
 direct_service_patients - NOT PRIO
-doctor_queue
 fixed_charges
 inpatients_queue
 invoice_additions
-lab_queue
 lab_tests
 nurse_bill
 nurse_comments
 nurse_instructions
-nurse_queue
 nurse_stock
 patient_conditions
 patient_diagnosis
@@ -21,17 +18,11 @@ patient_tests
 patient_vitals
 payment_records
 payment_requests
-pharmacy_queue
 pharmacy_stock
-radiology_queue
 radiology_tests
-reception_queue -> clearance_queue
 
 
 delete patient in all queues before moving to inpatient
-
-think about the nurse; triage and nurse tasks should be distinguished
-
 
 *** TODO
 - patient vitals

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PatientSession;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class PatientSessionController extends Controller
@@ -15,6 +16,13 @@ class PatientSessionController extends Controller
             'patient_id' => 'required'
         ]);
         $data = $request->all();
+
+        $existingRecord = PatientSession::where('patient_id', $data['patient_id'])->where('status', 'ACTIVE')->first();
+
+        if ($existingRecord) {
+            return response(['error' => 'A session has already been started with this patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         $data['created_by'] = Auth::id();
 
         return PatientSession::create($data);
