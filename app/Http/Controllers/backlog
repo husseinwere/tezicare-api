@@ -15,7 +15,6 @@ patient_prescriptions
 patient_recommendations
 patient_symptoms
 patient_tests
-patient_vitals
 payment_records
 payment_requests
 pharmacy_stock
@@ -25,6 +24,6 @@ radiology_tests
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- patient vitals
+- doctor inputs
 
 - queue asc, patients desc

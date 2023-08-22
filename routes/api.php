@@ -95,6 +95,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //PATIENT VITALS
     Route::resource('patient-vitals', PatientVitalsController::class);
 
+    //PATIENT CONDITIONS
+    Route::resource('patient-conditions', PatientConditionController::class);
+
     //PATIENT INSURANCE
     Route::resource('insurance/patients', PatientInsuranceController::class);
 
