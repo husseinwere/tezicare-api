@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\InsuranceCoverController;
+use App\Http\Controllers\Patient\PatientDiagnosisController;
+use App\Http\Controllers\Patient\PatientImpressionController;
+use App\Http\Controllers\Patient\PatientRecommendationController;
+use App\Http\Controllers\Patient\PatientSymptomController;
 use App\Http\Controllers\Patient\PatientVitalsController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PatientInsuranceController;
@@ -97,6 +101,18 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //PATIENT CONDITIONS
     Route::resource('patient-conditions', PatientConditionController::class);
+
+    //PATIENT DIAGNOSIS
+    Route::resource('patient-diagnosis', PatientDiagnosisController::class);
+
+    //PATIENT IMPRESSIONS
+    Route::resource('patient-impressions', PatientImpressionController::class);
+
+    //PATIENT RECOMMENDATIONS
+    Route::resource('patient-recommendation', PatientRecommendationController::class);
+
+    //PATIENT SYMPTOMS
+    Route::resource('patient-symptoms', PatientSymptomController::class);
 
     //PATIENT INSURANCE
     Route::resource('insurance/patients', PatientInsuranceController::class);

@@ -16,9 +16,9 @@ class PatientConditionController extends Controller
     {
         $patientId = $request->query('patient_id');
 
-        $condition = PatientCondition::where('patient_id', $patientId)->get();
+        $conditions = PatientCondition::where('patient_id', $patientId)->get();
         
-        return $condition;
+        return $conditions;
     }
 
     /**

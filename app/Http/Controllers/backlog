@@ -7,13 +7,8 @@ nurse_bill
 nurse_comments
 nurse_instructions
 nurse_stock
-patient_conditions
-patient_diagnosis
 patient_drugs
-patient_impressions
 patient_prescriptions
-patient_recommendations
-patient_symptoms
 patient_tests
 payment_records
 payment_requests
@@ -24,6 +19,6 @@ radiology_tests
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- doctor inputs
+- patient_tests
 
 - queue asc, patients desc
