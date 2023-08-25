@@ -18,12 +18,15 @@ return new class extends Migration
             $table->unsignedBigInteger('test_id');
             $table->foreign('test_id')->references('id')->on('lab_tests');
             $table->string('test');
-            $table->decimal('fee', 10, 2);
+            $table->decimal('price', 10, 2);
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
-            $table->unsignedBigInteger('tested_by');
+            $table->string('payment_status')->default('NOT_PAID');
+            $table->string('results')->nullable();
+            $table->unsignedBigInteger('tested_by')->nullable();
             $table->foreign('tested_by')->references('id')->on('users');
             $table->timestamps();
+            $table->string('status')->default('ACTIVE');
         });
     }
 
