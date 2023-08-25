@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InsuranceCoverController;
+use App\Http\Controllers\Lab\LabTestController;
 use App\Http\Controllers\Patient\PatientDiagnosisController;
 use App\Http\Controllers\Patient\PatientImpressionController;
 use App\Http\Controllers\Patient\PatientRecommendationController;
@@ -109,10 +110,14 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('patient-impressions', PatientImpressionController::class);
 
     //PATIENT RECOMMENDATIONS
-    Route::resource('patient-recommendation', PatientRecommendationController::class);
+    Route::resource('patient-recommendations', PatientRecommendationController::class);
 
     //PATIENT SYMPTOMS
     Route::resource('patient-symptoms', PatientSymptomController::class);
+
+
+    //LAB TESTS
+    Route::resource('lab-tests', LabTestController::class);
 
     //PATIENT INSURANCE
     Route::resource('insurance/patients', PatientInsuranceController::class);
