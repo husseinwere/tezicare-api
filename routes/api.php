@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\InsuranceCoverController;
 use App\Http\Controllers\Lab\LabTestController;
+use App\Http\Controllers\Lab\RadiologyTestController;
 use App\Http\Controllers\Patient\PatientDiagnosisController;
 use App\Http\Controllers\Patient\PatientImpressionController;
 use App\Http\Controllers\Patient\PatientRecommendationController;
@@ -118,6 +119,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //LAB TESTS
     Route::resource('lab-tests', LabTestController::class);
+
+    //RADIOLOGY TESTS
+    Route::resource('radiology-tests', RadiologyTestController::class);
 
     //PATIENT INSURANCE
     Route::resource('insurance/patients', PatientInsuranceController::class);

@@ -1,24 +1,21 @@
 direct_service_patients - NOT PRIO
 fixed_charges
 inpatients_queue
-invoice_additions
-lab_tests
+invoice_additions - NOT PRIO
 nurse_bill
 nurse_comments
 nurse_instructions
 nurse_stock
 patient_drugs
 patient_prescriptions
-patient_tests
 payment_records
 payment_requests
 pharmacy_stock
-radiology_tests
 
 
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- patient_tests
+- patient drugs
 
 - queue asc, patients desc
