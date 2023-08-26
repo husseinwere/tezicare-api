@@ -1,26 +1,21 @@
 <?php
 
-namespace App\Http\Controllers\Patient;
+namespace App\Http\Controllers\Lab;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lab\LabTest;
-use App\Models\Patient\PatientTest;
+use App\Models\Lab\RadiologyTest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
-class PatientTestController extends Controller
+class RadiologyTestController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $sessionId = $request->query('session_id');
-
-        $tests = PatientTest::where('session_id', $sessionId)->get();
-
-        return $tests;
+        return RadiologyTest::all();
     }
 
     /**
@@ -29,19 +24,13 @@ class PatientTestController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'session_id' => 'required',
-            'test_id' => 'required'
+            'test' => 'required',
+            'price' => 'required'
         ]);
-
         $data = $request->all();
-
-        $test = LabTest::find($data['test_id']);
-
-        $data['test'] = $test['test'];
-        $data['price'] = $test['price'];
         $data['created_by'] = Auth::id();
 
-        $createdTest = PatientTest::create($data);
+        $createdTest = RadiologyTest::create($data);
 
         if($createdTest){
             return response(null, Response::HTTP_CREATED);
@@ -56,10 +45,13 @@ class PatientTestController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $request->validate([
+            'test' => 'required',
+            'price' => 'required'
+        ]);
         $data = $request->all();
 
-        $test = PatientTest::find($id);
-
+        $test = RadiologyTest::find($id);
         $updatedTest = $test->update($data);
 
         if($updatedTest){
@@ -75,18 +67,11 @@ class PatientTestController extends Controller
      */
     public function destroy(string $id)
     {
-        $test = PatientTest::find($id);
-
-        if($test['payment_status'] == "PAID" || $test['status'] == "CLEARED") {
-            return response(['error' => 'You cannot delete paid for or cleared tests.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if(RadiologyTest::destroy($id)) {
+            return response(null, Response::HTTP_NO_CONTENT);
         }
         else {
-            if(PatientTest::destroy($id)) {
-                return response(null, Response::HTTP_NO_CONTENT);
-            }
-            else {
-                return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

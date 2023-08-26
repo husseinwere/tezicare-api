@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Lab;
 use App\Http\Controllers\Controller;
 use App\Models\Lab\LabTest;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class LabTestController extends Controller
@@ -29,7 +30,14 @@ class LabTestController extends Controller
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        return LabTest::create($data);
+        $createdTest = LabTest::create($data);
+
+        if($createdTest){
+            return response(null, Response::HTTP_CREATED);
+        }
+        else {
+            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -44,9 +52,14 @@ class LabTestController extends Controller
         $data = $request->all();
 
         $test = LabTest::find($id);
-        $test->update($data);
+        $updatedTest = $test->update($data);
 
-        return $test;
+        if($updatedTest){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -54,6 +67,11 @@ class LabTestController extends Controller
      */
     public function destroy(string $id)
     {
-        return LabTest::destroy($id);
+        if(LabTest::destroy($id)) {
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else {
+            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
