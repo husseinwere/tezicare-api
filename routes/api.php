@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\InsuranceCoverController;
+use App\Http\Controllers\Inventory\PharmaceuticalController;
 use App\Http\Controllers\Lab\LabTestController;
 use App\Http\Controllers\Lab\RadiologyTestController;
 use App\Http\Controllers\Patient\PatientDiagnosisController;
 use App\Http\Controllers\Patient\PatientImpressionController;
 use App\Http\Controllers\Patient\PatientRecommendationController;
 use App\Http\Controllers\Patient\PatientSymptomController;
+use App\Http\Controllers\Patient\PatientTestController;
 use App\Http\Controllers\Patient\PatientVitalsController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PatientInsuranceController;
@@ -116,12 +118,18 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //PATIENT SYMPTOMS
     Route::resource('patient-symptoms', PatientSymptomController::class);
 
+    //PATIENT TESTS
+    Route::resource('patient-tests', PatientTestController::class);
 
     //LAB TESTS
     Route::resource('lab-tests', LabTestController::class);
 
     //RADIOLOGY TESTS
     Route::resource('radiology-tests', RadiologyTestController::class);
+
+    //PHARMACEUTICALS
+    Route::resource('pharmaceuticals', PharmaceuticalController::class);
+    Route::get('/pharmaceuticals/search/{name}', [PharmaceuticalController::class, 'search']);
 
     //PATIENT INSURANCE
     Route::resource('insurance/patients', PatientInsuranceController::class);

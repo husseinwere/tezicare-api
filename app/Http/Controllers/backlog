@@ -10,12 +10,18 @@ patient_drugs
 patient_prescriptions
 payment_records
 payment_requests
-pharmacy_stock
 
 
 delete patient in all queues before moving to inpatient
 
 *** TODO
 - patient drugs
+- do migration
+- patient prescriptions
+- nonpharmaceuticals
 
 - queue asc, patients desc
+- queue routes should use resource
+- create a base controller for queue, which other controllers will extend
+
+- know scenarios that can cause route conflict
