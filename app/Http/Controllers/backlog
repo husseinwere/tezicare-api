@@ -6,7 +6,6 @@ nurse_bill
 nurse_comments
 nurse_instructions
 nurse_stock
-patient_drugs
 patient_prescriptions
 payment_records
 payment_requests
@@ -15,7 +14,7 @@ payment_requests
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- patient prescriptions
+- patient prescriptions (have drug id nullable)
 - nonpharmaceuticals
 
 - queue asc, patients desc

@@ -123,7 +123,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('patient-tests', PatientTestController::class);
 
     //PATIENT DRUGS
-    Route::resource('patient-tests', PatientDrugController::class);
+    Route::resource('patient-drugs', PatientDrugController::class);
 
     //LAB TESTS
     Route::resource('lab-tests', LabTestController::class);
