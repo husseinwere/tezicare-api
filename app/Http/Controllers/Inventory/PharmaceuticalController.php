@@ -28,10 +28,10 @@ class PharmaceuticalController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'price' => 'required'
+            'price' => 'required',
+            'quantity' => 'required'
         ]);
         $data = $request->all();
-        $data['quantity'] = 0;
         $data['created_by'] = Auth::id();
 
         $createdPharmaceutical = Pharmaceutical::create($data);

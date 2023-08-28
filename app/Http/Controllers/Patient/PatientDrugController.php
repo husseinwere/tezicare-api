@@ -47,14 +47,17 @@ class PatientDrugController extends Controller
             return response(['error' => 'Not enough stock to dispense this drug.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
-            DB::transaction(function () use ($data, $drug) {
-                PatientDrug::create($data);
-                $drug->decrement('quantity', $data['quantity']);
+            return DB::transaction(function () use ($data, $drug) {
+                $createdDrug = PatientDrug::create($data);
+                $dispensedDrug = $drug->decrement('quantity', $data['quantity']);
 
-                return response(null, Response::HTTP_CREATED);
+                if($createdDrug && $dispensedDrug) {
+                    return response(null, Response::HTTP_CREATED);
+                }
+                else {
+                    return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
             });
-
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -89,14 +92,17 @@ class PatientDrugController extends Controller
             return response(['error' => 'You cannot delete paid for or cleared drugs.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
-            DB::transaction(function () use ($id, $drug, $stock) {
-                $stock->increment('quantity', $drug['quantity']);
-                PatientDrug::destroy($id);
+            return DB::transaction(function () use ($id, $drug, $stock) {
+                $incrementedStock = $stock->increment('quantity', $drug['quantity']);
+                $deletedDrug = PatientDrug::destroy($id);
 
-                return response(null, Response::HTTP_NO_CONTENT);
+                if($incrementedStock && $deletedDrug){
+                    return response(null, Response::HTTP_NO_CONTENT);
+                }
+                else {
+                    return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
             });
-
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
