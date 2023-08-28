@@ -15,8 +15,6 @@ payment_requests
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- patient drugs
-- do migration
 - patient prescriptions
 - nonpharmaceuticals
 
