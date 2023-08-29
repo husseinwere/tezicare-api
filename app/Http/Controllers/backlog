@@ -22,3 +22,5 @@ delete patient in all queues before moving to inpatient
 - create a base controller for queue, which other controllers will extend
 
 - know scenarios that can cause route conflict
+
+- reports

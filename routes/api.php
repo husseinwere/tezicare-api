@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InsuranceCoverController;
+use App\Http\Controllers\Inventory\NonPharmaceuticalController;
 use App\Http\Controllers\Inventory\PharmaceuticalController;
 use App\Http\Controllers\Lab\LabTestController;
 use App\Http\Controllers\Lab\RadiologyTestController;
@@ -134,6 +135,10 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //PHARMACEUTICALS
     Route::resource('pharmaceuticals', PharmaceuticalController::class);
     Route::get('/pharmaceuticals/search/{name}', [PharmaceuticalController::class, 'search']);
+
+    //NON-PHARMACEUTICALS
+    Route::resource('non-pharmaceuticals', NonPharmaceuticalController::class);
+    Route::get('/non-pharmaceuticals/search/{name}', [NonPharmaceuticalController::class, 'search']);
 
     //PATIENT INSURANCE
     Route::resource('insurance/patients', PatientInsuranceController::class);
