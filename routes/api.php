@@ -8,6 +8,7 @@ use App\Http\Controllers\Lab\RadiologyTestController;
 use App\Http\Controllers\Patient\PatientDiagnosisController;
 use App\Http\Controllers\Patient\PatientDrugController;
 use App\Http\Controllers\Patient\PatientImpressionController;
+use App\Http\Controllers\Patient\PatientPrescriptionController;
 use App\Http\Controllers\Patient\PatientRecommendationController;
 use App\Http\Controllers\Patient\PatientSymptomController;
 use App\Http\Controllers\Patient\PatientTestController;
@@ -122,6 +123,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //PATIENT TESTS
     Route::resource('patient-tests', PatientTestController::class);
+
+    //PATIENT PRESCRIPTIONS
+    Route::resource('patient-prescriptions', PatientPrescriptionController::class);
 
     //PATIENT DRUGS
     Route::resource('patient-drugs', PatientDrugController::class);

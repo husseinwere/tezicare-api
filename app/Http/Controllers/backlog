@@ -5,8 +5,6 @@ invoice_additions - NOT PRIO
 nurse_bill
 nurse_comments
 nurse_instructions
-nurse_stock
-patient_prescriptions
 payment_records
 payment_requests
 
@@ -14,8 +12,7 @@ payment_requests
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- patient prescriptions (have drug id nullable)
-- nonpharmaceuticals
+- nurse bill, nurse services
 
 - queue asc, patients desc
 - queue routes should use resource
@@ -24,3 +21,5 @@ delete patient in all queues before moving to inpatient
 - know scenarios that can cause route conflict
 
 - reports
+
+- investigate how to sync with a local database when internet is down
