@@ -5,20 +5,18 @@ namespace App\Models\Patient;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PatientTest extends Model
+class PatientNursing extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'session_id',
-        'test_id',
-        'test',
+        'service_id',
+        'service',
         'price',
         'created_by',
         'payment_status',
-        'result',
-        'description',
-        'tested_by',
+        'serviced_by',
         'status'
     ];
 }

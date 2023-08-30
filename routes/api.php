@@ -9,6 +9,7 @@ use App\Http\Controllers\Nurse\NursingServiceController;
 use App\Http\Controllers\Patient\PatientDiagnosisController;
 use App\Http\Controllers\Patient\PatientDrugController;
 use App\Http\Controllers\Patient\PatientImpressionController;
+use App\Http\Controllers\Patient\PatientNursingController;
 use App\Http\Controllers\Patient\PatientPrescriptionController;
 use App\Http\Controllers\Patient\PatientRecommendationController;
 use App\Http\Controllers\Patient\PatientSymptomController;
@@ -130,6 +131,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //PATIENT DRUGS
     Route::resource('patient-drugs', PatientDrugController::class);
+
+    //PATIENT NURSING
+    Route::resource('patient-nursing', PatientNursingController::class);
 
     //LAB TESTS
     Route::resource('lab-tests', LabTestController::class);

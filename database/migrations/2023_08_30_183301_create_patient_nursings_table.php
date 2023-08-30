@@ -11,21 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('patient_radiology_tests', function (Blueprint $table) {
+        Schema::create('patient_nursings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('session_id');
             $table->foreign('session_id')->references('id')->on('patient_sessions');
-            $table->unsignedBigInteger('test_id');
-            $table->foreign('test_id')->references('id')->on('lab_tests');
-            $table->string('test');
+            $table->unsignedBigInteger('service_id');
+            $table->foreign('service_id')->references('id')->on('nursing_services');
+            $table->string('service');
             $table->decimal('price', 10, 2);
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->string('payment_status')->default('NOT_PAID');
-            $table->string('result')->nullable();
-            $table->string('description')->nullable();
-            $table->unsignedBigInteger('tested_by')->nullable();
-            $table->foreign('tested_by')->references('id')->on('users');
+            $table->unsignedBigInteger('serviced_by')->nullable();
+            $table->foreign('serviced_by')->references('id')->on('users');
             $table->timestamps();
             $table->string('status')->default('ACTIVE');
         });
@@ -36,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('patient_radiology_tests');
+        Schema::dropIfExists('patient_nursings');
     }
 };

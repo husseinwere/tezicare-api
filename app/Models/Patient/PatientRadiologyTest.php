@@ -16,7 +16,8 @@ class PatientRadiologyTest extends Model
         'price',
         'created_by',
         'payment_status',
-        'results',
+        'result',
+        'description',
         'tested_by',
         'status'
     ];
