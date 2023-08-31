@@ -2,17 +2,16 @@ direct_service_patients - NOT PRIO
 fixed_charges
 inpatients_queue
 invoice_additions - NOT PRIO
-nurse_bill
 nurse_comments
 nurse_instructions
 payment_records
 payment_requests
 
-
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- nurse bill, nurse services
+- wards
+- beds
 
 - queue asc, patients desc
 - queue routes should use resource
