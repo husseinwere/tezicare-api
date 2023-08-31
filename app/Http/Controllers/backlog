@@ -3,7 +3,6 @@ fixed_charges
 inpatients_queue
 invoice_additions - NOT PRIO
 nurse_comments
-nurse_instructions
 payment_records
 payment_requests
 
