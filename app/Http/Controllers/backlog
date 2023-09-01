@@ -13,8 +13,8 @@ delete patient in all queues before moving to inpatient
 - ward rounds
 
 - queue asc, patients desc
-- queue routes should use resource
 - on send to next station, delete from queues appropriately
+- error handling on initial controllers
 
 - can we have cron jobs to create ward rounds automatically for inpatients when a new day starts
 
