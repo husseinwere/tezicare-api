@@ -27,6 +27,8 @@ use App\Http\Controllers\Queues\PharmacyQueueController;
 use App\Http\Controllers\Queues\RadiologyQueueController;
 use App\Http\Controllers\Queues\TriageQueueController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Ward\BedController;
+use App\Http\Controllers\Ward\WardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -155,6 +157,13 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //NON-PHARMACEUTICALS
     Route::resource('non-pharmaceuticals', NonPharmaceuticalController::class);
     Route::get('/non-pharmaceuticals/search/{name}', [NonPharmaceuticalController::class, 'search']);
+
+    //WARDS
+    Route::resource('wards', WardController::class);
+
+    //BEDS
+    Route::resource('beds', BedController::class);
+    Route::get('/beds/transfer/{id}', [BedController::class, 'transfer']);
 
     //PATIENT INSURANCE
     Route::resource('insurance/patients', PatientInsuranceController::class);
