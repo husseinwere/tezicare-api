@@ -10,11 +10,13 @@ delete patient in all queues before moving to inpatient
 
 *** TODO
 - inpatients_queue
+- ward rounds
 
 - queue asc, patients desc
 - queue routes should use resource
-- create a base controller for queue, which other controllers will extend
 - on send to next station, delete from queues appropriately
+
+- can we have cron jobs to create ward rounds automatically for inpatients when a new day starts
 
 - know scenarios that can cause route conflict
 

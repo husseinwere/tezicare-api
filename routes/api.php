@@ -64,49 +64,26 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::put('/sessions/discharge/{id}', [PatientSessionController::class, 'discharge']);
     Route::put('/sessions/delete/{id}', [PatientSessionController::class, 'destroy']);
 
-    //QUEUES
-    Route::get('/queue/triage', [TriageQueueController::class, 'index']);
-    Route::get('/queue/triage/{id}', [TriageQueueController::class, 'show']);
-    Route::post('/queue/triage', [TriageQueueController::class, 'store']);
-    Route::put('/queue/triage/update/{id}', [TriageQueueController::class, 'update']);
-    Route::delete('/queue/triage/{id}', [TriageQueueController::class, 'destroy']);
+    //TRIAGE QUEUE
+    Route::resource('queue/triage', TriageQueueController::class);
 
-    Route::get('/queue/doctor', [DoctorQueueController::class, 'index']);
-    Route::get('/queue/doctor/{id}', [DoctorQueueController::class, 'show']);
-    Route::post('/queue/doctor', [DoctorQueueController::class, 'store']);
-    Route::put('/queue/doctor/update/{id}', [DoctorQueueController::class, 'update']);
-    Route::delete('/queue/doctor/{id}', [DoctorQueueController::class, 'destroy']);
+    //DOCTOR QUEUE
+    Route::resource('queue/doctor', DoctorQueueController::class);
 
-    Route::get('/queue/nurse', [NurseQueueController::class, 'index']);
-    Route::get('/queue/nurse/{id}', [NurseQueueController::class, 'show']);
-    Route::post('/queue/nurse', [NurseQueueController::class, 'store']);
-    Route::put('/queue/nurse/update/{id}', [NurseQueueController::class, 'update']);
-    Route::delete('/queue/nurse/{id}', [NurseQueueController::class, 'destroy']);
+    //NURSE QUEUE
+    Route::resource('queue/nurse', NurseQueueController::class);
 
-    Route::get('/queue/lab', [LabQueueController::class, 'index']);
-    Route::get('/queue/lab/{id}', [LabQueueController::class, 'show']);
-    Route::post('/queue/lab', [LabQueueController::class, 'store']);
-    Route::put('/queue/lab/update/{id}', [LabQueueController::class, 'update']);
-    Route::delete('/queue/lab/{id}', [LabQueueController::class, 'destroy']);
+    //LAB QUEUE
+    Route::resource('queue/lab', LabQueueController::class);
 
-    Route::get('/queue/radiology', [RadiologyQueueController::class, 'index']);
-    Route::get('/queue/radiology/{id}', [RadiologyQueueController::class, 'show']);
-    Route::post('/queue/radiology', [RadiologyQueueController::class, 'store']);
-    Route::put('/queue/radiology/update/{id}', [RadiologyQueueController::class, 'update']);
-    Route::delete('/queue/radiology/{id}', [RadiologyQueueController::class, 'destroy']);
+    //RADIOLOGY QUEUE
+    Route::resource('queue/radiology', RadiologyQueueController::class);
 
-    Route::get('/queue/pharmacy', [PharmacyQueueController::class, 'index']);
-    Route::get('/queue/pharmacy/{id}', [PharmacyQueueController::class, 'show']);
-    Route::post('/queue/pharmacy', [PharmacyQueueController::class, 'store']);
-    Route::put('/queue/pharmacy/update/{id}', [PharmacyQueueController::class, 'update']);
-    Route::delete('/queue/pharmacy/{id}', [PharmacyQueueController::class, 'destroy']);
+    //PHARMACY QUEUE
+    Route::resource('queue/pharmacy', PharmacyQueueController::class);
 
-    Route::get('/queue/clearance', [ClearanceQueueController::class, 'index']);
-    Route::get('/queue/clearance/{id}', [ClearanceQueueController::class, 'show']);
-    Route::post('/queue/clearance', [ClearanceQueueController::class, 'store']);
-    Route::put('/queue/clearance/update/{id}', [ClearanceQueueController::class, 'update']);
-    Route::delete('/queue/clearance/{id}', [ClearanceQueueController::class, 'destroy']);
-    //QUEUES END
+    //CLEARANCE QUEUE
+    Route::resource('queue/clearance', ClearanceQueueController::class);
 
     //PATIENT VITALS
     Route::resource('patient-vitals', PatientVitalsController::class);
