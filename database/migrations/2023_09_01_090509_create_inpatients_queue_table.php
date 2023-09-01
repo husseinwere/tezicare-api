@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('inpatients_queue', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('session_id');
+            $table->foreign('session_id')->references('id')->on('patient_sessions');
+            $table->unsignedBigInteger('created_by');
+            $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();
+            $table->string('status')->default('ACTIVE');
         });
     }
 
