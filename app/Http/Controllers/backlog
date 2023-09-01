@@ -9,12 +9,12 @@ payment_requests
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- wards
-- beds
+- inpatients_queue
 
 - queue asc, patients desc
 - queue routes should use resource
 - create a base controller for queue, which other controllers will extend
+- on send to next station, delete from queues appropriately
 
 - know scenarios that can cause route conflict
 
