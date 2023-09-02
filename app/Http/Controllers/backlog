@@ -1,10 +1,8 @@
 direct_service_patients - NOT PRIO
 fixed_charges
-inpatients_queue
 invoice_additions - NOT PRIO
 nurse_comments
 payment_records
-payment_requests
 
 delete patient in all queues before moving to inpatient
 
