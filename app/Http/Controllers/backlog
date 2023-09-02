@@ -9,7 +9,7 @@ payment_requests
 delete patient in all queues before moving to inpatient
 
 *** TODO
-- inpatients_queue
+- payments
 - ward rounds
 
 - queue asc, patients desc
