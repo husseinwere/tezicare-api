@@ -20,11 +20,12 @@ return new class extends Migration
             $table->string('payment_method');
             $table->decimal('amount', 10, 2);
             $table->string('mpesa_code')->nullable();
-            $table->string('insurance_id')->nullable();
+            $table->unsignedBigInteger('insurance_id')->nullable();
             $table->foreign('insurance_id')->references('id')->on('patient_insurances');
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();
+            $table->string('status')->default('ACTIVE');
         });
     }
 

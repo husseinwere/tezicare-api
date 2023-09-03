@@ -16,6 +16,7 @@ class PaymentRecord extends Model
         'amount',
         'mpesa_code',
         'insurance_id',
-        'created_by'
+        'created_by',
+        'status'
     ];
 }

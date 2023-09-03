@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Billing\PaymentRecordController;
+use App\Http\Controllers\Billing\PaymentRequestController;
 use App\Http\Controllers\InsuranceCoverController;
 use App\Http\Controllers\Inventory\NonPharmaceuticalController;
 use App\Http\Controllers\Inventory\PharmaceuticalController;
@@ -145,6 +147,14 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //BEDS
     Route::resource('beds', BedController::class);
     Route::get('/beds/transfer/{id}', [BedController::class, 'transfer']);
+
+    //PAYMENT REQUESTS
+    Route::resource('payment-requests', PaymentRequestController::class);
+    Route::get('/payment-requests/cancel/{id}', [PaymentRequestController::class, 'cancel']);
+
+    //PAYMENT RECORDS
+    Route::resource('payment-records', PaymentRecordController::class);
+    Route::get('/payment-records/session/{id}', [PaymentRecordController::class, 'sessionRecords']);
 
     //PATIENT INSURANCE
     Route::resource('insurance/patients', PatientInsuranceController::class);

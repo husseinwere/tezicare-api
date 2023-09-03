@@ -51,8 +51,8 @@ class PaymentRequestController extends Controller
     {
         $data = $request->all();
 
-        $request = PaymentRequest::find($id);
-        $updatedRequest = $request->update($data);
+        $paymentRequest = PaymentRequest::find($id);
+        $updatedRequest = $paymentRequest->update($data);
 
         if($updatedRequest){
             return response(null, Response::HTTP_OK);
@@ -67,10 +67,10 @@ class PaymentRequestController extends Controller
      */
     public function cancel(string $id)
     {
-        $request = PaymentRequest::find($id);
-        $request->status = 'CANCELLED';
+        $paymentRequest = PaymentRequest::find($id);
+        $paymentRequest->status = 'CANCELLED';
 
-        if($request->save()) {
+        if($paymentRequest->save()) {
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {
@@ -83,10 +83,10 @@ class PaymentRequestController extends Controller
      */
     public function destroy(string $id)
     {
-        $request = PaymentRequest::find($id);
-        $request->status = 'DELETED';
+        $paymentRequest = PaymentRequest::find($id);
+        $paymentRequest->status = 'DELETED';
 
-        if($request->save()) {
+        if($paymentRequest->save()) {
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {
