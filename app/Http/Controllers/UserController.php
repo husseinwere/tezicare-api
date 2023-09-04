@@ -28,14 +28,19 @@ class UserController extends Controller
             'password' => bcrypt($fields['password'])
         ]);
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        if($user) {
+            $token = $user->createToken('myapptoken')->plainTextToken;
 
-        $response = [
-            'user' => $user,
-            'token' => $token
-        ];
+            $response = [
+                'user' => $user,
+                'token' => $token
+            ];
 
-        return response($response, 201);
+            return response($response, 201);
+        }
+        else {
+            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function login(Request $request) {
@@ -67,8 +72,8 @@ class UserController extends Controller
     public function logout(Request $request) {
         $request->user()->currentAccessToken()->delete();
 
-        return [
+        return response([
             'message' => 'Logged out'
-        ];
+        ], 201);
     }
 }
