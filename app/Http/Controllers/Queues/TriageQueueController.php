@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Queues;
 
-use App\Http\Controllers\Controller;
 use App\Models\Queues\TriageQueue;
 
-class TriageQueueController extends Controller
+class TriageQueueController extends QueueBaseController
 {
     public function __construct(TriageQueue $model)
     {
