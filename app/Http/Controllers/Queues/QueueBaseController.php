@@ -35,7 +35,7 @@ class QueueBaseController extends Controller
                     ->select($this->table . '.status', $this->table . '.created_at', 
                                 DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 
                                 DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'),
-                                'patients.gender', 'patients.dob')
+                                'patients.id as opno', 'patients.gender', 'patients.dob')
                     ->paginate($pageSize, ['*'], 'page', $pageIndex);
         
         return $queue;
@@ -76,7 +76,7 @@ class QueueBaseController extends Controller
                     ->select($this->table . '.status', $this->table . '.created_at', 
                                 DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 
                                 DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'),
-                                'patients.gender', 'patients.dob')
+                                'patients.id as opno', 'patients.gender', 'patients.dob')
                     ->first();
     }
 
