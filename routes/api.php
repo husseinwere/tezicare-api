@@ -52,6 +52,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     Route::post('/auth/register', [UserController::class, 'register']);
     Route::get('/auth/logout', [UserController::class, 'logout']);
+    Route::resource('users', UserController::class);
 
     Route::get('/patients', [PatientController::class, 'index']);
     Route::get('/patients/{id}', [PatientController::class, 'show']);

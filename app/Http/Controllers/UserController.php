@@ -76,4 +76,46 @@ class UserController extends Controller
             'message' => 'Logged out'
         ], 201);
     }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        return User::where('status', 'ACTIVE')->get();
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $data = $request->all();
+
+        $user = User::find($id);
+        $updatedUser = $user->update($data);
+
+        if($updatedUser){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        $user = User::find($id);
+        $user->status = 'DELETED';
+
+        if($user->save()) {
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else {
+            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
