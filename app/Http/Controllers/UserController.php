@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -80,9 +81,12 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return User::where('status', 'ACTIVE')->get();
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
+        
+        return User::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -125,5 +129,16 @@ class UserController extends Controller
         else {
             return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Search the specified resource by name.
+     */
+    public function search(Request $request, string $name)
+    {
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
+
+        return User::where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 }
