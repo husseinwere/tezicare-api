@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function register(Request $request) {
+    public function store(Request $request) {
         $fields = $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
@@ -20,27 +20,23 @@ class UserController extends Controller
             'password' => 'required|string'
         ]);
 
+        //password is a random 4 digit string that should as well be sent to email
+        $password = '12345';
+
         $user = User::create([
             'first_name' => $fields['first_name'],
             'last_name' => $fields['last_name'],
             'email' => $fields['email'],
             'phone' => $fields['phone'],
             'roles' => $fields['roles'],
-            'password' => bcrypt($fields['password'])
+            'password' => bcrypt($password)
         ]);
 
         if($user) {
-            $token = $user->createToken('myapptoken')->plainTextToken;
-
-            $response = [
-                'user' => $user,
-                'token' => $token
-            ];
-
-            return response($response, 201);
+            return response(null, 201);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
