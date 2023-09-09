@@ -16,8 +16,7 @@ class UserController extends Controller
             'last_name' => 'required|string',
             'email' => 'required|string|unique:users,email',
             'phone' => 'string',
-            'roles' => 'required|string',
-            'password' => 'required|string'
+            'roles' => 'required|string'
         ]);
 
         //password is a random 4 digit string that should as well be sent to email
