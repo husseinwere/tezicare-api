@@ -131,11 +131,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //PHARMACEUTICALS
     Route::resource('pharmaceuticals', PharmaceuticalController::class);
-    Route::get('/pharmaceuticals/search/{name}', [PharmaceuticalController::class, 'search']);
 
     //NON-PHARMACEUTICALS
     Route::resource('non-pharmaceuticals', NonPharmaceuticalController::class);
-    Route::get('/non-pharmaceuticals/search/{name}', [NonPharmaceuticalController::class, 'search']);
 
     //WARDS
     Route::resource('wards', WardController::class);

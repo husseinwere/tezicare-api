@@ -24,8 +24,15 @@ class InventoryBaseController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $search = $request->query('search');
         
-        return $this->model::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
+        if($search) {
+            return $this->model::where('status', 'ACTIVE')->where('name', 'like', '%' . $search . '%')
+                                ->paginate($pageSize, ['*'], 'page', $pageIndex);
+        }
+        else {
+            return $this->model::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
+        }
     }
 
     /**
@@ -83,16 +90,5 @@ class InventoryBaseController extends Controller
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    /**
-     * Search the specified resource by name.
-     */
-    public function search(Request $request, string $name)
-    {
-        $pageSize = $request->query('page_size', 20);
-        $pageIndex = $request->query('page_index', 1);
-
-        return $this->model::where('name', 'like', '%' . $name . '%')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 }
