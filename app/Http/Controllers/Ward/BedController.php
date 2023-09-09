@@ -40,7 +40,7 @@ class BedController extends Controller
             return response(null, Response::HTTP_CREATED);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -58,7 +58,7 @@ class BedController extends Controller
             return response(null, Response::HTTP_OK);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -81,11 +81,11 @@ class BedController extends Controller
                 return response(null, Response::HTTP_OK);
             }
             else {
-                return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }
         else {
-            return response(['error' => 'You cannot transfer a bed that is occupied.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'You cannot transfer a bed that is occupied.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
@@ -101,11 +101,11 @@ class BedController extends Controller
                 return response(null, Response::HTTP_NO_CONTENT);
             }
             else {
-                return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }
         else {
-            return response(['error' => 'You cannot delete a bed that is occupied.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'You cannot delete a bed that is occupied.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 }

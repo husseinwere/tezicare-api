@@ -74,7 +74,7 @@ class PatientDiagnosisController extends Controller
             return PatientDiagnosis::destroy($id);
         }
         else {
-            return response(['error' => 'You cannot edit records of a discharged patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'You cannot edit records of a discharged patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 }

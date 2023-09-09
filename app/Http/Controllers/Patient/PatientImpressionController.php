@@ -74,7 +74,7 @@ class PatientImpressionController extends Controller
             return PatientImpression::destroy($id);
         }
         else {
-            return response(['error' => 'You cannot edit records of a discharged patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'You cannot edit records of a discharged patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 }

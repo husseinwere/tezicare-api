@@ -20,7 +20,7 @@ class PatientSessionController extends Controller
         $existingRecord = PatientSession::where('patient_id', $data['patient_id'])->where('status', 'ACTIVE')->first();
 
         if ($existingRecord) {
-            return response(['error' => 'A session has already been started with this patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'A session has already been started with this patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $data['created_by'] = Auth::id();

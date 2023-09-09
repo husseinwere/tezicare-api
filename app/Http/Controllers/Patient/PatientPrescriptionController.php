@@ -42,7 +42,7 @@ class PatientPrescriptionController extends Controller
             return response(null, Response::HTTP_CREATED);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return response(null, Response::HTTP_CREATED);
@@ -62,7 +62,7 @@ class PatientPrescriptionController extends Controller
             return response(null, Response::HTTP_OK);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -80,11 +80,11 @@ class PatientPrescriptionController extends Controller
                 return response(null, Response::HTTP_NO_CONTENT);
             }
             else {
-                return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }
         else {
-            return response(['error' => 'You cannot edit records of a discharged patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'You cannot edit records of a discharged patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 }

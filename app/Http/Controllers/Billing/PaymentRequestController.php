@@ -40,7 +40,7 @@ class PaymentRequestController extends Controller
             return response(null, Response::HTTP_CREATED);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -58,7 +58,7 @@ class PaymentRequestController extends Controller
             return response(null, Response::HTTP_OK);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -74,7 +74,7 @@ class PaymentRequestController extends Controller
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -90,7 +90,7 @@ class PaymentRequestController extends Controller
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

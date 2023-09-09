@@ -47,7 +47,7 @@ class PatientTestController extends Controller
             return response(null, Response::HTTP_CREATED);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -66,7 +66,7 @@ class PatientTestController extends Controller
             return response(null, Response::HTTP_OK);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -78,14 +78,14 @@ class PatientTestController extends Controller
         $test = PatientTest::find($id);
 
         if($test['payment_status'] == "PAID" || $test['status'] == "CLEARED") {
-            return response(['error' => 'You cannot delete paid for or cleared tests.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'You cannot delete paid for or cleared tests.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
             if(PatientTest::destroy($id)) {
                 return response(null, Response::HTTP_NO_CONTENT);
             }
             else {
-                return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }
     }

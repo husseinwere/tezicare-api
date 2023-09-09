@@ -44,7 +44,7 @@ class PatientDrugController extends Controller
         $data['created_by'] = Auth::id();
 
         if($data['quantity'] > $drug->quantity) {
-            return response(['error' => 'Not enough stock to dispense this drug.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'Not enough stock to dispense this drug.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
             return DB::transaction(function () use ($data, $drug) {
@@ -55,7 +55,7 @@ class PatientDrugController extends Controller
                     return response(null, Response::HTTP_CREATED);
                 }
                 else {
-                    return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             });
         }
@@ -76,7 +76,7 @@ class PatientDrugController extends Controller
             return response(null, Response::HTTP_OK);
         }
         else {
-            return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -89,7 +89,7 @@ class PatientDrugController extends Controller
         $stock = Pharmaceutical::find($drug['drug_id']);
 
         if($drug['payment_status'] == "PAID" || $drug['status'] == "CLEARED") {
-            return response(['error' => 'You cannot delete paid for or cleared drugs.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'You cannot delete paid for or cleared drugs.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
             return DB::transaction(function () use ($id, $drug, $stock) {
@@ -100,7 +100,7 @@ class PatientDrugController extends Controller
                     return response(null, Response::HTTP_NO_CONTENT);
                 }
                 else {
-                    return response(['error' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             });
         }
