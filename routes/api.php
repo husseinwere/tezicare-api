@@ -54,9 +54,8 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::get('/auth/logout', [UserController::class, 'logout']);
     Route::resource('users', UserController::class);
 
+    //PATIENTS
     Route::resource('patients', PatientController::class);
-    Route::get('/patients/search/name/{name}', [PatientController::class, 'searchByName']);
-    Route::get('/patients/search/id/{id}', [PatientController::class, 'searchById']);
 
     Route::get('/sessions/{id}', [PatientSessionController::class, 'show']);
     Route::post('/sessions/create', [PatientSessionController::class, 'store']);
