@@ -54,11 +54,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::get('/auth/logout', [UserController::class, 'logout']);
     Route::resource('users', UserController::class);
 
-    Route::get('/patients', [PatientController::class, 'index']);
-    Route::get('/patients/{id}', [PatientController::class, 'show']);
-    Route::post('/patients/create', [PatientController::class, 'store']);
-    Route::put('/patients/update/{id}', [PatientController::class, 'update']);
-    Route::put('/patients/delete/{id}', [PatientController::class, 'destroy']);
+    Route::resource('patients', PatientController::class);
     Route::get('/patients/search/name/{name}', [PatientController::class, 'searchByName']);
     Route::get('/patients/search/id/{id}', [PatientController::class, 'searchById']);
 
