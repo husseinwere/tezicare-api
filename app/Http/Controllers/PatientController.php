@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -47,7 +48,14 @@ class PatientController extends Controller
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        return Patient::create($data);
+        $createdPatient = Patient::create($data);
+
+        if($createdPatient){
+            return response(null, Response::HTTP_CREATED);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -55,7 +63,13 @@ class PatientController extends Controller
      */
     public function show(string $id)
     {
-        return Patient::find($id);
+        $patient = Patient::find($id);
+        if($patient){
+            return response($patient);
+        }
+        else {
+            return response(['message' => 'Patient not found'], Response::HTTP_NOT_FOUND);
+        }
     }
 
     /**
@@ -73,9 +87,14 @@ class PatientController extends Controller
         $data = $request->all();
 
         $patient = Patient::find($id);
-        $patient->update($data);
+        $updatedPatient = $patient->update($data);
 
-        return $patient;
+        if($updatedPatient){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -85,8 +104,12 @@ class PatientController extends Controller
     {
         $patient = Patient::find($id);
         $patient->status = 'DELETED';
-        $patient->save();
-
-        return $patient;
+        
+        if($patient->save()) {
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
