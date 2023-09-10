@@ -121,10 +121,10 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('patient-nursing', PatientNursingController::class);
 
     //LAB TESTS
-    Route::resource('lab-tests', LabTestController::class);
+    Route::resource('lab-tests/general', LabTestController::class);
 
     //RADIOLOGY TESTS
-    Route::resource('radiology-tests', RadiologyTestController::class);
+    Route::resource('lab-tests/radiology', RadiologyTestController::class);
 
     //RADIOLOGY TESTS
     Route::resource('nursing-services', NursingServiceController::class);
