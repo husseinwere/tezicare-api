@@ -57,11 +57,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //PATIENTS
     Route::resource('patients', PatientController::class);
 
-    Route::get('/sessions/{id}', [PatientSessionController::class, 'show']);
-    Route::post('/sessions/create', [PatientSessionController::class, 'store']);
-    Route::put('/sessions/update/{id}', [PatientSessionController::class, 'update']);
+    //PATIENT SESSIONS
+    Route::resource('sessions', PatientSessionController::class);
     Route::put('/sessions/discharge/{id}', [PatientSessionController::class, 'discharge']);
-    Route::put('/sessions/delete/{id}', [PatientSessionController::class, 'destroy']);
 
     //TRIAGE QUEUE
     Route::resource('queue/triage', TriageQueueController::class);

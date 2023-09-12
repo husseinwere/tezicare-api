@@ -10,10 +10,18 @@ use Illuminate\Support\Facades\Auth;
 
 class PatientSessionController extends Controller
 {
+    public function index(Request $request)
+    {
+        $patient_id = $request->input('patient_id');
+
+        return PatientSession::where('patient_id', $patient_id)->get();
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'patient_id' => 'required'
+            'patient_id' => 'required',
+            'consultation_type' => 'required'
         ]);
         $data = $request->all();
 
