@@ -14,7 +14,7 @@ class PatientSessionController extends Controller
     {
         $patient_id = $request->input('patient_id');
 
-        return PatientSession::where('patient_id', $patient_id)->get();
+        return PatientSession::where('patient_id', $patient_id)->limit(10)->get();
     }
 
     public function getPatientStats(string $patient_id)
