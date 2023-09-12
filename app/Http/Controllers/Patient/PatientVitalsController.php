@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Patient\PatientVitals;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class PatientVitalsController extends Controller
@@ -19,6 +20,14 @@ class PatientVitalsController extends Controller
         $vitals = PatientVitals::where('session_id', $sessionId)->get();
         
         return $vitals;
+    }
+
+    /**
+     * Display the session latest vitals.
+     */
+    public function getLatestVitals($session_id)
+    {
+        return PatientVitals::where('session_id', $session_id)->latest()->first();
     }
 
     /**
