@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('session_id');
             $table->foreign('session_id')->references('id')->on('patient_sessions');
-            $table->string('temperature');
-            $table->string('weight');
-            $table->string('blood_pressure');
-            $table->string('spo2');
-            $table->string('pulse_rate');
+            $table->string('temperature')->nullable();
+            $table->string('height')->nullable();
+            $table->string('weight')->nullable();
+            $table->string('blood_pressure')->nullable();
+            $table->string('spo2')->nullable();
+            $table->string('pulse_rate')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();

@@ -14,6 +14,7 @@ class PatientVitals extends Model
     protected $fillable = [
         'session_id',
         'temperature',
+        'height',
         'weight',
         'blood_pressure',
         'spo2',
