@@ -12,6 +12,7 @@ class PatientSession extends Model
     protected $fillable = [
         'patient_id',
         'patient_type',
+        'consultation_type',
         'registration_fee',
         'consultation_fee',
         'admission_fee',
