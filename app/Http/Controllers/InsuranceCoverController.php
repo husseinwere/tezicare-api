@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\InsuranceCover;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class InsuranceCoverController extends Controller
@@ -12,7 +13,7 @@ class InsuranceCoverController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {   
         return InsuranceCover::where('status', 'ACTIVE')->get();
     }
@@ -28,7 +29,14 @@ class InsuranceCoverController extends Controller
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        return InsuranceCover::create($data);
+        $createdCover = InsuranceCover::create($data);
+
+        if($createdCover){
+            return response(null, Response::HTTP_CREATED);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -42,9 +50,14 @@ class InsuranceCoverController extends Controller
         $data = $request->all();
 
         $cover = InsuranceCover::find($id);
-        $cover->update($data);
+        $updatedCover = $cover->update($data);
 
-        return $cover;
+        if($updatedCover){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -54,8 +67,11 @@ class InsuranceCoverController extends Controller
     {
         $cover = InsuranceCover::find($id);
         $cover->status = 'DELETED';
-        $cover->save();
-
-        return $cover;
+        if($cover->save()) {
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
