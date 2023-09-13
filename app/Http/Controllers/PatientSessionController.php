@@ -19,8 +19,8 @@ class PatientSessionController extends Controller
 
     public function getPatientStats(string $patient_id)
     {
-        $outpatientCount = PatientSession::where('patient_id', $patient_id)->where('type', 'OUTPATIENT')->count();
-        $inpatientCount = PatientSession::where('patient_id', $patient_id)->where('type', 'INPATIENT')->count();
+        $outpatientCount = PatientSession::where('patient_id', $patient_id)->where('patient_type', 'OUTPATIENT')->count();
+        $inpatientCount = PatientSession::where('patient_id', $patient_id)->where('patient_type', 'INPATIENT')->count();
 
         return [
             'outpatient' => $outpatientCount,
