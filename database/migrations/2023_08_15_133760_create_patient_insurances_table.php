@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('insurance_id');
             $table->foreign('insurance_id')->references('id')->on('insurance_covers');
             $table->string('card_no');
+            $table->decimal('cap', 10, 2)->nullable();
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();

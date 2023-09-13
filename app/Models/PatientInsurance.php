@@ -12,6 +12,7 @@ class PatientInsurance extends Model
         'patient_id',
         'insurance_id',
         'card_no',
+        'cap',
         'created_by',
         'status'
     ];
