@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PatientInsurance;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class PatientInsuranceController extends Controller
@@ -34,7 +35,14 @@ class PatientInsuranceController extends Controller
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        return PatientInsurance::create($data);
+        $createdInsurance = PatientInsurance::create($data);
+
+        if($createdInsurance){
+            return response(null, Response::HTTP_CREATED);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -48,9 +56,14 @@ class PatientInsuranceController extends Controller
         $data = $request->all();
 
         $insurance = PatientInsurance::find($id);
-        $insurance->update($data);
+        $updatedInsurance = $insurance->update($data);
 
-        return $insurance;
+        if($updatedInsurance){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -60,8 +73,11 @@ class PatientInsuranceController extends Controller
     {
         $insurance = PatientInsurance::find($id);
         $insurance->status = 'DELETED';
-        $insurance->save();
-
-        return $insurance;
+        if($insurance->save()) {
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
