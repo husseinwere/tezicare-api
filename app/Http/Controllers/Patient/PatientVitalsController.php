@@ -7,6 +7,7 @@ use App\Models\Patient\PatientVitals;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PatientVitalsController extends Controller
 {
@@ -25,9 +26,15 @@ class PatientVitalsController extends Controller
     /**
      * Display the session latest vitals.
      */
-    public function getLatestVitals($session_id)
+    public function getLatestVitals(string $patient_id)
     {
-        return PatientVitals::where('session_id', $session_id)->latest()->first();
+        return DB::table('patient_vitals')
+                    ->join('patient_sessions', 'patient_vitals.session_id', '=', 'patient_sessions.id')
+                    ->join('patients', 'patient_sessions.patient_id', '=', 'patients.id')
+                    ->where('patient_sessions.patient_id', $patient_id)
+                    ->select('patient_vitals.height', 'patient_vitals.weight', 'patient_vitals.pulse_rate',
+                                'patient_vitals.temperature', 'patient_vitals.blood_pressure', 'patient_vitals.spo2')
+                    ->orderBy('patient_vitals.created_at', 'desc')->first();
     }
 
     /**

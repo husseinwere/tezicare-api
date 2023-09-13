@@ -88,7 +88,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //PATIENT VITALS
     Route::resource('patient-vitals', PatientVitalsController::class);
-    Route::get('/patient-vitals/latest/{session_id}', [PatientVitalsController::class, 'getLatestVitals']);
+    Route::get('/patient-vitals/latest/{patient_id}', [PatientVitalsController::class, 'getLatestVitals']);
 
     //PATIENT CONDITIONS
     Route::resource('patient-conditions', PatientConditionController::class);
