@@ -30,7 +30,8 @@ class PatientInsuranceController extends Controller
         $request->validate([
             'patient_id' => 'required',
             'insurance_id' => 'required',
-            'card_no' => 'required'
+            'card_no' => 'required',
+            'cap' => 'required'
         ]);
         $data = $request->all();
         $data['created_by'] = Auth::id();
