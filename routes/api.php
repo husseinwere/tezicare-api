@@ -148,7 +148,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //PAYMENT REQUESTS
     Route::resource('payment-requests', PaymentRequestController::class);
-    Route::get('/payment-requests/cancel/{id}', [PaymentRequestController::class, 'cancel']);
+    Route::delete('/payment-requests/cancel/{id}', [PaymentRequestController::class, 'cancel']);
 
     //PAYMENT RECORDS
     Route::resource('payment-records', PaymentRecordController::class);
