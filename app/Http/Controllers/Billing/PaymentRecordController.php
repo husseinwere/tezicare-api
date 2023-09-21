@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Billing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Billing\PaymentRecord;
+use App\Models\Billing\PaymentRequest;
+use App\Models\Patient\PatientDrug;
+use App\Models\Patient\PatientRadiologyTest;
+use App\Models\Patient\PatientTest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -55,6 +59,9 @@ class PaymentRecordController extends Controller
 
                 PaymentRecord::create($data);
             }
+
+            $this->markAsPaid($data);
+
             return response(null, Response::HTTP_CREATED);
         }
         catch (\Exception $e) {
@@ -93,6 +100,34 @@ class PaymentRecordController extends Controller
         }
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private function markAsPaid($data) {
+        $request = PaymentRequest::find($data['request_id']);
+        $items = $request['items'];
+        if($items) {
+            $items = explode(',', $items);
+
+            foreach($items as $itemId) {
+                if($request['source'] == 'Lab') {
+                    $test = PatientTest::find($itemId);
+                    $test->payment_status = 'PAID';
+                    $test->save();
+                }
+                else if($request['source'] == 'Radiology') {
+                    $test = PatientRadiologyTest::find($itemId);
+                    $test->payment_status = 'PAID';
+                    $test->save();
+                }
+                if($request['source'] == 'Non-Pharmaceuticals') {}
+                if($request['source'] == 'Nurse') {}
+                if($request['source'] == 'Pharmacy') {
+                    $drug = PatientDrug::find($itemId);
+                    $drug->payment_status = 'PAID';
+                    $drug->save();
+                }
+            }
         }
     }
 }
