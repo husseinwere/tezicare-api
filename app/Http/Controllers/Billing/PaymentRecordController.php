@@ -57,6 +57,10 @@ class PaymentRecordController extends Controller
                 $data['insurance_id'] = $payment['insurance_id'];
                 $data['amount'] = $payment['amount'];
 
+                if($data['insurance_id']) {
+                    $data['status'] = 'UNCLAIMED';
+                }
+
                 PaymentRecord::create($data);
             }
 
