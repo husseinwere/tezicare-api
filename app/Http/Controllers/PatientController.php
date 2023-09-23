@@ -51,7 +51,7 @@ class PatientController extends Controller
         $createdPatient = Patient::create($data);
 
         if($createdPatient){
-            return response(null, Response::HTTP_CREATED);
+            return response($createdPatient, Response::HTTP_CREATED);
         }
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
