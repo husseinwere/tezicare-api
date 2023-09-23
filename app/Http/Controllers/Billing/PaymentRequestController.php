@@ -25,8 +25,8 @@ class PaymentRequestController extends Controller
                 ->join('users', 'payment_requests.created_by', '=', 'users.id')
                 ->where('payment_requests.status', 'NOT_PAID')
                 ->select('payment_requests.id', 'payment_requests.source', 'payment_requests.amount', 'payment_requests.created_at', 
-                            DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 
-                            DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'), 'patients.id as opno')
+                            DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 'patient_sessions.id as session_id',
+                            DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'), 'patients.id as patient_id')
                 ->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
