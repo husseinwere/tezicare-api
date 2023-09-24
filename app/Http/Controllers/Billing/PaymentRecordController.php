@@ -49,7 +49,7 @@ class PaymentRecordController extends Controller
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        $payments = json_decode($data['payments']);
+        $payments = $data['payments'];
         try {
             foreach ($payments as $payment) {
                 $data['payment_method'] = $payment['payment_method'];
@@ -60,11 +60,20 @@ class PaymentRecordController extends Controller
                 if($data['insurance_id']) {
                     $data['status'] = 'UNCLAIMED';
                 }
+                else {
+                    $data['status'] = 'ACTIVE';
+                }
 
                 PaymentRecord::create($data);
             }
 
+            //MARK REQUEST ITEMS AS PAID
             $this->markAsPaid($data);
+
+            //MARK PAYMENT REQUEST AS PAID
+            $paymentRequest = PaymentRequest::find($data['request_id']);
+            $paymentRequest->status = 'PAID';
+            $paymentRequest->save();
 
             return response(null, Response::HTTP_CREATED);
         }
