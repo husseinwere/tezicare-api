@@ -18,7 +18,7 @@ class PatientVitalsController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        $vitals = PatientVitals::where('session_id', $sessionId)->get();
+        $vitals = PatientVitals::where('session_id', $sessionId)->limit(20)->latest()->get();
         
         return $vitals;
     }
