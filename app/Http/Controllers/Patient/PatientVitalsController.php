@@ -42,16 +42,20 @@ class PatientVitalsController extends Controller
      */
     public function store(Request $request)
     {
-        //DELETE FROM PREVIOUS QUEUE WHERE NECESSARY
-
-        //SAVE
         $request->validate([
             'session_id' => 'required'
         ]);
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        return PatientVitals::create($data);
+        $createdVitals = PatientVitals::create($data);
+
+        if($createdVitals){
+            return response(null, Response::HTTP_CREATED);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -61,10 +65,15 @@ class PatientVitalsController extends Controller
     {
         $data = $request->all();
 
-        $queue = PatientVitals::find($id);
-        $queue->update($data);
+        $vitals = PatientVitals::find($id);
+        $updatedVitals = $vitals->update($data);
 
-        return $queue;
+        if($updatedVitals){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -72,6 +81,11 @@ class PatientVitalsController extends Controller
      */
     public function destroy(string $id)
     {
-        return PatientVitals::destroy($id);
+        if(PatientVitals::destroy($id)) {
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
