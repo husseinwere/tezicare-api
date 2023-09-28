@@ -8,6 +8,7 @@ use App\Models\Billing\PaymentRequest;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientRadiologyTest;
 use App\Models\Patient\PatientTest;
+use App\Models\Queues\TriageQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -119,6 +120,13 @@ class PaymentRecordController extends Controller
     private function markAsPaid($data) {
         $request = PaymentRequest::find($data['request_id']);
         $items = $request['items'];
+
+        if($request['source'] == 'Reception consultation') {
+            $queue = TriageQueue::find($request['session_id']);
+            $queue->status = 'ACTIVE';
+            $queue->save();
+        }
+
         if($items) {
             $items = explode(',', $items);
 
@@ -133,9 +141,9 @@ class PaymentRecordController extends Controller
                     $test->payment_status = 'PAID';
                     $test->save();
                 }
-                if($request['source'] == 'Non-Pharmaceuticals') {}
-                if($request['source'] == 'Nurse') {}
-                if($request['source'] == 'Pharmacy') {
+                else if($request['source'] == 'Non-Pharmaceuticals') {}
+                else if($request['source'] == 'Nurse') {}
+                else if($request['source'] == 'Pharmacy') {
                     $drug = PatientDrug::find($itemId);
                     $drug->payment_status = 'PAID';
                     $drug->save();
