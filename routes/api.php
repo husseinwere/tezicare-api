@@ -65,6 +65,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //TRIAGE QUEUE
     Route::resource('queue/triage', TriageQueueController::class);
+    Route::get('/queue/triage/send-to-doctor/{session_id}', [TriageQueueController::class, 'sendToDoctor']);
 
     //DOCTOR QUEUE
     Route::resource('queue/doctor', DoctorQueueController::class);
