@@ -16,9 +16,6 @@ class PatientTest extends Model
         'price',
         'created_by',
         'payment_status',
-        'result',
-        'description',
-        'tested_by',
         'status'
     ];
 }

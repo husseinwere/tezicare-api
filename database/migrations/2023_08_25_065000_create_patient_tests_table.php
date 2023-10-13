@@ -22,10 +22,6 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->string('payment_status')->default('NOT_PAID');
-            $table->string('result')->nullable();
-            $table->string('description')->nullable();
-            $table->unsignedBigInteger('tested_by')->nullable();
-            $table->foreign('tested_by')->references('id')->on('users');
             $table->timestamps();
             $table->string('status')->default('ACTIVE');
         });
