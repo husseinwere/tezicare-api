@@ -13,9 +13,19 @@ class LabTestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return LabTest::all();
+        $lab = $request->query('lab');
+
+        if($lab == 'general') {
+            return LabTest::where('lab', 'General')->get();
+        }
+        else if($lab == 'radiology') {
+            return LabTest::where('lab', 'Radiology')->get();
+        }
+        else {
+            return LabTest::all();
+        }
     }
 
     /**
@@ -24,6 +34,7 @@ class LabTestController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'lab' => 'required',
             'test' => 'required',
             'price' => 'required'
         ]);

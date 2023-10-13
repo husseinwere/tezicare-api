@@ -10,6 +10,7 @@ class LabTest extends Model
     use HasFactory;
 
     protected $fillable = [
+        'lab',
         'test',
         'price',
         'created_by'

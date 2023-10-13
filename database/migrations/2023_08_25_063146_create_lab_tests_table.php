@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('lab_tests', function (Blueprint $table) {
             $table->id();
+            $table->string('lab')->default('General');
             $table->string('test');
             $table->decimal('price', 10, 2);
             $table->unsignedBigInteger('created_by');
