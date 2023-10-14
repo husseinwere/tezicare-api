@@ -15,16 +15,18 @@ class LabTestController extends Controller
      */
     public function index(Request $request)
     {
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
         $lab = $request->query('lab');
 
         if($lab == 'general') {
-            return LabTest::where('lab', 'General')->get();
+            return LabTest::where('lab', 'General')->paginate($pageSize, ['*'], 'page', $pageIndex);;
         }
         else if($lab == 'radiology') {
-            return LabTest::where('lab', 'Radiology')->get();
+            return LabTest::where('lab', 'Radiology')->paginate($pageSize, ['*'], 'page', $pageIndex);;
         }
         else {
-            return LabTest::all();
+            return LabTest::paginate($pageSize, ['*'], 'page', $pageIndex);;
         }
     }
 
@@ -56,10 +58,6 @@ class LabTestController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'test' => 'required',
-            'price' => 'required'
-        ]);
         $data = $request->all();
 
         $test = LabTest::find($id);
