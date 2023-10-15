@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('patient_prescriptions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id');
-            $table->foreign('patient_id')->references('id')->on('patients');
+            $table->unsignedBigInteger('session_id');
+            $table->foreign('session_id')->references('id')->on('patient_sessions');
             $table->string('drug');
             $table->string('dosage');
             $table->unsignedBigInteger('created_by');

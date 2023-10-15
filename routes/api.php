@@ -114,8 +114,8 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('patient-tests', PatientTestController::class);
     Route::resource('lab-results', LabResultController::class);
 
-    //PATIENT PRESCRIPTIONS
-    Route::resource('patient-prescriptions', PatientPrescriptionController::class);
+    //PATIENT PRESCRIPTION
+    Route::resource('patient-prescription', PatientPrescriptionController::class);
 
     //PATIENT DRUGS
     Route::resource('patient-drugs', PatientDrugController::class);
