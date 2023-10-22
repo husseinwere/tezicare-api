@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Models\Patient\NurseInstruction;
+use App\Models\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -72,11 +73,15 @@ class NurseInstructionController extends Controller
      */
     public function destroy(string $id)
     {
-        if(NurseInstruction::destroy($id)) {
-            return response(null, Response::HTTP_NO_CONTENT);
+        $instruction = NurseInstruction::find($id);
+        $session_id = $instruction['session_id'];
+        $session = PatientSession::where('id', $session_id)->where('status', 'ACTIVE')->first();
+
+        if($session) {
+            return NurseInstruction::destroy($id);
         }
         else {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'You cannot edit records of a discharged patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 }
