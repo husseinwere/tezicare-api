@@ -73,7 +73,7 @@ class PatientPrescriptionController extends Controller
     {
         $prescription = PatientPrescription::find($id);
         $session_id = $prescription['session_id'];
-        $session = PatientSession::where('session_id', $session_id)->where('status', 'ACTIVE')->first();
+        $session = PatientSession::where('id', $session_id)->where('status', 'ACTIVE')->first();
 
         if($session) {
             if(PatientPrescription::destroy($id)) {

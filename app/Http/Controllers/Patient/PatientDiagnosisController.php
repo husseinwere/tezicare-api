@@ -68,7 +68,7 @@ class PatientDiagnosisController extends Controller
     {
         $diagnosis = PatientDiagnosis::find($id);
         $session_id = $diagnosis['session_id'];
-        $session = PatientSession::where('session_id', $session_id)->where('status', 'ACTIVE')->first();
+        $session = PatientSession::where('id', $session_id)->where('status', 'ACTIVE')->first();
 
         if($session) {
             return PatientDiagnosis::destroy($id);

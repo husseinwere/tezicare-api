@@ -68,7 +68,7 @@ class PatientSymptomController extends Controller
     {
         $symptom = PatientSymptom::find($id);
         $session_id = $symptom['session_id'];
-        $session = PatientSession::where('session_id', $session_id)->where('status', 'ACTIVE')->first();
+        $session = PatientSession::where('id', $session_id)->where('status', 'ACTIVE')->first();
 
         if($session) {
             return PatientSymptom::destroy($id);
