@@ -14,6 +14,7 @@ class PatientTest extends Model
         'test_id',
         'test',
         'price',
+        'additional_info',
         'created_by',
         'payment_status',
         'status'
