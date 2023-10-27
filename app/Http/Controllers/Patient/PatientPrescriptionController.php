@@ -31,7 +31,7 @@ class PatientPrescriptionController extends Controller
         $request->validate([
             'session_id' => 'required',
             'drug' => 'required',
-            'dosage' => 'dosage'
+            'dosage' => 'required'
         ]);
         $data = $request->all();
         $data['created_by'] = Auth::id();
