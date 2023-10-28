@@ -87,7 +87,7 @@ class QueueBaseController extends Controller
     {
         $data = $request->all();
 
-        $item = $this->model::find($id);
+        $item = $this->model::where('session_id', $id);
         $updatedItem = $item->update($data);
 
         if($updatedItem){
