@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Lab;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lab\LabResult;
+use App\Models\Lab\LabResultUpload;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -17,14 +18,27 @@ class LabResultController extends Controller
     {
         $request->validate([
             'test_id' => 'required',
-            'result' => 'required'
+            'result' => 'required',
+            'files.*' => 'file|mimes:jpg,jpeg,png,pdf|max:5120'
         ]);
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        $createdResult = LabResult::create($data);
+        $createdResult = LabResult::create($data);        
 
         if($createdResult){
+            foreach($request->file('files') as $file) {
+                $path = $file->store('public/lab-results');
+                $url = asset(str_replace('public', 'storage', $path));
+
+                $fileUpload = [
+                    'result_id' => $createdResult->id,
+                    'url' => $url
+                ];
+                
+                LabResultUpload::create($fileUpload);
+            }
+
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -43,6 +57,18 @@ class LabResultController extends Controller
         $updatedResult = $result->update($data);
 
         if($updatedResult){
+            foreach($request->file('files') as $file) {
+                $path = $file->store('public/lab-results');
+                $url = asset(str_replace('public', 'storage', $path));
+
+                $fileUpload = [
+                    'result_id' => $id,
+                    'url' => $url
+                ];
+                
+                LabResultUpload::create($fileUpload);
+            }
+
             return response(null, Response::HTTP_OK);
         }
         else {
