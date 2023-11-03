@@ -75,9 +75,11 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //LAB QUEUE
     Route::resource('queue/lab', LabQueueController::class);
+    Route::get('/queue/lab/complete-session/{sessionId}', [LabQueueController::class, 'completeSession']);
 
     //RADIOLOGY QUEUE
     Route::resource('queue/radiology', RadiologyQueueController::class);
+    Route::get('/queue/radiology/complete-session/{sessionId}', [RadiologyQueueController::class, 'completeSession']);
 
     //PHARMACY QUEUE
     Route::resource('queue/pharmacy', PharmacyQueueController::class);

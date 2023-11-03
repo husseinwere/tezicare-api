@@ -13,7 +13,6 @@ class LabResult extends Model
         'test_id',
         'result',
         'description',
-        'file',
         'created_by'
     ];
 }

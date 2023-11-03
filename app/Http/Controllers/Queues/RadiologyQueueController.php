@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Queues;
 
 use App\Models\Patient\PatientTest;
+use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\RadiologyQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -44,6 +45,21 @@ class RadiologyQueueController extends QueueBaseController
         }
         else {
             return response(['message' => 'Patient is already in radiology queue.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    public function completeSession(string $sessionId) {
+        $queue = RadiologyQueue::where('session_id', $sessionId)->first();
+        $doctorQueue = DoctorQueue::where('session_id', $sessionId)->first();
+
+        if(RadiologyQueue::destroy($queue->id)) {
+            $doctorQueue->status = 'FROM_RADIOLOGY';
+            $doctorQueue->save();
+
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -24,7 +24,7 @@ class LabResultUploadController extends Controller
      */
     public function destroy(string $id)
     {
-        // make sure to delete file
+        // add delete file logic
         if(LabResultUpload::destroy($id)) {
             return response(null, Response::HTTP_NO_CONTENT);
         }
