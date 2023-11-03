@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Billing\PaymentRecord;
 use App\Models\Billing\PaymentRequest;
 use App\Models\Patient\PatientDrug;
-use App\Models\Patient\PatientRadiologyTest;
 use App\Models\Patient\PatientTest;
 use App\Models\Queues\TriageQueue;
 use Illuminate\Http\Request;
@@ -131,13 +130,8 @@ class PaymentRecordController extends Controller
             $items = explode(',', $items);
 
             foreach($items as $itemId) {
-                if($request['source'] == 'Lab') {
+                if($request['source'] == 'Lab' || $request['source'] == 'Radiology') {
                     $test = PatientTest::find($itemId);
-                    $test->payment_status = 'PAID';
-                    $test->save();
-                }
-                else if($request['source'] == 'Radiology') {
-                    $test = PatientRadiologyTest::find($itemId);
                     $test->payment_status = 'PAID';
                     $test->save();
                 }
