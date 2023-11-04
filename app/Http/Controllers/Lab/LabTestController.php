@@ -17,16 +17,16 @@ class LabTestController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
-        $lab = $request->query('lab');
+        $lab = ucfirst($request->query('lab'));
+        $shouldPaginate = $request->query('paginate', true);
 
-        if($lab == 'general') {
-            return LabTest::where('lab', 'General')->paginate($pageSize, ['*'], 'page', $pageIndex);;
-        }
-        else if($lab == 'radiology') {
-            return LabTest::where('lab', 'Radiology')->paginate($pageSize, ['*'], 'page', $pageIndex);;
+        $query = LabTest::where('lab', $lab);
+
+        if($shouldPaginate) {
+            return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
         }
         else {
-            return LabTest::paginate($pageSize, ['*'], 'page', $pageIndex);;
+            return $query->get();
         }
     }
 

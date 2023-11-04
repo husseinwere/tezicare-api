@@ -25,15 +25,22 @@ class InventoryBaseController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
         $search = $request->query('search');
-        
+        $shouldPaginate = $request->query('paginate', true);
+
+        $query = $this->model::where('status', 'ACTIVE');
+
         if($search) {
-            return $this->model::where('status', 'ACTIVE')->where('name', 'like', '%' . $search . '%')
-                                ->paginate($pageSize, ['*'], 'page', $pageIndex);
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        if($shouldPaginate) {
+            return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
         }
         else {
-            return $this->model::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
+            return $query->get();
         }
     }
+
 
     /**
      * Store a newly created resource in storage.
