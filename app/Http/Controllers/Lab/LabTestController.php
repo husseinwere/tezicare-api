@@ -18,15 +18,23 @@ class LabTestController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
         $lab = ucfirst($request->query('lab'));
-        $shouldPaginate = $request->query('paginate', true);
+        $shouldPaginate = $request->query('paginate', 'true');
 
-        $query = LabTest::where('lab', $lab);
-
-        if($shouldPaginate) {
-            return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
+        if($shouldPaginate == 'true') {
+            if($lab) {
+                return LabTest::where('lab', $lab)->paginate($pageSize, ['*'], 'page', $pageIndex);
+            }
+            else {
+                return LabTest::paginate($pageSize, ['*'], 'page', $pageIndex);
+            }
         }
         else {
-            return $query->get();
+            if($lab) {
+                return LabTest::where('lab', $lab)->get();
+            }
+            else {
+                return LabTest::get();
+            }
         }
     }
 

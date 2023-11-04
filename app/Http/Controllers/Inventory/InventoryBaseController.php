@@ -25,7 +25,7 @@ class InventoryBaseController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
         $search = $request->query('search');
-        $shouldPaginate = $request->query('paginate', true);
+        $shouldPaginate = $request->query('paginate', 'true');
 
         $query = $this->model::where('status', 'ACTIVE');
 
@@ -33,7 +33,7 @@ class InventoryBaseController extends Controller
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        if($shouldPaginate) {
+        if($shouldPaginate == 'true') {
             return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
         }
         else {
