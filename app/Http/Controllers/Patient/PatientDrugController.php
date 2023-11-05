@@ -67,25 +67,6 @@ class PatientDrugController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $data = $request->all();
-
-        $drug = PatientDrug::find($id);
-
-        $updatedDrug = $drug->update($data);
-
-        if($updatedDrug){
-            return response(null, Response::HTTP_OK);
-        }
-        else {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
