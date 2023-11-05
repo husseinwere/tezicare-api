@@ -19,7 +19,12 @@ class PatientDrugController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        $drugs = PatientDrug::where('session_id', $sessionId)->get();
+        $drugs = PatientDrug::join('pharmaceuticals', 'pharmaceuticals.id', '=', 'patient_drugs.drug_id')
+                            ->join('users', 'users.id', '=', 'patient_drugs.created_by')
+                            ->select('patient_drugs.id', 'patient_drugs.dosage', 'patient_drugs.unit_price', 'patient_drugs.quantity',
+                                    'patient_drugs.treatment', 'pharmaceuticals.name as drug', 'patient_drugs.payment_status',
+                                    DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'))
+                            ->where('session_id', $sessionId)->get();
 
         return $drugs;
     }
