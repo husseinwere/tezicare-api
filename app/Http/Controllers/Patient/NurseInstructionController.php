@@ -8,6 +8,7 @@ use App\Models\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class NurseInstructionController extends Controller
 {
@@ -18,7 +19,9 @@ class NurseInstructionController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        $instructions = NurseInstruction::where('session_id', $sessionId)->get();
+        $instructions = NurseInstruction::join('users', 'users.id', '=', 'nurse_instructions.created_by')
+                                        ->select('nurse_instructions.*', DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'))
+                                        ->where('session_id', $sessionId)->get();
 
         return $instructions;
     }

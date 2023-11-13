@@ -19,10 +19,10 @@ class PatientNonPharmaceuticalController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        $nonPharmaceuticals = PatientNonPharmaceutical::join('non_pharmaceuticals', 'non_pharmaceuticals.id', '=', 'patient_non_pharmaceuticals.drug_id')
+        $nonPharmaceuticals = PatientNonPharmaceutical::join('non_pharmaceuticals', 'non_pharmaceuticals.id', '=', 'patient_non_pharmaceuticals.non_pharmaceutical_id')
                             ->join('users', 'users.id', '=', 'patient_non_pharmaceuticals.created_by')
                             ->select('patient_non_pharmaceuticals.id', 'patient_non_pharmaceuticals.unit_price', 'patient_non_pharmaceuticals.quantity',
-                                    'non_pharmaceuticals.name as non_pharmaceutical', 'patient_non_pharmaceuticals.payment_status',
+                                    'non_pharmaceuticals.name', 'patient_non_pharmaceuticals.payment_status',
                                     DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'))
                             ->where('session_id', $sessionId)->get();
 
