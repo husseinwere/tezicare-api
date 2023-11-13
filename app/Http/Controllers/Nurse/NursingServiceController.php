@@ -13,9 +13,18 @@ class NursingServiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return NursingService::all();
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
+        $shouldPaginate = $request->query('paginate', 'true');
+
+        if($shouldPaginate == 'true') {
+            return NursingService::paginate($pageSize, ['*'], 'page', $pageIndex);
+        }
+        else {
+            return NursingService::get();
+        }
     }
 
     /**
@@ -24,7 +33,7 @@ class NursingServiceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'test' => 'required',
+            'service' => 'required',
             'price' => 'required'
         ]);
         $data = $request->all();
