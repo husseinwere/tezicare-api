@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Billing\PaymentRecord;
 use App\Models\Billing\PaymentRequest;
 use App\Models\Patient\PatientDrug;
+use App\Models\Patient\PatientNonPharmaceutical;
+use App\Models\Patient\PatientNursing;
 use App\Models\Patient\PatientTest;
 use App\Models\Queues\TriageQueue;
 use Illuminate\Http\Request;
@@ -135,8 +137,16 @@ class PaymentRecordController extends Controller
                     $test->payment_status = 'PAID';
                     $test->save();
                 }
-                else if($request['source'] == 'Non-Pharmaceuticals') {}
-                else if($request['source'] == 'Nurse') {}
+                else if($request['source'] == 'Non-Pharmaceuticals') {
+                    $nonPharmaceutical = PatientNonPharmaceutical::find($itemId);
+                    $nonPharmaceutical->payment_status = 'PAID';
+                    $nonPharmaceutical->save();
+                }
+                else if($request['source'] == 'Nurse') {
+                    $service = PatientNursing::find($itemId);
+                    $service->payment_status = 'PAID';
+                    $service->save();
+                }
                 else if($request['source'] == 'Pharmacy') {
                     $drug = PatientDrug::find($itemId);
                     $drug->payment_status = 'PAID';

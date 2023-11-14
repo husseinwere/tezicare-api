@@ -8,6 +8,7 @@ use App\Models\Patient\PatientNursing;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PatientNursingController extends Controller
 {
@@ -18,7 +19,9 @@ class PatientNursingController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        $services = PatientNursing::where('session_id', $sessionId)->get();
+        $services = PatientNursing::join('users', 'users.id', '=', 'patient_nursings.created_by')
+                                    ->select('patient_nursings.*', DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'))
+                                    ->where('session_id', $sessionId)->get();
 
         return $services;
     }
