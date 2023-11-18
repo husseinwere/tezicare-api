@@ -23,6 +23,7 @@ use App\Http\Controllers\Patient\PatientVitalsController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PatientInsuranceController;
 use App\Http\Controllers\PatientSessionController;
+use App\Http\Controllers\Queues\AdmissionQueueController;
 use App\Http\Controllers\Queues\ClearanceQueueController;
 use App\Http\Controllers\Queues\DoctorQueueController;
 use App\Http\Controllers\Queues\InpatientQueueController;
@@ -93,6 +94,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //CLEARANCE QUEUE
     Route::resource('queue/clearance', ClearanceQueueController::class);
+
+    //ADMISSION QUEUE
+    Route::resource('queue/admission', AdmissionQueueController::class);
 
     //PATIENT VITALS
     Route::resource('patient-vitals', PatientVitalsController::class);
