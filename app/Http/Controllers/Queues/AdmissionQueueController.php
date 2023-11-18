@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Queues;
 
+use App\Models\PatientSession;
 use App\Models\Queues\AdmissionQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -27,6 +28,11 @@ class AdmissionQueueController extends QueueBaseController
             $createdQueue = AdmissionQueue::create($data);
 
             if($createdQueue){
+                //CHANGE PATIENT SESSION TO INPATIENT
+                $session = PatientSession::find($data['session_id']);
+                $session->patient_type = 'INPATIENT';
+                $session->save();
+
                 return response(null, Response::HTTP_CREATED);
             }
             else {
