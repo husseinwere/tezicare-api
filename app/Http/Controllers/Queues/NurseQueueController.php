@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Queues;
 
 use App\Models\Patient\NurseInstruction;
+use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\NurseQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -43,6 +44,21 @@ class NurseQueueController extends QueueBaseController
         }
         else {
             return response(['message' => 'Patient is already in nurse queue.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    public function completeSession(string $sessionId) {
+        $queue = NurseQueue::where('session_id', $sessionId)->first();
+        $doctorQueue = DoctorQueue::where('session_id', $sessionId)->first();
+
+        if(NurseQueue::destroy($queue->id)) {
+            $doctorQueue->status = 'FROM_NURSE';
+            $doctorQueue->save();
+
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

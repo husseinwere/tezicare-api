@@ -70,9 +70,11 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //DOCTOR QUEUE
     Route::resource('queue/doctor', DoctorQueueController::class);
+    Route::get('/queue/doctor/complete-session/{sessionId}', [DoctorQueueController::class, 'completeSession']);
 
     //NURSE QUEUE
     Route::resource('queue/nurse', NurseQueueController::class);
+    Route::get('/queue/nurse/complete-session/{sessionId}', [NurseQueueController::class, 'completeSession']);
 
     //LAB QUEUE
     Route::resource('queue/lab', LabQueueController::class);
