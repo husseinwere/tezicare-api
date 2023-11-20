@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Billing\PaymentRecordController;
 use App\Http\Controllers\Billing\PaymentRequestController;
+use App\Http\Controllers\Doctor\DoctorConsultationController;
 use App\Http\Controllers\Hospital\ConsultationTypeController;
 use App\Http\Controllers\InsuranceCoverController;
 use App\Http\Controllers\Inventory\NonPharmaceuticalController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Patient\PatientRecommendationController;
 use App\Http\Controllers\Patient\PatientSymptomController;
 use App\Http\Controllers\Patient\PatientTestController;
 use App\Http\Controllers\Patient\PatientVitalsController;
+use App\Http\Controllers\Patient\WardRoundController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PatientInsuranceController;
 use App\Http\Controllers\PatientSessionController;
@@ -73,6 +75,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('queue/doctor', DoctorQueueController::class);
     Route::get('/queue/doctor/complete-session/{sessionId}', [DoctorQueueController::class, 'completeSession']);
 
+    //DOCTOR CONSULTATION
+    Route::resource('doctor-consultations', DoctorConsultationController::class);
+
     //NURSE QUEUE
     Route::resource('queue/nurse', NurseQueueController::class);
     Route::get('/queue/nurse/complete-session/{sessionId}', [NurseQueueController::class, 'completeSession']);
@@ -91,6 +96,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //INPATIENTS QUEUE
     Route::resource('queue/inpatients', InpatientQueueController::class);
+
+    //WARD ROUNDS
+    Route::resource('ward-rounds', WardRoundController::class);
 
     //CLEARANCE QUEUE
     Route::resource('queue/clearance', ClearanceQueueController::class);

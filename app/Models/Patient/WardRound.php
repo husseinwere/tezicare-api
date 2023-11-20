@@ -1,23 +1,24 @@
 <?php
 
-namespace App\Models\Queues;
+namespace App\Models\Patient;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class InpatientQueue extends Model
+class WardRound extends Model
 {
     use HasFactory;
-
-    protected $table = 'inpatients_queue';
 
     protected $fillable = [
         'session_id',
         'ward_id',
         'bed_id',
-        'admission_fee',
+        'bed_price',
         'doctor_id',
-        'created_by',
-        'status'
+        'doctor_comment',
+        'doctor_price',
+        'nurse_id',
+        'nurse_comment',
+        'nurse_price'
     ];
 }

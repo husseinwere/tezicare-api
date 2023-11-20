@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inpatients_queue', function (Blueprint $table) {
+        Schema::create('ward_rounds', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('session_id');
             $table->foreign('session_id')->references('id')->on('patient_sessions');
@@ -19,13 +19,16 @@ return new class extends Migration
             $table->foreign('ward_id')->references('id')->on('wards');
             $table->unsignedBigInteger('bed_id');
             $table->foreign('bed_id')->references('id')->on('beds');
-            $table->decimal('admission_fee', 10, 2);
-            $table->unsignedBigInteger('doctor_id');
+            $table->decimal('bed_price', 10, 2);
+            $table->unsignedBigInteger('doctor_id')->nullable();
             $table->foreign('doctor_id')->references('id')->on('users');
-            $table->unsignedBigInteger('created_by');
-            $table->foreign('created_by')->references('id')->on('users');
+            $table->string('doctor_comment')->nullable();
+            $table->decimal('doctor_price', 10, 2)->nullable();
+            $table->unsignedBigInteger('nurse_id')->nullable();
+            $table->foreign('nurse_id')->references('id')->on('users');
+            $table->string('nurse_comment')->nullable();
+            $table->decimal('nurse_price', 10, 2)->nullable();
             $table->timestamps();
-            $table->string('status')->default('ACTIVE');
         });
     }
 
@@ -34,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inpatients_queue');
+        Schema::dropIfExists('ward_rounds');
     }
 };
