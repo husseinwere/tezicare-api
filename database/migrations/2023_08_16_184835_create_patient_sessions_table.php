@@ -19,10 +19,6 @@ return new class extends Migration
             $table->string('consultation_type')->default('GENERAL');
             $table->integer('registration_fee')->nullable();
             $table->integer('consultation_fee')->nullable();
-            $table->integer('admission_fee')->nullable();
-            $table->integer('bed_fee')->nullable();
-            $table->integer('doctor_fee')->nullable();
-            $table->integer('nurse_fee')->nullable();
             $table->dateTime('discharged')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');

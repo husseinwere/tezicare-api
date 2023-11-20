@@ -28,15 +28,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('insurance_covers')->insert([
-            ['insurance' => 'NHIF', 'cap' => '1500']
+            ['insurance' => 'NHIF', 'cap' => '1500', 'created_by' => 1]
         ]);
 
         DB::table('wards')->insert([
-            ['name' => 'Male Ward', 'price' => '2500']
+            ['name' => 'Male Ward', 'price' => '2500', 'created_by' => 1]
         ]);
 
         DB::table('beds')->insert([
-            ['ward_id' => 1, 'name' => 'B90090909']
+            ['ward_id' => 1, 'name' => 'B90090909', 'created_by' => 1]
         ]);
     }
 }
