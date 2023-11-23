@@ -24,7 +24,7 @@ class PatientTestController extends Controller
                             ->join('users as doctor', 'doctor.id', '=', 'patient_tests.created_by')
                             ->leftJoin('users as lab', 'lab.id', '=', 'lab_results.created_by')
                             ->select('patient_tests.id', 'patient_tests.test', 'patient_tests.price', 'patient_tests.additional_info', 'patient_tests.payment_status', 'patient_tests.created_at',
-                                    'lab_tests.lab', 'lab_results.id as result_id', 'lab_results.result', 'lab_results.description', 'lab_results.file',
+                                    'lab_tests.lab', 'lab_results.id as result_id', 'lab_results.result', 'lab_results.description',
                                     DB::raw('CONCAT(doctor.first_name, " ", doctor.last_name) as requested_by'),
                                     DB::raw('CONCAT(lab.first_name, " ", lab.last_name) as results_by'))
                             ->where('patient_tests.session_id', $sessionId)

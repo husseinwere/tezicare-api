@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Queues;
 
-use App\Models\PatientSession;
 use App\Models\Queues\AdmissionQueue;
+use App\Models\Queues\DoctorQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdmissionQueueController extends QueueBaseController
 {
@@ -28,6 +29,9 @@ class AdmissionQueueController extends QueueBaseController
             $createdQueue = AdmissionQueue::create($data);
 
             if($createdQueue){
+                $doctorQueue = DoctorQueue::where('session_id', $data['session_id']);
+                DoctorQueue::destroy($doctorQueue->id);
+                
                 return response(null, Response::HTTP_CREATED);
             }
             else {
