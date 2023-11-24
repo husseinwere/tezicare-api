@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Queues;
 
 use App\Models\Doctor\DoctorConsultation;
 use App\Models\PatientSession;
+use App\Models\Queues\AdmissionQueue;
 use App\Models\Queues\InpatientQueue;
 use App\Models\Ward\Bed;
 use Illuminate\Http\Request;
@@ -21,8 +22,7 @@ class InpatientQueueController extends QueueBaseController
         $request->validate([
             'session_id' => 'required',
             'ward_id' => 'required',
-            'bed_id' => 'required',
-            'admission_fee' => 'required'
+            'bed_id' => 'required'
         ]);
         
         $data = $request->all();
@@ -36,6 +36,10 @@ class InpatientQueueController extends QueueBaseController
             $createdQueue = InpatientQueue::create($data);
 
             if($createdQueue) {
+                //REMOVE FROM ADMISSION QUEUE
+                $admissionQueue = AdmissionQueue::where('session_id', $data['session_id'])->first();
+                AdmissionQueue::destroy($admissionQueue->id);
+
                 //CHANGE SESSION TO INPATIENT
                 $session = PatientSession::find($data['session_id']);
                 $session->patient_type = 'INPATIENT';

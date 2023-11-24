@@ -9,6 +9,7 @@ use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
 use App\Models\Patient\PatientNursing;
 use App\Models\Patient\PatientTest;
+use App\Models\Queues\AdmissionQueue;
 use App\Models\Queues\TriageQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -123,8 +124,13 @@ class PaymentRecordController extends Controller
         $items = $request['items'];
 
         if($request['source'] == 'Reception consultation') {
-            $queue = TriageQueue::find($request['session_id']);
+            $queue = TriageQueue::where('session_id', $request['session_id'])->first();
             $queue->status = 'ACTIVE';
+            $queue->save();
+        }
+        else if($request['source'] == 'Admission deposit') {
+            $queue = AdmissionQueue::where('session_id', $request['session_id'])->first();
+            $queue->status = 'PAID';
             $queue->save();
         }
 

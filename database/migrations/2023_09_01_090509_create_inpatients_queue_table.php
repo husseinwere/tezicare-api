@@ -19,7 +19,6 @@ return new class extends Migration
             $table->foreign('ward_id')->references('id')->on('wards');
             $table->unsignedBigInteger('bed_id');
             $table->foreign('bed_id')->references('id')->on('beds');
-            $table->decimal('admission_fee', 10, 2);
             $table->unsignedBigInteger('doctor_id');
             $table->foreign('doctor_id')->references('id')->on('users');
             $table->unsignedBigInteger('created_by');

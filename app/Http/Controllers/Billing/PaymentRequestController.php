@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Billing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Billing\PaymentRequest;
+use App\Models\Queues\AdmissionQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -46,6 +47,12 @@ class PaymentRequestController extends Controller
         $createdRequest = PaymentRequest::create($data);
 
         if($createdRequest){
+            if($data['source'] == 'Admission deposit') {
+                $queue = AdmissionQueue::where('session_id', $data['session_id'])->first();
+                $queue->status = 'PENDING_PAYMENT';
+                $queue->save();
+            }
+
             return response(null, Response::HTTP_CREATED);
         }
         else {

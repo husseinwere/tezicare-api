@@ -15,7 +15,6 @@ class InpatientQueue extends Model
         'session_id',
         'ward_id',
         'bed_id',
-        'admission_fee',
         'doctor_id',
         'created_by',
         'status'
