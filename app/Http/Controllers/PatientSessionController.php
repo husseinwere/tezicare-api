@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PatientSessionController extends Controller
 {
@@ -49,7 +50,9 @@ class PatientSessionController extends Controller
 
     public function show(string $id)
     {
-        return PatientSession::find($id);
+        return PatientSession::leftJoin('users', 'users.id', '=', 'patient_sessions.doctor_id')
+                            ->select('patient_sessions.*', DB::raw('CONCAT(users.first_name, " ", users.last_name) as doctor'))
+                            ->where('patient_sessions.id', $id)->first();
     }
 
     public function update(Request $request, string $id)

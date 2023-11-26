@@ -29,7 +29,7 @@ class AdmissionQueueController extends QueueBaseController
             $createdQueue = AdmissionQueue::create($data);
 
             if($createdQueue){
-                $doctorQueue = DoctorQueue::where('session_id', $data['session_id']);
+                $doctorQueue = DoctorQueue::where('session_id', $data['session_id'])->first();
                 DoctorQueue::destroy($doctorQueue->id);
                 
                 return response(null, Response::HTTP_CREATED);
