@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Queues;
 
-use App\Models\Doctor\DoctorConsultation;
 use App\Models\PatientSession;
 use App\Models\Queues\AdmissionQueue;
 use App\Models\Queues\InpatientQueue;
@@ -28,8 +27,8 @@ class InpatientQueueController extends QueueBaseController
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        $consultation = DoctorConsultation::where('session_id', $data['session_id'])->first();
-        $data['doctor_id'] = $consultation->doctor_id;
+        $session = PatientSession::find($data['session_id']);
+        $data['doctor_id'] = $session->doctor_id;
 
         $queuePresent = InpatientQueue::where('session_id', $data['session_id'])->first();
         if(!$queuePresent) {
@@ -41,7 +40,6 @@ class InpatientQueueController extends QueueBaseController
                 AdmissionQueue::destroy($admissionQueue->id);
 
                 //CHANGE SESSION TO INPATIENT
-                $session = PatientSession::find($data['session_id']);
                 $session->patient_type = 'INPATIENT';
                 $session->save();
 

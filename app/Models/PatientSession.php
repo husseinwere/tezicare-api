@@ -15,10 +15,7 @@ class PatientSession extends Model
         'consultation_type',
         'registration_fee',
         'consultation_fee',
-        'admission_fee',
-        'bed_fee',
-        'doctor_fee',
-        'nurse_fee',
+        'doctor_id',
         'discharged',
         'created_by',
         'status'
