@@ -11,6 +11,7 @@ use App\Http\Controllers\Lab\LabResultController;
 use App\Http\Controllers\Lab\LabTestController;
 use App\Http\Controllers\Nurse\NursingServiceController;
 use App\Http\Controllers\Patient\NurseInstructionController;
+use App\Http\Controllers\Patient\PatientConditionController;
 use App\Http\Controllers\Patient\PatientDiagnosisController;
 use App\Http\Controllers\Patient\PatientDrugController;
 use App\Http\Controllers\Patient\PatientImpressionController;
