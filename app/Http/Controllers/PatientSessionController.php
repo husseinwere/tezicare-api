@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Patient\PatientDiagnosis;
 use App\Models\PatientSession;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -16,17 +17,6 @@ class PatientSessionController extends Controller
         $patient_id = $request->input('patient_id');
 
         return PatientSession::where('patient_id', $patient_id)->limit(10)->latest()->get();
-    }
-
-    public function getPatientStats(string $patient_id)
-    {
-        $outpatientCount = PatientSession::where('patient_id', $patient_id)->where('patient_type', 'OUTPATIENT')->count();
-        $inpatientCount = PatientSession::where('patient_id', $patient_id)->where('patient_type', 'INPATIENT')->count();
-
-        return [
-            'outpatient' => $outpatientCount,
-            'inpatient' => $inpatientCount
-        ];
     }
 
     public function store(Request $request)
@@ -88,5 +78,132 @@ class PatientSessionController extends Controller
         $session->save();
 
         return $session;
+    }
+
+    //REPORTS
+    public function getPatientStats(string $patient_id)
+    {
+        $outpatientCount = PatientSession::where('patient_id', $patient_id)->where('patient_type', 'OUTPATIENT')->count();
+        $inpatientCount = PatientSession::where('patient_id', $patient_id)->where('patient_type', 'INPATIENT')->count();
+
+        return [
+            'outpatient' => $outpatientCount,
+            'inpatient' => $inpatientCount
+        ];
+    }
+
+    public function getVisitStats(Request $request)
+    {
+        $year = $request->input('year');
+        $month = $request->input('month');
+        $date = $request->input('date');
+
+        $query = PatientSession::where('status', 'CLEARED');
+        if ($year) { $query->whereYear('created_at', $year); }
+        if ($month) { $query->whereMonth('created_at', $month); }
+        if ($date) { $query->whereDate('created_at', $date); }
+        $totalPatientCount = $query->count();
+
+        $query = PatientSession::where('patient_type', 'OUTPATIENT')->where('status', 'CLEARED');
+        if ($year) { $query->whereYear('created_at', $year); }
+        if ($month) { $query->whereMonth('created_at', $month); }
+        if ($date) { $query->whereDate('created_at', $date); }
+        $totalOutpatientCount = $query->count();
+
+        $totalInpatientCount = $totalPatientCount - $totalOutpatientCount;
+
+        $query = PatientSession::where('patient_type', 'OUTPATIENT')->where('status', 'CLEARED')
+                                ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
+                                ->where('patients.gender', 'Male');
+        if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
+        if ($month) { $query->whereMonth('patient_sessions.created_at', $month); }
+        if ($date) { $query->whereDate('patient_sessions.created_at', $date); }
+        $maleOutpatientCount = $query->count();
+
+        $femaleOutpatientCount = $totalOutpatientCount - $maleOutpatientCount;
+
+        $query = PatientSession::where('patient_type', 'OUTPATIENT')->where('status', 'CLEARED')
+                                ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
+                                ->where(DB::raw('YEAR(CURRENT_DATE) - YEAR(patients.dob)'), '>', 5);
+        if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
+        if ($month) { $query->whereMonth('patient_sessions.created_at', $month); }
+        if ($date) { $query->whereDate('patient_sessions.created_at', $date); }
+        $over5OutpatientCount = $query->count();
+
+        $under5OutpatientCount = $totalOutpatientCount - $over5OutpatientCount;
+
+        if($date) { $startDate = date('Y-m-d', strtotime("$year-$month-$date")); }
+        else { $startDate = date('Y-m-d', strtotime("$year-$month-01")); }
+
+        $query = PatientSession::where('patient_type', 'OUTPATIENT')->where('status', 'CLEARED')
+                                ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
+                                ->where('patients.created_at', '>', $startDate);
+        if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
+        if ($month) { $query->whereMonth('patient_sessions.created_at', $month); }
+        if ($date) { $query->whereDate('patient_sessions.created_at', $date); }
+        $newOutpatientCount = $query->count();
+
+        $revisitOutpatientCount = $totalOutpatientCount - $newOutpatientCount;
+
+        $query = PatientSession::where('patient_type', 'INPATIENT')->where('status', 'CLEARED')
+                                ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
+                                ->where('patients.gender', 'Male');
+        if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
+        if ($month) { $query->whereMonth('patient_sessions.created_at', $month); }
+        if ($date) { $query->whereDate('patient_sessions.created_at', $date); }
+        $maleInpatientCount = $query->count();
+
+        $femaleInpatientCount = $totalInpatientCount - $maleInpatientCount;
+
+        $query = PatientSession::where('patient_type', 'INPATIENT')->where('status', 'CLEARED')
+                                ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
+                                ->where(DB::raw('YEAR(CURRENT_DATE) - YEAR(patients.dob)'), '>', 5);
+        if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
+        if ($month) { $query->whereMonth('patient_sessions.created_at', $month); }
+        if ($date) { $query->whereDate('patient_sessions.created_at', $date); }
+        $over5InpatientCount = $query->count();
+
+        $under5InpatientCount = $totalInpatientCount - $over5InpatientCount;
+
+        $query = PatientSession::where('patient_type', 'INPATIENT')->where('status', 'CLEARED')
+                                ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
+                                ->where('patients.created_at', '>', $startDate);
+        if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
+        if ($month) { $query->whereMonth('patient_sessions.created_at', $month); }
+        if ($date) { $query->whereDate('patient_sessions.created_at', $date); }
+        $newInpatientCount = $query->count();
+
+        $revisitInpatientCount = $totalInpatientCount - $newInpatientCount;
+
+        //DIAGNOSIS
+        $query = PatientDiagnosis::select('diagnosis', DB::raw('COUNT(*) as count'));
+        if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
+        if ($month) { $query->whereMonth('patient_sessions.created_at', $month); }
+        if ($date) { $query->whereDate('patient_sessions.created_at', $date); }
+        $diagnosisCounts = $query->groupBy(DB::raw('LOWER(diagnosis)'))
+                                ->orderBy('count', 'desc')
+                                ->get();
+
+        return [
+            'outpatient' => [
+                'total' => $totalOutpatientCount,
+                'male' => $maleOutpatientCount,
+                'female' => $femaleOutpatientCount,
+                'under5' => $under5OutpatientCount,
+                'over5' => $over5OutpatientCount,
+                'new' => $newOutpatientCount,
+                'revisit' => $revisitOutpatientCount
+            ],
+            'inpatient' => [
+                'total' => $totalInpatientCount,
+                'male' => $maleInpatientCount,
+                'female' => $femaleInpatientCount,
+                'under5' => $under5InpatientCount,
+                'over5' => $over5InpatientCount,
+                'new' => $newInpatientCount,
+                'revisit' => $revisitInpatientCount
+            ],
+            'diagnosis' => $diagnosisCounts
+        ];
     }
 }

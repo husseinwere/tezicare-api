@@ -181,8 +181,6 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //INSURANCE COVERS
     Route::resource('insurance/covers', InsuranceCoverController::class);
 
-});
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    //REPORTS
+    Route::get('/reports/patient-visits', [PatientSessionController::class, 'getVisitStats']);
 });
