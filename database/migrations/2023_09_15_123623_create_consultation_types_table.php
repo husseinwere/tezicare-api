@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->decimal('price', 10, 2);
+            $table->decimal('inpatient_nurse_rate', 10, 2)->nullable();
+            $table->decimal('inpatient_doctor_rate', 10, 2)->nullable();
             $table->timestamps();
         });
     }

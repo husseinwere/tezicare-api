@@ -11,6 +11,8 @@ class ConsultationType extends Model
 
     protected $fillable = [
         'name',
-        'price'
+        'price',
+        'inpatient_nurse_rate',
+        'inpatient_doctor_rate'
     ];
 }

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hospital\ConsultationType;
 use App\Models\Patient\WardRound;
+use App\Models\PatientSession;
 use App\Models\Ward\Ward;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -38,6 +40,11 @@ class WardRoundController extends Controller
 
         $ward = Ward::find($data['ward_id']);
         $data['bed_price'] = $ward->price;
+
+        $session = PatientSession::find($data['session_id']);
+        $consultation_type = ConsultationType::where('name', $session->consultation_type)->first();
+        $data['doctor_price'] = $consultation_type->inpatient_doctor_rate;
+        $data['nurse_price'] = $consultation_type->inpatient_nurse_rate;
 
         $createdRound = WardRound::create($data);
 

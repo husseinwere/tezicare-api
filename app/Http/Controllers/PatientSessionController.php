@@ -2,13 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventory\NonPharmaceutical;
+use App\Models\Inventory\Pharmaceutical;
+use App\Models\Patient;
 use App\Models\Patient\PatientDiagnosis;
+use App\Models\Patient\PatientDrug;
+use App\Models\Patient\PatientNonPharmaceutical;
+use App\Models\Patient\PatientNursing;
+use App\Models\Patient\PatientTest;
 use App\Models\PatientSession;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Response as FacadesResponse;
 
 class PatientSessionController extends Controller
 {
@@ -23,7 +32,9 @@ class PatientSessionController extends Controller
     {
         $request->validate([
             'patient_id' => 'required',
-            'consultation_type' => 'required'
+            'consultation_type' => 'required',
+            'consultation_fee' => 'required',
+            'registration_fee' => 'required'
         ]);
         $data = $request->all();
 
@@ -35,7 +46,14 @@ class PatientSessionController extends Controller
 
         $data['created_by'] = Auth::id();
 
-        return PatientSession::create($data);
+        $createdSession = PatientSession::create($data);
+
+        if($createdSession){
+            return response($createdSession, Response::HTTP_CREATED);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function show(string $id)
@@ -205,5 +223,305 @@ class PatientSessionController extends Controller
             ],
             'diagnosis' => $diagnosisCounts
         ];
+    }
+
+    public function printInvoice(string $id) {
+        $patientSession = PatientSession::find($id);
+
+        if($patientSession){
+            $totalInvoiceAmount = 0;
+
+            $consultation_fee = $patientSession->consultation_fee;
+            $registration_fee = $patientSession->registration_fee;
+
+            $totalInvoiceAmount += $consultation_fee;
+            $totalInvoiceAmount += $registration_fee;
+
+            $itemsHTML = "
+                <tr class='item'>
+                    <td style='width:35%;'>Registration fee</td>
+                    <td style='width:20%; text-align:center;'>1</td>
+                    <td style='width:25%; text-align:right;'>$registration_fee</td>
+                    <td style='width:20%; text-align:right;'>$registration_fee</td>
+                </tr>
+                <tr class='item'>
+                    <td style='width:35%;'>Consultation fee</td>
+                    <td style='width:20%; text-align:center;'>1</td>
+                    <td style='width:25%; text-align:right;'>$consultation_fee</td>
+                    <td style='width:20%; text-align:right;'>$consultation_fee</td>
+                </tr>
+            ";
+
+            //NURSE FEES
+            $items = PatientNursing::where('session_id', $id)->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalInvoiceAmount += $item->price;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->service</td>
+                        <td style='width:20%; text-align:center;'>1</td>
+                        <td style='width:25%; text-align:right;'>$item->price</td>
+                        <td style='width:20%; text-align:right;'>$item->price</td>
+                    </tr>
+                ";
+            }
+
+            //NON-PHARMACEUTICALS
+            $items = PatientNonPharmaceutical::where('session_id', $id)->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $nonPharmaceutical = NonPharmaceutical::find($item->non_pharmaceutical_id);
+                $totalPrice = $item->quantity * $item->unit_price;
+                $totalInvoiceAmount += $totalPrice;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$nonPharmaceutical->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->unit_price</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
+            }
+
+            //LAB FEES
+            $items = PatientTest::where('session_id', $id)->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalInvoiceAmount += $item->price;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->test</td>
+                        <td style='width:20%; text-align:center;'>1</td>
+                        <td style='width:25%; text-align:right;'>$item->price</td>
+                        <td style='width:20%; text-align:right;'>$item->price</td>
+                    </tr>
+                ";
+            }
+
+            //PHARMACY FEES
+            $items = PatientDrug::where('session_id', $id)->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $pharmaceutical = Pharmaceutical::find($item->drug_id);
+                $totalPrice = $item->quantity * $item->unit_price;
+                $totalInvoiceAmount += $totalPrice;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$pharmaceutical->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->unit_price</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
+            }
+
+            $patient = Patient::find($patientSession->patient_id);
+            $patientString = "
+                $patient->first_name $patient->last_name (OP No: $patient->id) <br>
+                Gender: $patient->gender, Age: <br>
+                $patient->phone, $patient->email<br>
+                $patient->residence
+            ";
+
+            $invoiceHTML = "
+                <style>
+                    .top_rw{ background-color:#f4f4f4; }
+                    button{ padding:5px 10px; font-size:14px;}
+                    .invoice-box {
+                        width: 100%;
+                        margin: auto;
+                        padding:10px;
+                        border: 1px solid #eee;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+                        font-size: 14px;
+                        line-height: 24px;
+                        font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+                        color: #555;
+                    }
+                    .invoice-box table {
+                        width: 100%;
+                        line-height: inherit;
+                        text-align: left;
+                        border-bottom: solid 1px #ccc;
+                    }
+                    .invoice-box table td {
+                        padding: 5px;
+                        vertical-align:middle;
+                    }
+                    .invoice-box table tr td:nth-child(2) {
+                        text-align: right;
+                    }
+                    .invoice-box table tr.top table td {
+                        padding-bottom: 20px;
+                    }
+                    .invoice-box table tr.top table td.title {
+                        font-size: 45px;
+                        line-height: 45px;
+                        color: #333;
+                    }
+                    .invoice-box table tr.information table td {
+                        padding-bottom: 40px;
+                    }
+                    .invoice-box table tr.heading th {
+                        background: #eee;
+                        border-bottom: 1px solid #ddd;
+                        font-weight: bold;
+                        font-size:12px;
+                    }
+                    .invoice-box table tr.details td {
+                        padding-bottom: 20px;
+                    }
+                    .invoice-box table tr.item td{
+                        border-bottom: 1px solid #eee;
+                    }
+                    .invoice-box table tr.item.last td {
+                        border-bottom: none;
+                    }
+                    .invoice-box table tr.total td:nth-child(2) {
+                        border-top: 2px solid #eee;
+                        font-weight: bold;
+                    }
+                    /** RTL **/
+                    .rtl {
+                        direction: rtl;
+                        font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+                    }
+                    .rtl table {
+                        text-align: right;
+                    }
+                    .rtl table tr td:nth-child(2) {
+                        text-align: left;
+                    }
+                </style>
+                
+                <div class='invoice-box'>
+                    <table cellpadding='0' cellspacing='0'>
+                        <thead>
+                            <tr>
+                                <th colspan='2'></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class='top_rw'>
+                                <td colspan='2'>
+                                    <h2 style='margin-bottom: 0px;'> HOSPITAL INVOICE </h2>
+                                    <span> Date: $patientSession->created_at </span>
+                                </td>
+                                <td  style='width:30%; margin-right: 10px;'>
+                                    Invoice No: $patientSession->id
+                                </td>
+                            </tr>
+                            <tr class='information'>
+                                <td colspan='3'>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan='2'>
+                                                    <b> Invoice to: </b> <br>
+                                                    $patientString
+                                                </td>
+                                                <td> <b> Invoice from: </b><br>
+                                                    Hospital Name<br>
+                                                    Hospital address<br>
+                                                    Hospital email<br>
+                                                    Hospital phone
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan='3'>
+                                    <table cellspacing='0px' cellpadding='2px'>
+                                        <thead>
+                                            <tr class='heading'>
+                                                <th style='width:35%;'>
+                                                    ITEM
+                                                </th>
+                                                <th style='width:20%; text-align:center;'>
+                                                    QTY.
+                                                </th>
+                                                <th style='width:25%; text-align:right;'>
+                                                    PRICE
+                                                </th>
+                                                <th style='width:20%; text-align:right;'>
+                                                    TOTAL AMOUNT
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            $itemsHTML
+                                            <tr class='item'>
+                                                <td style='width:35%;'></td>
+                                                <td style='width:20%; text-align:center;'></td>
+                                                <td style='width:25%; text-align:right;'><b> Grand Total </b></td>
+                                                <td style='width:20%; text-align:right;'>$totalInvoiceAmount</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan='3'>
+                                    <table cellspacing='0px' cellpadding='2px'>
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td width='50%'>
+                                                </td>
+                                                <td>
+                                                * This is a computer generated invoice and does not
+                                                require a physical signature
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width='50%'>
+                                                </td>
+                                                <td>
+                                                    <b> Patient Signature </b>
+                                                    <br>
+                                                    <br>
+                                                    ...................................
+                                                    <br>
+                                                    <br>
+                                                    <br>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            ";
+
+            // Create PDF instance
+            $pdf = Pdf::loadHTML($invoiceHTML);
+            
+            $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
+            $response->header('Access-Control-Allow-Origin', '*');
+            $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+            $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+            return $response;
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

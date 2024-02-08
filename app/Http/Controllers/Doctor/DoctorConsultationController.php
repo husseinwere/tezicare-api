@@ -70,9 +70,7 @@ class DoctorConsultationController extends Controller
      */
     public function destroy(string $id)
     {
-        $consultation = DoctorConsultation::find($id);
-        $consultation->status = 'DELETED';
-        if($consultation->save()) {
+        if(DoctorConsultation::destroy($id)) {
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {
