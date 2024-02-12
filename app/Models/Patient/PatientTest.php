@@ -2,8 +2,10 @@
 
 namespace App\Models\Patient;
 
+use App\Models\Lab\LabResult;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PatientTest extends Model
 {
@@ -19,4 +21,8 @@ class PatientTest extends Model
         'payment_status',
         'status'
     ];
+
+    public function results(): HasOne {
+        return $this->hasOne(LabResult::class, 'test_id');
+    }
 }

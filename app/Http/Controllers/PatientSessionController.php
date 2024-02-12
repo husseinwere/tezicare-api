@@ -9,8 +9,11 @@ use App\Models\Patient\PatientDiagnosis;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
 use App\Models\Patient\PatientNursing;
+use App\Models\Patient\PatientSymptom;
 use App\Models\Patient\PatientTest;
+use App\Models\Patient\WardRound;
 use App\Models\PatientSession;
+use App\Models\Ward\Ward;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -267,6 +270,50 @@ class PatientSessionController extends Controller
                 ";
             }
 
+            if($patientSession->patient_type == 'INPATIENT') {
+                //BED FEES
+                $items = WardRound::where('session_id', $id)->get();
+                foreach($items as $item) {
+                    $ward = Ward::find($item->ward_id);
+                    $totalInvoiceAmount += $item->bed_price;
+
+                    $itemsHTML .= "
+                        <tr class='item'>
+                            <td style='width:35%;'>Bed Charges ($ward->name)</td>
+                            <td style='width:20%; text-align:center;'>1</td>
+                            <td style='width:25%; text-align:right;'>$item->bed_price</td>
+                            <td style='width:20%; text-align:right;'>$item->bed_price</td>
+                        </tr>
+                    ";
+
+                    if($item->doctor_price) {
+                        $totalInvoiceAmount += $item->doctor_price;
+
+                        $itemsHTML .= "
+                            <tr class='item'>
+                                <td style='width:35%;'>Ward Round (Doctor)</td>
+                                <td style='width:20%; text-align:center;'>1</td>
+                                <td style='width:25%; text-align:right;'>$item->doctor_price</td>
+                                <td style='width:20%; text-align:right;'>$item->doctor_price</td>
+                            </tr>
+                        ";
+                    }
+
+                    if($item->nurse_price) {
+                        $totalInvoiceAmount += $item->nurse_price;
+
+                        $itemsHTML .= "
+                            <tr class='item'>
+                                <td style='width:35%;'>Ward Round (Nurse)</td>
+                                <td style='width:20%; text-align:center;'>1</td>
+                                <td style='width:25%; text-align:right;'>$item->nurse_price</td>
+                                <td style='width:20%; text-align:right;'>$item->nurse_price</td>
+                            </tr>
+                        ";
+                    }
+                }
+            }
+
             //NON-PHARMACEUTICALS
             $items = PatientNonPharmaceutical::where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
@@ -512,6 +559,223 @@ class PatientSessionController extends Controller
 
             // Create PDF instance
             $pdf = Pdf::loadHTML($invoiceHTML);
+            
+            $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
+            $response->header('Access-Control-Allow-Origin', '*');
+            $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+            $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+            return $response;
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function printDischargeSummary(string $id) {
+        $patientSession = PatientSession::find($id);
+
+        if($patientSession){
+            //PATIENT SYMPTOMS
+            $symptoms = PatientSymptom::pluck('symptom')->toArray();
+            $symptomsString = implode(', ', $symptoms);
+
+            //PATIENT DIAGNOSIS
+            $diagnosis = PatientDiagnosis::pluck('diagnosis')->toArray();
+            $diagnosisString = implode(', ', $diagnosis);
+
+            $patient = Patient::find($patientSession->patient_id);
+            $patientString = "
+                $patient->first_name $patient->last_name (OP No: $patient->id) <br>
+                Gender: $patient->gender, Age: <br>
+                $patient->phone, $patient->email<br>
+                $patient->residence
+            ";
+
+            //LAB REPORT
+            $tests = PatientTest::leftJoin('lab_results', 'patient_tests.id', '=', 'lab_results.test_id')
+                                ->where('patient_tests.session_id', $patientSession->id)->where('patient_tests.status', 'ACTIVE')
+                                ->select('patient_tests.*', 'lab_results.result', 'lab_results.description')
+                                ->get();
+
+            $testsString = "<ul>";
+            foreach($tests as $test) {
+                $testResult = "N/A";
+                if($test->result) {
+                    $testResult = "$test->result - $test->description";
+                }
+
+                $testsString .= "
+                    <li>$test->test: <i>$testResult</i></li>
+                ";
+            }
+            $testsString .= "</ul>";
+
+            $summaryHTML = "
+                <style>
+                    .top_rw{ background-color:#f4f4f4; }
+                    button{ padding:5px 10px; font-size:14px;}
+                    .invoice-box {
+                        width: 100%;
+                        margin: auto;
+                        padding:10px;
+                        border: 1px solid #eee;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+                        font-size: 14px;
+                        line-height: 24px;
+                        font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+                        color: #555;
+                    }
+                    .invoice-box table {
+                        width: 100%;
+                        line-height: inherit;
+                        text-align: left;
+                        border-bottom: solid 1px #ccc;
+                    }
+                    .invoice-box table td {
+                        padding: 5px;
+                        vertical-align:middle;
+                    }
+                    .invoice-box table tr td:nth-child(2) {
+                        text-align: right;
+                    }
+                    .invoice-box table tr.top table td {
+                        padding-bottom: 20px;
+                    }
+                    .invoice-box table tr.top table td.title {
+                        font-size: 45px;
+                        line-height: 45px;
+                        color: #333;
+                    }
+                    .invoice-box table tr.information table td {
+                        padding-bottom: 40px;
+                    }
+                    .invoice-box table tr.heading th {
+                        background: #eee;
+                        border-bottom: 1px solid #ddd;
+                        font-weight: bold;
+                        font-size:12px;
+                    }
+                    .invoice-box table tr.details td {
+                        padding-bottom: 20px;
+                    }
+                    .invoice-box table tr.item td{
+                        border-bottom: 1px solid #eee;
+                    }
+                    .invoice-box table tr.item.last td {
+                        border-bottom: none;
+                    }
+                    .invoice-box table tr.total td:nth-child(2) {
+                        border-top: 2px solid #eee;
+                        font-weight: bold;
+                    }
+                    /** RTL **/
+                    .rtl {
+                        direction: rtl;
+                        font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+                    }
+                    .rtl table {
+                        text-align: right;
+                    }
+                    .rtl table tr td:nth-child(2) {
+                        text-align: left;
+                    }
+                </style>
+                
+                <div class='invoice-box'>
+                    <table cellpadding='0' cellspacing='0'>
+                        <thead>
+                            <tr>
+                                <th colspan='2'></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class='top_rw'>
+                                <td colspan='2'>
+                                    <h2 style='margin-bottom: 0px;'> DISCHARGE SUMMARY </h2>
+                                    <span> Date: $patientSession->created_at </span>
+                                </td>
+                                <td  style='width:30%; margin-right: 10px;'>
+                                    Invoice No: $patientSession->id
+                                </td>
+                            </tr>
+                            <tr class='information'>
+                                <td colspan='3'>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan='2'>
+                                                    <b> Patient: </b> <br>
+                                                    $patientString
+                                                </td>
+                                                <td>
+                                                    Hospital Name<br>
+                                                    Hospital address<br>
+                                                    Hospital email<br>
+                                                    Hospital phone
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan='3'>
+                                    <p>
+                                        <b>SYMPTOMS: </b>
+                                        $symptomsString
+                                    </p>
+                                    <p>
+                                        <b>DIAGNOSIS: </b>
+                                        $diagnosisString
+                                    </p>
+                                    <p>
+                                        <b>LAB REPORT: </b>
+                                        $testsString
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan='3'>
+                                    <table cellspacing='0px' cellpadding='2px'>
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td width='50%'>
+                                                </td>
+                                                <td>
+                                                    <b> Patient Signature </b>
+                                                    <br>
+                                                    <br>
+                                                    ...................................
+                                                    <br>
+                                                    <br>
+                                                    <br>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            ";
+
+            // Create PDF instance
+            $pdf = Pdf::loadHTML($summaryHTML);
             
             $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
             $response->header('Access-Control-Allow-Origin', '*');
