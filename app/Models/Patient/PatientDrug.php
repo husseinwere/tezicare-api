@@ -2,8 +2,10 @@
 
 namespace App\Models\Patient;
 
+use App\Models\Inventory\Pharmaceutical;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PatientDrug extends Model
 {
@@ -20,4 +22,8 @@ class PatientDrug extends Model
         'payment_status',
         'status'
     ];
+
+    public function pharmaceutical(): BelongsTo {
+        return $this->belongsTo(Pharmaceutical::class, 'drug_id');
+    }
 }

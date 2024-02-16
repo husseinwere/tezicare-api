@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentRecordController;
 use App\Http\Controllers\Billing\PaymentRequestController;
 use App\Http\Controllers\Doctor\DoctorConsultationController;
@@ -66,7 +67,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //PATIENT SESSIONS
     Route::resource('sessions', PatientSessionController::class);
     Route::get('/sessions/patient-stats/{patient_id}', [PatientSessionController::class, 'getPatientStats']);
-    Route::get('/sessions/discharge/{id}', [PatientSessionController::class, 'discharge']);
+    Route::put('/sessions/clear/{id}', [PatientSessionController::class, 'clearPatient']);
     Route::get('/sessions/print/invoice/{id}', [PatientSessionController::class, 'printInvoice']);
     Route::get('/sessions/print/discharge-summary/{id}', [PatientSessionController::class, 'printDischargeSummary']);
 
@@ -185,4 +186,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //REPORTS
     Route::get('/reports/patient-visits', [PatientSessionController::class, 'getVisitStats']);
+
+    //INVOICE
+    Route::get('/invoices', [InvoiceController::class, 'index']);
 });

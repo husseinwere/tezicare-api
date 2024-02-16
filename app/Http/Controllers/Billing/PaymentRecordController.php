@@ -31,12 +31,9 @@ class PaymentRecordController extends Controller
     /**
      * Get records for a specific patient session.
      */
-    public function sessionRecords(Request $request, string $id)
-    {
-        $pageSize = $request->query('page_size', 20);
-        $pageIndex = $request->query('page_index', 1);
-        
-        return PaymentRecord::where('session_id', $id)->where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
+    public function sessionRecords(string $id)
+    {   
+        return PaymentRecord::where('session_id', $id)->where('status', '<>', 'DELETED')->get();
     }
 
     /**

@@ -9,12 +9,21 @@ use App\Models\Patient\PatientDiagnosis;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
 use App\Models\Patient\PatientNursing;
+use App\Models\Patient\PatientPrescription;
+use App\Models\Patient\PatientRecommendation;
 use App\Models\Patient\PatientSymptom;
 use App\Models\Patient\PatientTest;
 use App\Models\Patient\WardRound;
 use App\Models\PatientSession;
+use App\Models\Queues\DoctorQueue;
+use App\Models\Queues\InpatientQueue;
+use App\Models\Queues\LabQueue;
+use App\Models\Queues\NurseQueue;
+use App\Models\Queues\PharmacyQueue;
+use App\Models\Queues\RadiologyQueue;
+use App\Models\Queues\TriageQueue;
+use App\Models\User;
 use App\Models\Ward\Ward;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -76,20 +85,25 @@ class PatientSessionController extends Controller
         return $session;
     }
 
-    public function discharge(string $id)
+    public function clearPatient(string $id)
     {
-        //DELETE PATIENT FROM QUEUES (INCASE iTS NECESSARY)
-
-        //UPDATE DISCHARGE DATE TIME
-        $currentDateTime = Carbon::now();
+        TriageQueue::where('session_id', $id)->delete();
+        DoctorQueue::where('session_id', $id)->delete();
+        PharmacyQueue::where('session_id', $id)->delete();
+        NurseQueue::where('session_id', $id)->delete();
+        LabQueue::where('session_id', $id)->delete();
+        RadiologyQueue::where('session_id', $id)->delete();
+        InpatientQueue::where('session_id', $id)->delete();
 
         $session = PatientSession::find($id);
-        $session->discharge = $currentDateTime;
-        $session->save();
+        $session->status = 'CLEARED';
 
-        //SEND TO CLEARANCE QUEUE AT CASHIER
-
-        return $session;
+        if($session->save()){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function destroy(string $id)
@@ -332,7 +346,8 @@ class PatientSessionController extends Controller
             }
 
             //LAB FEES
-            $items = PatientTest::where('session_id', $id)->where('status', 'ACTIVE')->get();
+            $items = PatientTest::join('lab_results', 'patient_tests.id', '=', 'lab_results.test_id')
+                                ->where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
                 $totalInvoiceAmount += $item->price;
 
@@ -576,12 +591,16 @@ class PatientSessionController extends Controller
         $patientSession = PatientSession::find($id);
 
         if($patientSession){
+            //DOCTOR
+            $doctor = User::find($patientSession->doctor_id);
+            $doctorName = "$doctor->first_name $doctor->last_name";
+
             //PATIENT SYMPTOMS
-            $symptoms = PatientSymptom::pluck('symptom')->toArray();
+            $symptoms = PatientSymptom::where('session_id', $id)->pluck('symptom')->toArray();
             $symptomsString = implode(', ', $symptoms);
 
             //PATIENT DIAGNOSIS
-            $diagnosis = PatientDiagnosis::pluck('diagnosis')->toArray();
+            $diagnosis = PatientDiagnosis::where('session_id', $id)->pluck('diagnosis')->toArray();
             $diagnosisString = implode(', ', $diagnosis);
 
             $patient = Patient::find($patientSession->patient_id);
@@ -591,6 +610,31 @@ class PatientSessionController extends Controller
                 $patient->phone, $patient->email<br>
                 $patient->residence
             ";
+
+            //RECOMMENDATION
+            $recommendations = PatientRecommendation::where('session_id', $id)->pluck('recommendation')->toArray();
+            $recommendationsString = implode(', ', $recommendations);
+
+            //DOCTOR PRESCRIPTION
+            $prescriptions = PatientPrescription::where('session_id', $id)->get();
+            $prescriptionString = "<ul>";
+            foreach($prescriptions as $prescription) {
+                $prescriptionString .= "
+                    <li>$prescription->drug: <i>$prescription->dosage</i></li>
+                ";
+            }
+            $prescriptionString .= "</ul>";
+
+            //DRUGS
+            $drugs = PatientDrug::with('pharmaceutical')->where('session_id', $id)->get();
+            $drugsString = "<ul>";
+            foreach($drugs as $drug) {
+                $pharmaceutical = $drug->pharmaceutical;
+                $drugsString .= "
+                    <li>$pharmaceutical->name: <i>$drug->dosage</i></li>
+                ";
+            }
+            $drugsString .= "</ul>";
 
             //LAB REPORT
             $tests = PatientTest::leftJoin('lab_results', 'patient_tests.id', '=', 'lab_results.test_id')
@@ -740,6 +784,18 @@ class PatientSessionController extends Controller
                                         <b>LAB REPORT: </b>
                                         $testsString
                                     </p>
+                                    <p>
+                                        <b>PRESCRIPTION: </b>
+                                        $prescriptionString
+                                    </p>
+                                    <p>
+                                        <b>TREATMENT: </b>
+                                        $drugsString
+                                    </p>
+                                    <p>
+                                        <b>RECOMMENDATIONS: </b>
+                                        $recommendationsString
+                                    </p>
                                 </td>
                             </tr>
                             <tr>
@@ -756,9 +812,18 @@ class PatientSessionController extends Controller
                                                 <td width='50%'>
                                                 </td>
                                                 <td>
-                                                    <b> Patient Signature </b>
+                                                * This is a computer generated invoice and does not
+                                                require a physical signature
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width='50%'>
+                                                </td>
+                                                <td>
+                                                    <b> Doctor Signature </b>
                                                     <br>
-                                                    <br>
+                                                    $doctorName
+                                                    <br><br>
                                                     ...................................
                                                     <br>
                                                     <br>
