@@ -15,6 +15,7 @@ use App\Models\Patient\PatientSymptom;
 use App\Models\Patient\PatientTest;
 use App\Models\Patient\WardRound;
 use App\Models\PatientSession;
+use App\Models\Queues\ClearanceQueue;
 use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\InpatientQueue;
 use App\Models\Queues\LabQueue;
@@ -95,6 +96,7 @@ class PatientSessionController extends Controller
         LabQueue::where('session_id', $id)->delete();
         RadiologyQueue::where('session_id', $id)->delete();
         InpatientQueue::where('session_id', $id)->delete();
+        ClearanceQueue::where('session_id', $id)->delete();
 
         $session = PatientSession::find($id);
         $session->status = 'CLEARED';
