@@ -2,8 +2,10 @@
 
 namespace App\Models\Billing;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentRecord extends Model
 {
@@ -19,4 +21,12 @@ class PaymentRecord extends Model
         'created_by',
         'status'
     ];
+
+    public function created_by(): BelongsTo {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function request(): BelongsTo {
+        return $this->belongsTo(PaymentRequest::class, 'request_id');
+    }
 }

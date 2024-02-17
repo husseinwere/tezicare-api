@@ -33,7 +33,13 @@ class PaymentRecordController extends Controller
      */
     public function sessionRecords(string $id)
     {   
-        return PaymentRecord::where('session_id', $id)->where('status', '<>', 'DELETED')->get();
+        $records = PaymentRecord::with(['request', 'created_by'])->where('session_id', $id)->where('status', '<>', 'DELETED')->get();
+        $totalAmountPaid = $records->sum('amount');
+
+        return [
+            'paymentRecords' => $records,
+            'totalAmountPaid' => $totalAmountPaid
+        ];
     }
 
     /**

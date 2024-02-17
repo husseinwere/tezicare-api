@@ -29,6 +29,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use DateTime;
 use Illuminate\Support\Facades\Response as FacadesResponse;
 
 class PatientSessionController extends Controller
@@ -379,9 +380,10 @@ class PatientSessionController extends Controller
             }
 
             $patient = Patient::find($patientSession->patient_id);
+            $age = $this->calculateAge($patient->dob);
             $patientString = "
                 $patient->first_name $patient->last_name (OP No: $patient->id) <br>
-                Gender: $patient->gender, Age: <br>
+                Gender: $patient->gender, Age: $age<br>
                 $patient->phone, $patient->email<br>
                 $patient->residence
             ";
@@ -604,9 +606,10 @@ class PatientSessionController extends Controller
             $diagnosisString = implode(', ', $diagnosis);
 
             $patient = Patient::find($patientSession->patient_id);
+            $age = $this->calculateAge($patient->dob);
             $patientString = "
                 $patient->first_name $patient->last_name (OP No: $patient->id) <br>
-                Gender: $patient->gender, Age: <br>
+                Gender: $patient->gender, Age: $age<br>
                 $patient->phone, $patient->email<br>
                 $patient->residence
             ";
@@ -852,5 +855,14 @@ class PatientSessionController extends Controller
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function calculateAge($dob)
+    {
+        $dob = new DateTime($dob);
+        $today = new DateTime('today');
+        $age = $dob->diff($today)->y;
+
+        return $age;
     }
 }
