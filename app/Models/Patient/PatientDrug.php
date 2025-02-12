@@ -3,6 +3,7 @@
 namespace App\Models\Patient;
 
 use App\Models\Inventory\Pharmaceutical;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,5 +26,9 @@ class PatientDrug extends Model
 
     public function pharmaceutical(): BelongsTo {
         return $this->belongsTo(Pharmaceutical::class, 'drug_id');
+    }
+
+    public function created_by(): BelongsTo {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

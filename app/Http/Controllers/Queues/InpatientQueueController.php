@@ -17,10 +17,18 @@ class InpatientQueueController extends QueueBaseController
         parent::__construct($model);
     }
 
+    public function index(Request $request)
+    {
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
+
+        return InpatientQueue::with(['session.patient', 'session.doctor', 'bed.ward', 'created_by'])
+                            ->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
+    }
+
     public function store(Request $request) {
         $request->validate([
             'session_id' => 'required',
-            'ward_id' => 'required',
             'bed_id' => 'required'
         ]);
         

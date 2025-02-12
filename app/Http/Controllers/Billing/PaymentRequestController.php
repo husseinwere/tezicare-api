@@ -8,7 +8,6 @@ use App\Models\Queues\AdmissionQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class PaymentRequestController extends Controller
 {
@@ -20,15 +19,8 @@ class PaymentRequestController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
         
-        return DB::table('payment_requests')
-                ->join('patient_sessions', 'payment_requests.session_id', '=', 'patient_sessions.id')
-                ->join('patients', 'patient_sessions.patient_id', '=', 'patients.id')
-                ->join('users', 'payment_requests.created_by', '=', 'users.id')
-                ->where('payment_requests.status', 'NOT_PAID')
-                ->select('payment_requests.id', 'payment_requests.source', 'payment_requests.amount', 'payment_requests.created_at', 
-                            DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 'patient_sessions.id as session_id',
-                            DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'), 'patients.id as patient_id')
-                ->paginate($pageSize, ['*'], 'page', $pageIndex);
+        return PaymentRequest::with(['session.patient', 'created_by'])->where('payment_requests.status', 'NOT_PAID')
+                            ->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class QueueBaseController extends Controller
 {
@@ -28,17 +27,7 @@ class QueueBaseController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
 
-        $queue = DB::table($this->table)
-                    ->join('patient_sessions', $this->table . '.session_id', '=', 'patient_sessions.id')
-                    ->join('patients', 'patient_sessions.patient_id', '=', 'patients.id')
-                    ->join('users', $this->table . '.created_by', '=', 'users.id')
-                    ->select($this->table . '.id', $this->table . '.status', $this->table . '.created_at', $this->table . '.session_id', 
-                                DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 
-                                DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'),
-                                'patients.id as opno', 'patients.gender', 'patients.dob')
-                    ->paginate($pageSize, ['*'], 'page', $pageIndex);
-        
-        return $queue;
+        return $this->model::with(['session.patient', 'created_by'])->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -68,16 +57,7 @@ class QueueBaseController extends Controller
      */
     public function show(string $id)
     {
-        return DB::table($this->table)
-                    ->join('patient_sessions', $this->table . '.session_id', '=', 'patient_sessions.id')
-                    ->join('patients', 'patient_sessions.patient_id', '=', 'patients.id')
-                    ->join('users', $this->table . '.created_by', '=', 'users.id')
-                    ->where($this->table . '.id', $id)
-                    ->select($this->table . '.status', $this->table . '.created_at', $this->table . '.session_id',
-                                DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'), 
-                                DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'),
-                                'patients.id as opno', 'patients.gender', 'patients.dob')
-                    ->first();
+        return $this->model::with(['session.patient', 'created_by'])->find($id);
     }
 
     /**

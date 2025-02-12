@@ -39,7 +39,6 @@ use App\Http\Controllers\Queues\TriageQueueController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Ward\BedController;
 use App\Http\Controllers\Ward\WardController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -103,6 +102,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //WARD ROUNDS
     Route::resource('ward-rounds', WardRoundController::class);
+    Route::get('/ward-rounds/info/{sessionId}', [WardRoundController::class, 'getWardDetails']);
 
     //CLEARANCE QUEUE
     Route::resource('queue/clearance', ClearanceQueueController::class);
@@ -185,7 +185,12 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('insurance/covers', InsuranceCoverController::class);
 
     //REPORTS
+    Route::get('/reports/dashboard', [PatientSessionController::class, 'dashboardToday']);
     Route::get('/reports/patient-visits', [PatientSessionController::class, 'getVisitStats']);
+    Route::get('/reports/financial/payment-type-report', [PaymentRecordController::class, 'paymentTypeReport']);
+    Route::get('/reports/financial/payment-source-report', [PaymentRecordController::class, 'paymentSourceReport']);
+    Route::get('/reports/financial/insurance-type-report', [PaymentRecordController::class, 'insuranceTypeReport']);
+    Route::get('/reports/financial/annual-payment-report', [PaymentRecordController::class, 'annualPaymentReport']);
 
     //INVOICE
     Route::get('/invoices', [InvoiceController::class, 'index']);

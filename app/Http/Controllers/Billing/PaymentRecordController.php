@@ -11,6 +11,7 @@ use App\Models\Patient\PatientNursing;
 use App\Models\Patient\PatientTest;
 use App\Models\Queues\AdmissionQueue;
 use App\Models\Queues\TriageQueue;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -24,15 +25,36 @@ class PaymentRecordController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+
+        $patient_id = $request->query('opno');
+        $startAt = $request->query('startAt');
+        $endAt = $request->query('endAt');
+
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
+
+        // add status check if you allow record deletion in future
+
+        if($patient_id) {
+            $query->whereHas('session', function($q) use ($patient_id) {
+                $q->where('patient_id', $patient_id);
+            });
+        }
+
+        if($startAt && $endAt) {
+            $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
+            $endAt = Carbon::createFromFormat('Y-m-d', $endAt)->endOfDay();
+
+            $query->whereBetween('created_at', [$startAt, $endAt]);
+        }
         
-        return PaymentRecord::paginate($pageSize, ['*'], 'page', $pageIndex);
+        return $query->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
      * Get records for a specific patient session.
      */
     public function sessionRecords(string $id)
-    {   
+    {
         $records = PaymentRecord::with(['request', 'created_by'])->where('session_id', $id)->where('status', '<>', 'DELETED')->get();
         $totalAmountPaid = $records->sum('amount');
 
@@ -163,5 +185,118 @@ class PaymentRecordController extends Controller
                 }
             }
         }
+    }
+
+    public function paymentTypeReport(Request $request) {
+        $startAt = $request->query('startAt');
+        $endAt = $request->query('endAt');
+
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
+
+        if($startAt && $endAt) {
+            $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
+            $endAt = Carbon::createFromFormat('Y-m-d', $endAt)->endOfDay();
+
+            $query->whereBetween('created_at', [$startAt, $endAt]);
+        }
+
+        $records = $query->get();
+        $paymentTypes = $records->groupBy('payment_method');
+
+        $report = [];
+        foreach($paymentTypes as $key => $payments) {
+            $totalAmount = $payments->sum('amount');
+            $report[] = [
+                'payment_method' => $key,
+                'total_amount' => $totalAmount
+            ];
+        }
+
+        return $report;
+    }
+
+    public function paymentSourceReport(Request $request) {
+        $startAt = $request->query('startAt');
+        $endAt = $request->query('endAt');
+
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
+
+        if($startAt && $endAt) {
+            $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
+            $endAt = Carbon::createFromFormat('Y-m-d', $endAt)->endOfDay();
+
+            $query->whereBetween('created_at', [$startAt, $endAt]);
+        }
+
+        $records = $query->get();
+        $paymentSources = $records->groupBy('request.source');
+
+        $report = [];
+        foreach($paymentSources as $key => $payments) {
+            $totalAmount = $payments->sum('amount');
+            $report[] = [
+                'source' => $key,
+                'total_amount' => $totalAmount
+            ];
+        }
+
+        return $report;
+    }
+
+    public function insuranceTypeReport(Request $request) {
+        $startAt = $request->query('startAt');
+        $endAt = $request->query('endAt');
+
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by', 'insurance'])
+            ->whereNotNull('insurance_id');
+
+        if($startAt && $endAt) {
+            $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
+            $endAt = Carbon::createFromFormat('Y-m-d', $endAt)->endOfDay();
+
+            $query->whereBetween('created_at', [$startAt, $endAt]);
+        }
+
+        $records = $query->get();
+        $insurancePayments = $records->groupBy('insurance_id');
+
+        $report = [];
+        foreach($insurancePayments as $key => $payments) {
+            $totalAmount = $payments->sum('amount');
+            $insuranceName = $payments->first()->insurance->insurance;
+            $report[] = [
+                'insurance' => $insuranceName,
+                'total_amount' => $totalAmount
+            ];
+        }
+
+        return $report;
+    }
+
+    public function annualPaymentReport(Request $request) {
+        $year = $request->query('year', date('Y'));
+
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
+
+        $records = $query->whereYear('created_at', $year)->get();
+        $months = $records->groupBy(function($record) {
+            return Carbon::parse($record->created_at)->format('m');
+        });
+
+        $report = [];
+        $ms = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        foreach($ms as $m) {
+            $report[] = [
+                'month' => $m,
+                'total_amount' => 0
+            ];
+        }
+
+        foreach($months as $key => $payments) {
+            $totalAmount = $payments->sum('amount');
+            $report[$key - 1]['total_amount'] = $totalAmount;
+        }
+
+        return $report;
     }
 }

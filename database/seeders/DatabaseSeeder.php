@@ -18,13 +18,13 @@ class DatabaseSeeder extends Seeder
             'last_name' => 'Were',
             'phone' => '0727854413',
             'email' => 'hussein.were@tezi.co.ke',
-            'roles' => 'Administrator',
+            'roles' => 'ADMINISTRATOR',
             'password' => '$2a$12$Lx.UD20iAN1SG9iLwUr0g.3WijIyOKJPIpR.3dtqcRDb9dbD6u8UK'
         ]);
 
         DB::table('consultation_types')->insert([
-            ['name' => 'General', 'price' => '2000'],
-            ['name' => 'Pediatrician', 'price' => '2000']
+            ['name' => 'General', 'price' => '2000', 'inpatient_nurse_rate' => '500'],
+            ['name' => 'Pediatrician', 'price' => '2000', 'inpatient_doctor_rate' => '1000']
         ]);
 
         DB::table('insurance_covers')->insert([

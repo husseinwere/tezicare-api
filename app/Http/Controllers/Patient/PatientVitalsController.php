@@ -28,13 +28,11 @@ class PatientVitalsController extends Controller
      */
     public function getLatestVitals(string $patient_id)
     {
-        return DB::table('patient_vitals')
-                    ->join('patient_sessions', 'patient_vitals.session_id', '=', 'patient_sessions.id')
-                    ->join('patients', 'patient_sessions.patient_id', '=', 'patients.id')
-                    ->where('patient_sessions.patient_id', $patient_id)
-                    ->select('patient_vitals.height', 'patient_vitals.weight', 'patient_vitals.pulse_rate',
-                                'patient_vitals.temperature', 'patient_vitals.blood_pressure', 'patient_vitals.spo2')
-                    ->orderBy('patient_vitals.created_at', 'desc')->first();
+        return PatientVitals::with(['session', 'created_by'])
+                            ->whereHas('session', function ($query) use ($patient_id) {
+                                $query->where('patient_id', $patient_id);
+                            })
+                            ->latest()->first();
     }
 
     /**

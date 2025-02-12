@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PatientInsurance extends Model
 {
@@ -16,4 +17,9 @@ class PatientInsurance extends Model
         'created_by',
         'status'
     ];
+
+    public function insurance(): BelongsTo
+    {
+        return $this->belongsTo(InsuranceCover::class, 'insurance_id');
+    }
 }

@@ -30,6 +30,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\Response as FacadesResponse;
 
@@ -37,9 +38,17 @@ class PatientSessionController extends Controller
 {
     public function index(Request $request)
     {
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
         $patient_id = $request->input('patient_id');
 
-        return PatientSession::where('patient_id', $patient_id)->limit(10)->latest()->get();
+        $query = PatientSession::with('patient');
+
+        if($patient_id) {
+            $query->where('patient_id', $patient_id);
+        }
+
+        return $query->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     public function store(Request $request)
@@ -72,9 +81,7 @@ class PatientSessionController extends Controller
 
     public function show(string $id)
     {
-        return PatientSession::leftJoin('users', 'users.id', '=', 'patient_sessions.doctor_id')
-                            ->select('patient_sessions.*', DB::raw('CONCAT(users.first_name, " ", users.last_name) as doctor'))
-                            ->where('patient_sessions.id', $id)->first();
+        return PatientSession::with('doctor')->where('patient_sessions.id', $id)->first();
     }
 
     public function update(Request $request, string $id)
@@ -119,6 +126,19 @@ class PatientSessionController extends Controller
     }
 
     //REPORTS
+    public function dashboardToday()
+    {
+        $visitsToday = PatientSession::whereDate('created_at', Carbon::today())->count();
+        $activeSessions = PatientSession::where('status', 'ACTIVE')->count();
+        $inpatients = PatientSession::where('patient_type', 'INPATIENT')->where('status', 'ACTIVE')->count();
+
+        return [
+            'visits_today' => $visitsToday,
+            'active_sessions' => $activeSessions,
+            'inpatients' => $inpatients
+        ];
+    }
+
     public function getPatientStats(string $patient_id)
     {
         $outpatientCount = PatientSession::where('patient_id', $patient_id)->where('patient_type', 'OUTPATIENT')->count();
@@ -349,7 +369,7 @@ class PatientSessionController extends Controller
             }
 
             //LAB FEES
-            $items = PatientTest::join('lab_results', 'patient_tests.id', '=', 'lab_results.test_id')
+            $items = PatientTest::join('lab_results', 'patient_tests.id', '=', 'lab_results.patient_test_id')
                                 ->where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
                 $totalInvoiceAmount += $item->price;
@@ -597,7 +617,7 @@ class PatientSessionController extends Controller
         if($patientSession){
             //DOCTOR
             $doctor = User::find($patientSession->doctor_id);
-            $doctorName = "$doctor->first_name $doctor->last_name";
+            $doctorName = $doctor ? "$doctor->first_name $doctor->last_name" : "N/A";
 
             //PATIENT SYMPTOMS
             $symptoms = PatientSymptom::where('session_id', $id)->pluck('symptom')->toArray();
@@ -642,20 +662,20 @@ class PatientSessionController extends Controller
             $drugsString .= "</ul>";
 
             //LAB REPORT
-            $tests = PatientTest::leftJoin('lab_results', 'patient_tests.id', '=', 'lab_results.test_id')
-                                ->where('patient_tests.session_id', $patientSession->id)->where('patient_tests.status', 'ACTIVE')
-                                ->select('patient_tests.*', 'lab_results.result', 'lab_results.description')
-                                ->get();
+            $tests = PatientTest::with(['lab_test', 'lab_result'])->where('session_id', $patientSession->id)->where('status', 'ACTIVE')->get();
 
             $testsString = "<ul>";
             foreach($tests as $test) {
                 $testResult = "N/A";
-                if($test->result) {
-                    $testResult = "$test->result - $test->description";
+                $lab_test = $test->lab_test;
+                $lab_result = $test->lab_result;
+                if($lab_result) {
+                    $description = $lab_result->description ? "- " . $lab_result->description : "";
+                    $testResult = "$lab_result->result $description";
                 }
 
                 $testsString .= "
-                    <li>$test->test: <i>$testResult</i></li>
+                    <li>$lab_test->test: <i>$testResult</i></li>
                 ";
             }
             $testsString .= "</ul>";

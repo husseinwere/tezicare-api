@@ -4,6 +4,7 @@ namespace App\Models\Ward;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Bed extends Model
 {
@@ -15,4 +16,9 @@ class Bed extends Model
         'created_by',
         'status'
     ];
+
+    public function ward(): BelongsTo
+    {
+        return $this->belongsTo(Ward::class);
+    }
 }

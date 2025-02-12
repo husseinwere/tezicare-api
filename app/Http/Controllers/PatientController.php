@@ -20,17 +20,16 @@ class PatientController extends Controller
         $search = $request->query('search');
         $searchId = $request->query('searchId');
         
+        $query = Patient::where('status', 'ACTIVE');
+
         if($search) {
-            return Patient::where('status', 'ACTIVE')
-                            ->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $search . '%')
-                            ->paginate($pageSize, ['*'], 'page', $pageIndex);
+            $query->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $search . '%');
         }
         else if($searchId) {
-            return Patient::where('id', $searchId)->paginate();
+            return $query->where('id', $searchId);
         }
-        else {
-            return Patient::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
-        }
+
+        return $query->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**

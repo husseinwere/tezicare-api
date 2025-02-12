@@ -17,7 +17,7 @@ class LabResultController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'test_id' => 'required',
+            'patient_test_id' => 'required',
             'result' => 'required',
             'files.*' => 'file|mimes:jpg,jpeg,png,pdf|max:5120'
         ]);

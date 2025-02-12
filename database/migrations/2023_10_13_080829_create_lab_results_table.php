@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('lab_results', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('test_id');
-            $table->foreign('test_id')->references('id')->on('patient_tests');
+            $table->unsignedBigInteger('patient_test_id');
+            $table->foreign('patient_test_id')->references('id')->on('patient_tests');
             $table->string('result');
             $table->string('description')->nullable();
             $table->unsignedBigInteger('created_by');

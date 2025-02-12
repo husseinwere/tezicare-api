@@ -19,11 +19,7 @@ class NurseInstructionController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        $instructions = NurseInstruction::join('users', 'users.id', '=', 'nurse_instructions.created_by')
-                                        ->select('nurse_instructions.*', DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'))
-                                        ->where('session_id', $sessionId)->get();
-
-        return $instructions;
+        return NurseInstruction::with('created_by')->where('session_id', $sessionId)->get();
     }
 
     /**

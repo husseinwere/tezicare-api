@@ -3,6 +3,8 @@
 namespace App\Models\Patient;
 
 use App\Models\Lab\LabResult;
+use App\Models\Lab\LabTest;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -22,7 +24,15 @@ class PatientTest extends Model
         'status'
     ];
 
-    public function results(): HasOne {
-        return $this->hasOne(LabResult::class, 'test_id');
+    public function lab_test() {
+        return $this->belongsTo(LabTest::class, 'test_id');
+    }
+
+    public function lab_result(): HasOne {
+        return $this->hasOne(LabResult::class);
+    }
+
+    public function created_by() {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

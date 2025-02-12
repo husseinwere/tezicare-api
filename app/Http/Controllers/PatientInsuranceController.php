@@ -16,10 +16,7 @@ class PatientInsuranceController extends Controller
     {
         $patient_id = $request->query('patient_id');
 
-        return PatientInsurance::join('insurance_covers', 'patient_insurances.insurance_id', '=', 'insurance_covers.id')
-                                    ->select('patient_insurances.*', 'insurance_covers.insurance as insurance')
-                                    ->where('patient_insurances.patient_id', $patient_id)->where('patient_insurances.status', 'ACTIVE')
-                                    ->get();
+        return PatientInsurance::with('insurance')->where('patient_id', $patient_id)->where('status', 'ACTIVE')->get();
     }
 
     /**

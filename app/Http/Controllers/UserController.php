@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UserCreated;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -20,18 +22,19 @@ class UserController extends Controller
         ]);
 
         //password is a random 4 digit string that should as well be sent to email
-        $password = '12345';
+        $password = str_pad(random_int(11, 9999), 4, '0', STR_PAD_LEFT);
+        $fields['password'] = bcrypt($password);
 
-        $user = User::create([
-            'first_name' => $fields['first_name'],
-            'last_name' => $fields['last_name'],
-            'email' => $fields['email'],
-            'phone' => $fields['phone'],
-            'roles' => $fields['roles'],
-            'password' => bcrypt($password)
-        ]);
+        $user = User::create($fields);
 
         if($user) {
+            $accountCredentials = [
+                'name' => $user->first_name,
+                'email' => $user->email,
+                'password' => $password
+            ];
+            Mail::to($user->email)->send(new UserCreated($accountCredentials));
+
             return response(null, 201);
         }
         else {

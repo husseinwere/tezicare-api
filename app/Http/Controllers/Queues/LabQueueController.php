@@ -26,8 +26,12 @@ class LabQueueController extends QueueBaseController
 
         $queuePresent = LabQueue::where('session_id', $data['session_id'])->first();
         if(!$queuePresent) {
-            $generalTests = PatientTest::join('lab_tests', 'patient_tests.test_id', '=', 'lab_tests.id')
-                            ->where('session_id', $data['session_id'])->where('lab', 'General')->get();
+            $generalTests = PatientTest::with('lab_test')
+                                        ->where('session_id', $data['session_id'])
+                                        ->whereHas('lab_test', function ($query) {
+                                            $query->where('lab', 'General');
+                                        })
+                                        ->get();
 
             if(!$generalTests->isEmpty()) {
                 $generalQueue = LabQueue::create($data);

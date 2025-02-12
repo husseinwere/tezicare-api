@@ -26,8 +26,12 @@ class RadiologyQueueController extends QueueBaseController
 
         $queuePresent = RadiologyQueue::where('session_id', $data['session_id'])->first();
         if(!$queuePresent) {
-            $radiologyTests = PatientTest::join('lab_tests', 'patient_tests.test_id', '=', 'lab_tests.id')
-                            ->where('session_id', $data['session_id'])->where('lab', 'Radiology')->get();
+            $radiologyTests = PatientTest::with('lab_test')
+                                        ->where('session_id', $data['session_id'])
+                                        ->whereHas('lab_test', function ($query) {
+                                            $query->where('lab', 'Radiology');
+                                        })
+                                        ->get();
 
             if(!$radiologyTests->isEmpty()) {
                 $radiologyQueue = RadiologyQueue::create($data);

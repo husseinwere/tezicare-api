@@ -17,9 +17,7 @@ class BedController extends Controller
     {
         $wardId = $request->query('ward_id');
 
-        $beds = Bed::where('ward_id', $wardId)->get();
-        
-        return $beds;
+        return Bed::where('ward_id', $wardId)->get();
     }
 
     /**

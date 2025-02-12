@@ -3,6 +3,7 @@
 namespace App\Models\Patient;
 
 use App\Models\Inventory\NonPharmaceutical;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,11 @@ class PatientNonPharmaceutical extends Model
         'status'
     ];
 
-    public function nonPharmaceutical(): BelongsTo {
+    public function non_pharmaceutical(): BelongsTo {
         return $this->belongsTo(NonPharmaceutical::class);
+    }
+
+    public function created_by(): BelongsTo {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Hospital\ConsultationType;
 use App\Models\Patient\WardRound;
 use App\Models\PatientSession;
-use App\Models\Ward\Ward;
+use App\Models\Queues\InpatientQueue;
+use App\Models\Ward\Bed;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -21,9 +22,24 @@ class WardRoundController extends Controller
         $pageIndex = $request->query('page_index', 1);
         $sessionId = $request->query('session_id');
 
-        $rounds = WardRound::where('session_id', $sessionId)->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);;
+        return WardRound::with(['session.patient', 'bed.ward', 'doctor', 'nurse'])
+                        ->where('session_id', $sessionId)->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
+    }
+
+    public function getWardDetails(string $id)
+    {
+        $currentDate = date('Y-m-d');
+
+        $inpatient = InpatientQueue::with(['session.patient', 'bed.ward'])->where('session_id', $id)->latest()->first();
+
+        $currentRound = WardRound::where('session_id', $id)->where('created_at', 'like', $currentDate . '%')->latest()->first();
         
-        return $rounds;
+        return [
+            'patient' => $inpatient->session->patient,
+            'current_day' => $currentDate,
+            'bed' => $inpatient->bed,
+            'current_round' => $currentRound
+        ];
     }
 
     /**
@@ -33,13 +49,12 @@ class WardRoundController extends Controller
     {
         $request->validate([
             'session_id' => 'required',
-            'bed_id' => 'required',
-            'ward_id' => 'required'
+            'bed_id' => 'required'
         ]);
         $data = $request->all();
 
-        $ward = Ward::find($data['ward_id']);
-        $data['bed_price'] = $ward->price;
+        $bed = Bed::find($data['bed_id']);
+        $data['bed_price'] = $bed->ward->price;
 
         $session = PatientSession::find($data['session_id']);
         $consultation_type = ConsultationType::where('name', $session->consultation_type)->first();

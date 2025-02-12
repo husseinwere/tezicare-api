@@ -26,4 +26,14 @@ class PatientSession extends Model
     {
         return $this->belongsTo(Patient::class);
     }
+
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'doctor_id');
+    }
+
+    public function created_by(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

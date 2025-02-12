@@ -2,6 +2,8 @@
 
 namespace App\Models\Billing;
 
+use App\Models\InsuranceCover;
+use App\Models\PatientSession;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,5 +30,13 @@ class PaymentRecord extends Model
 
     public function request(): BelongsTo {
         return $this->belongsTo(PaymentRequest::class, 'request_id');
+    }
+
+    public function session(): BelongsTo {
+        return $this->belongsTo(PatientSession::class, 'session_id');
+    }
+
+    public function insurance(): BelongsTo {
+        return $this->belongsTo(InsuranceCover::class);
     }
 }

@@ -7,7 +7,6 @@ use App\Models\Doctor\DoctorConsultation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class DoctorConsultationController extends Controller
 {
@@ -18,10 +17,7 @@ class DoctorConsultationController extends Controller
     {
         $session_id = $request->query('session_id');
 
-        return DoctorConsultation::join('users', 'users.id', '=', 'doctor_consultations.doctor_id')
-                                    ->select('doctor_consultations.*', DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'))
-                                    ->where('patient_insurances.patient_id', $session_id)
-                                    ->get();
+        return DoctorConsultation::with('doctor')->where('session_id', $session_id)->get();
     }
 
     /**

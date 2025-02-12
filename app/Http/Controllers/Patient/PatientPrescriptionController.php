@@ -8,7 +8,6 @@ use App\Models\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class PatientPrescriptionController extends Controller
 {
@@ -19,11 +18,7 @@ class PatientPrescriptionController extends Controller
     {
         $sessionId = $request->query('session_id');
 
-        $prescriptions = PatientPrescription::join('users', 'users.id', '=', 'patient_prescriptions.created_by')
-                                            ->select('patient_prescriptions.*', DB::raw('CONCAT(users.first_name, " ", users.last_name) as created_by'))
-                                            ->where('session_id', $sessionId)->get();
-        
-        return $prescriptions;
+        return PatientPrescription::with('created_by')->where('session_id', $sessionId)->get();
     }
 
     /**

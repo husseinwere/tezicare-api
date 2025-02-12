@@ -72,14 +72,14 @@ class InvoiceController extends Controller
             }
 
             //NON-PHARMACEUTICALS
-            $nonPharmaceuticals = PatientNonPharmaceutical::with('nonPharmaceutical')->where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
+            $nonPharmaceuticals = PatientNonPharmaceutical::with('non_pharmaceutical')->where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
             foreach($nonPharmaceuticals as $item) {
                 $totalPrice = $item->quantity * $item->unit_price;
                 $totalInvoiceAmount += $totalPrice;
             }
 
             //LAB FEES
-            $lab = PatientTest::join('lab_results', 'patient_tests.id', '=', 'lab_results.test_id')
+            $lab = PatientTest::join('lab_results', 'patient_tests.id', '=', 'lab_results.patient_test_id')
                                 ->where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
             foreach($lab as $item) {
                 $totalInvoiceAmount += $item->price;
