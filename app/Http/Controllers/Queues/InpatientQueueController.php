@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Queues;
 
-use App\Models\PatientSession;
+use App\Models\Patient\PatientSession;
 use App\Models\Queues\AdmissionQueue;
 use App\Models\Queues\InpatientQueue;
 use App\Models\Ward\Bed;

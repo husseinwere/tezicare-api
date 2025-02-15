@@ -23,12 +23,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('consultation_types')->insert([
-            ['name' => 'General', 'price' => '2000', 'inpatient_nurse_rate' => '500'],
-            ['name' => 'Pediatrician', 'price' => '2000', 'inpatient_doctor_rate' => '1000']
+            ['name' => 'General', 'price' => '2000', 'inpatient_doctor_rate' => '1000', 'inpatient_nurse_rate' => '500'],
+            ['name' => 'Pediatrician', 'price' => '2000', 'inpatient_doctor_rate' => '1500', 'inpatient_nurse_rate' => '500']
         ]);
 
         DB::table('insurance_covers')->insert([
-            ['insurance' => 'NHIF', 'cap' => '1500', 'created_by' => 1]
+            ['insurance' => 'SHA', 'cap' => '1500', 'created_by' => 1]
         ]);
 
         DB::table('wards')->insert([

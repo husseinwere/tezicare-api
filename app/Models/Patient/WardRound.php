@@ -2,7 +2,6 @@
 
 namespace App\Models\Patient;
 
-use App\Models\PatientSession;
 use App\Models\User;
 use App\Models\Ward\Bed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

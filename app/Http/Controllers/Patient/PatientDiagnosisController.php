@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Models\Patient\PatientDiagnosis;
-use App\Models\PatientSession;
+use App\Models\Patient\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;

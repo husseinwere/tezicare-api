@@ -2,8 +2,8 @@
 
 namespace App\Models\Billing;
 
-use App\Models\InsuranceCover;
-use App\Models\PatientSession;
+use App\Models\Hospital\InsuranceCover;
+use App\Models\Patient\PatientSession;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

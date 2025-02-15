@@ -7,9 +7,9 @@ use App\Models\Billing\PaymentRequest;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
 use App\Models\Patient\PatientNursing;
+use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientTest;
 use App\Models\Patient\WardRound;
-use App\Models\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 

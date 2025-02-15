@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Models\Hospital\ConsultationType;
+use App\Models\Patient\PatientSession;
 use App\Models\Patient\WardRound;
-use App\Models\PatientSession;
 use App\Models\Queues\InpatientQueue;
 use App\Models\Ward\Bed;
 use Illuminate\Http\Request;

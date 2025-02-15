@@ -7,7 +7,6 @@ use App\Models\Queues\DoctorQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class AdmissionQueueController extends QueueBaseController
 {

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientSymptom;
-use App\Models\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;

@@ -4,8 +4,9 @@ use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentRecordController;
 use App\Http\Controllers\Billing\PaymentRequestController;
 use App\Http\Controllers\Doctor\DoctorConsultationController;
+use App\Http\Controllers\Hospital\ConfigurationController;
 use App\Http\Controllers\Hospital\ConsultationTypeController;
-use App\Http\Controllers\InsuranceCoverController;
+use App\Http\Controllers\Hospital\InsuranceCoverController;
 use App\Http\Controllers\Inventory\NonPharmaceuticalController;
 use App\Http\Controllers\Inventory\PharmaceuticalController;
 use App\Http\Controllers\Lab\LabResultController;
@@ -13,20 +14,20 @@ use App\Http\Controllers\Lab\LabTestController;
 use App\Http\Controllers\Nurse\NursingServiceController;
 use App\Http\Controllers\Patient\NurseInstructionController;
 use App\Http\Controllers\Patient\PatientConditionController;
+use App\Http\Controllers\Patient\PatientController;
 use App\Http\Controllers\Patient\PatientDiagnosisController;
 use App\Http\Controllers\Patient\PatientDrugController;
 use App\Http\Controllers\Patient\PatientImpressionController;
+use App\Http\Controllers\Patient\PatientInsuranceController;
 use App\Http\Controllers\Patient\PatientNonPharmaceuticalController;
 use App\Http\Controllers\Patient\PatientNursingController;
 use App\Http\Controllers\Patient\PatientPrescriptionController;
 use App\Http\Controllers\Patient\PatientRecommendationController;
+use App\Http\Controllers\Patient\PatientSessionController;
 use App\Http\Controllers\Patient\PatientSymptomController;
 use App\Http\Controllers\Patient\PatientTestController;
 use App\Http\Controllers\Patient\PatientVitalsController;
 use App\Http\Controllers\Patient\WardRoundController;
-use App\Http\Controllers\PatientController;
-use App\Http\Controllers\PatientInsuranceController;
-use App\Http\Controllers\PatientSessionController;
 use App\Http\Controllers\Queues\AdmissionQueueController;
 use App\Http\Controllers\Queues\ClearanceQueueController;
 use App\Http\Controllers\Queues\DoctorQueueController;
@@ -179,10 +180,10 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::get('/payment-records/session/{id}', [PaymentRecordController::class, 'sessionRecords']);
 
     //PATIENT INSURANCE
-    Route::resource('insurance/patients', PatientInsuranceController::class);
+    Route::resource('patient-insurance', PatientInsuranceController::class);
 
     //INSURANCE COVERS
-    Route::resource('insurance/covers', InsuranceCoverController::class);
+    Route::resource('insurance-covers', InsuranceCoverController::class);
 
     //REPORTS
     Route::get('/reports/dashboard', [PatientSessionController::class, 'dashboardToday']);
@@ -194,4 +195,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //INVOICE
     Route::get('/invoices', [InvoiceController::class, 'index']);
+
+    //HOSPITAL CONFIG
+    Route::resource('hospital-configs', ConfigurationController::class);
 });

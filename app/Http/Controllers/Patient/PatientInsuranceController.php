@@ -1,21 +1,23 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\InsuranceCover;
+use App\Models\Patient\PatientInsurance;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
-class InsuranceCoverController extends Controller
+class PatientInsuranceController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {   
-        return InsuranceCover::where('status', 'ACTIVE')->get();
+    public function index(Request $request)
+    {
+        $patient_id = $request->query('patient_id');
+
+        return PatientInsurance::with('insurance')->where('patient_id', $patient_id)->where('status', 'ACTIVE')->get();
     }
 
     /**
@@ -24,14 +26,17 @@ class InsuranceCoverController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'insurance' => 'required'
+            'patient_id' => 'required',
+            'insurance_id' => 'required',
+            'card_no' => 'required',
+            'cap' => 'required'
         ]);
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        $createdCover = InsuranceCover::create($data);
+        $createdInsurance = PatientInsurance::create($data);
 
-        if($createdCover){
+        if($createdInsurance){
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -45,14 +50,14 @@ class InsuranceCoverController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'insurance' => 'required'
+            'card_no' => 'required'
         ]);
         $data = $request->all();
 
-        $cover = InsuranceCover::find($id);
-        $updatedCover = $cover->update($data);
+        $insurance = PatientInsurance::find($id);
+        $updatedInsurance = $insurance->update($data);
 
-        if($updatedCover){
+        if($updatedInsurance){
             return response(null, Response::HTTP_OK);
         }
         else {
@@ -65,9 +70,9 @@ class InsuranceCoverController extends Controller
      */
     public function destroy(string $id)
     {
-        $cover = InsuranceCover::find($id);
-        $cover->status = 'DELETED';
-        if($cover->save()) {
+        $insurance = PatientInsurance::find($id);
+        $insurance->status = 'DELETED';
+        if($insurance->save()) {
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {

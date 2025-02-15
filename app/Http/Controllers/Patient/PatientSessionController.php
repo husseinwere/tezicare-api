@@ -1,20 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Patient;
 
+use App\Http\Controllers\Controller;
 use App\Models\Inventory\NonPharmaceutical;
 use App\Models\Inventory\Pharmaceutical;
-use App\Models\Patient;
+use App\Models\Patient\Patient;
 use App\Models\Patient\PatientDiagnosis;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
 use App\Models\Patient\PatientNursing;
 use App\Models\Patient\PatientPrescription;
 use App\Models\Patient\PatientRecommendation;
+use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientSymptom;
 use App\Models\Patient\PatientTest;
 use App\Models\Patient\WardRound;
-use App\Models\PatientSession;
 use App\Models\Queues\ClearanceQueue;
 use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\InpatientQueue;
