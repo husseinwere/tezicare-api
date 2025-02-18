@@ -8,7 +8,7 @@
             padding: 5px 10px;
             font-size: 14px;
         }
-        .logo, .stamp {
+        .logo {
             max-width: 200px;
             max-height: 100px;
         }
@@ -16,9 +16,11 @@
             position: relative;
         }
         .stamp {
+            max-width: 240px;
+            max-height: 160px;
             position: absolute;
             top: -100px;
-            left: -200px;
+            left: -160px;
         }
         .invoice-box {
             width: 100%;

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Hospital\Configuration;
 use App\Models\Inventory\NonPharmaceutical;
 use App\Models\Inventory\Pharmaceutical;
-use App\Models\Patient\Patient;
 use App\Models\Patient\PatientDiagnosis;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
@@ -467,15 +466,33 @@ class PatientSessionController extends Controller
 
             //PATIENT SYMPTOMS
             $symptoms = PatientSymptom::where('session_id', $id)->pluck('symptom')->toArray();
-            $symptomsString = implode(', ', $symptoms);
+            $symptomsString = "<ul>";
+            foreach($symptoms as $symptom) {
+                $symptomsString .= "
+                    <li>$symptom</li>
+                ";
+            }
+            $symptomsString .= "</ul>";
 
             //PATIENT DIAGNOSIS
             $diagnosis = PatientDiagnosis::where('session_id', $id)->pluck('diagnosis')->toArray();
-            $diagnosisString = implode(', ', $diagnosis);
+            $diagnosisString = "<ul>";
+            foreach($diagnosis as $d) {
+                $diagnosisString .= "
+                    <li>$d</li>
+                ";
+            }
+            $diagnosisString .= "</ul>";
 
             //RECOMMENDATION
             $recommendations = PatientRecommendation::where('session_id', $id)->pluck('recommendation')->toArray();
-            $recommendationsString = implode(', ', $recommendations);
+            $recommendationsString = "<ul>";
+            foreach($recommendations as $recommendation) {
+                $recommendationsString .= "
+                    <li>$recommendation</li>
+                ";
+            }
+            $recommendationsString .= "</ul>";
 
             //DOCTOR PRESCRIPTION
             $prescriptions = PatientPrescription::where('session_id', $id)->get();
@@ -503,16 +520,17 @@ class PatientSessionController extends Controller
 
             $testsString = "<ul>";
             foreach($tests as $test) {
-                $testResult = "N/A";
+                $testResult = "Not Done";
                 $lab_test = $test->lab_test;
                 $lab_result = $test->lab_result;
                 if($lab_result) {
-                    $description = $lab_result->description ? "- " . $lab_result->description : "";
-                    $testResult = "$lab_result->result $description";
+                    $description = $lab_result->description ? "<br>" . $lab_result->description : "";
+                    $testResult = "<i>$lab_result->result</i> $description";
                 }
 
                 $testsString .= "
-                    <li>$lab_test->test: <i>$testResult</i></li>
+                    <b>$lab_test->test: </b> <br><br>
+                    <p>$testResult</p>
                 ";
             }
             $testsString .= "</ul>";
@@ -587,7 +605,13 @@ class PatientSessionController extends Controller
 
             //RECOMMENDATION
             $recommendations = PatientRecommendation::where('session_id', $id)->pluck('recommendation')->toArray();
-            $recommendationsString = implode(', ', $recommendations);
+            $recommendationsString = "<ul>";
+            foreach($recommendations as $recommendation) {
+                $recommendationsString .= "
+                    <li>$recommendation</li>
+                ";
+            }
+            $recommendationsString .= "</ul>";
 
             $content = "
                 <tr>
