@@ -70,6 +70,8 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::put('/sessions/clear/{id}', [PatientSessionController::class, 'clearPatient']);
     Route::get('/sessions/print/invoice/{id}', [PatientSessionController::class, 'printInvoice']);
     Route::get('/sessions/print/discharge-summary/{id}', [PatientSessionController::class, 'printDischargeSummary']);
+    Route::get('/sessions/print/lab-report/{id}', [PatientSessionController::class, 'printLabReport']);
+    Route::get('/sessions/print/prescription/{id}', [PatientSessionController::class, 'printPrescription']);
 
     //TRIAGE QUEUE
     Route::resource('queue/triage', TriageQueueController::class);

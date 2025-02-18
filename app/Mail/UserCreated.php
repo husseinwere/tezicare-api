@@ -29,7 +29,7 @@ class UserCreated extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'TEZIPOS Account Credentials',
+            subject: 'Tezicare Account Credentials',
         );
     }
 
@@ -39,7 +39,7 @@ class UserCreated extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'accountCredentials',
+            view: 'mail.accountCredentials',
             with: $this->user
         );
     }
