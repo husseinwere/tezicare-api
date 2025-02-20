@@ -168,7 +168,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //BEDS
     Route::resource('beds', BedController::class);
-    Route::get('/beds/transfer/{id}', [BedController::class, 'transfer']);
+    Route::put('/beds/transfer/{id}', [BedController::class, 'transfer']);
 
     //CONSULTATION TYPES
     Route::resource('consultation-types', ConsultationTypeController::class);

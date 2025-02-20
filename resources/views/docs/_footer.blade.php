@@ -23,7 +23,7 @@
                         <b> Doctor In Charge </b>
                         <br>
                         @if($patientSession->doctor)
-                            {{' $patientSession->doctor->first_name '}} {{' $patientSession->doctor->last_name '}}
+                            {{ $patientSession->doctor->first_name }} {{ $patientSession->doctor->last_name }}
                         @else
                             N/A
                         @endif

@@ -18,6 +18,11 @@ class WardController extends Controller
         return Ward::all();
     }
 
+    public function show(string $id)
+    {
+        return Ward::find($id);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
