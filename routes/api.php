@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Billing\InvoiceAdditionController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentRecordController;
 use App\Http\Controllers\Billing\PaymentRequestController;
@@ -197,6 +198,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //INVOICE
     Route::get('/invoices', [InvoiceController::class, 'index']);
+    Route::resource('invoice-additions', InvoiceAdditionController::class);
 
     //HOSPITAL CONFIG
     Route::resource('hospital-configs', ConfigurationController::class);

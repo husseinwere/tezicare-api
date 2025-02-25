@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Billing\InvoiceAddition;
 use App\Models\Hospital\Configuration;
 use App\Models\Inventory\NonPharmaceutical;
 use App\Models\Inventory\Pharmaceutical;
@@ -40,11 +41,30 @@ class PatientSessionController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
         $patient_id = $request->input('patient_id');
+        $status = $request->input('status');
+        $patient_type = $request->input('patient_type');
+        $startAt = $request->input('startAt');
+        $endAt = $request->input('endAt');
 
         $query = PatientSession::with('patient');
 
         if($patient_id) {
             $query->where('patient_id', $patient_id);
+        }
+
+        if($status) {
+            $query->where('status', $status);
+        }
+
+        if($patient_type) {
+            $query->where('patient_type', $patient_type);
+        }
+
+        if($startAt && $endAt) {
+            $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
+            $endAt = Carbon::createFromFormat('Y-m-d', $endAt)->endOfDay();
+
+            $query->whereBetween('created_at', [$startAt, $endAt]);
         }
 
         return $query->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
@@ -293,6 +313,96 @@ class PatientSessionController extends Controller
                 </tr>
             ";
 
+            //INVOICE ADDITIONS: GENERAL
+            $items = InvoiceAddition::where('session_id', $id)->where('category', 'GENERAL')->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalPrice = $item->quantity * $item->rate;
+                $totalInvoiceAmount += $totalPrice;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
+            }
+
+            if($patientSession->patient_type == 'INPATIENT') {
+                //BED FEES
+                $bedRecords = WardRound::with('bed.ward')
+                                        ->select('bed_id', 'bed_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(bed_price) as total'))
+                                        ->where('session_id', $id)
+                                        ->groupBy('bed_id', 'bed_price')
+                                        ->get();
+                foreach($bedRecords as $item) {
+                    $ward = $item->bed->ward;
+                    $totalInvoiceAmount += $item->total;
+
+                    $itemsHTML .= "
+                        <tr class='item'>
+                            <td style='width:35%;'>Bed Charges ($ward->name)</td>
+                            <td style='width:20%; text-align:center;'>$item->quantity</td>
+                            <td style='width:25%; text-align:right;'>$item->bed_price</td>
+                            <td style='width:20%; text-align:right;'>$item->total</td>
+                        </tr>
+                    ";
+                }
+
+                //DOCTOR ROUND FEES
+                $doctorRecords = WardRound::select('doctor_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(doctor_price) as total'))
+                                        ->where('session_id', $id)
+                                        ->groupBy('doctor_price')
+                                        ->get();
+                foreach($doctorRecords as $item) {
+                    $totalInvoiceAmount += $item->total;
+
+                    $itemsHTML .= "
+                        <tr class='item'>
+                            <td style='width:35%;'>Ward Rounds (Doctor)</td>
+                            <td style='width:20%; text-align:center;'>$item->quantity</td>
+                            <td style='width:25%; text-align:right;'>$item->doctor_price</td>
+                            <td style='width:20%; text-align:right;'>$item->total</td>
+                        </tr>
+                    ";
+                }
+
+                //NURSE ROUND FEES
+                $nurseRecords = WardRound::select('nurse_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(nurse_price) as total'))
+                                        ->where('session_id', $id)
+                                        ->groupBy('nurse_price')
+                                        ->get();
+                foreach($nurseRecords as $item) {
+                    $totalInvoiceAmount += $item->total;
+
+                    $itemsHTML .= "
+                        <tr class='item'>
+                            <td style='width:35%;'>Ward Rounds (Nurse)</td>
+                            <td style='width:20%; text-align:center;'>$item->quantity</td>
+                            <td style='width:25%; text-align:right;'>$item->nurse_price</td>
+                            <td style='width:20%; text-align:right;'>$item->total</td>
+                        </tr>
+                    ";
+                }
+
+                //INVOICE ADDITIONS: INPATIENT
+                $items = InvoiceAddition::where('session_id', $id)->where('category', 'INPATIENT')->where('status', 'ACTIVE')->get();
+                foreach($items as $item) {
+                    $totalPrice = $item->quantity * $item->rate;
+                    $totalInvoiceAmount += $totalPrice;
+
+                    $itemsHTML .= "
+                        <tr class='item'>
+                            <td style='width:35%;'>$item->name</td>
+                            <td style='width:20%; text-align:center;'>$item->quantity</td>
+                            <td style='width:25%; text-align:right;'>$item->rate</td>
+                            <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        </tr>
+                    ";
+                }
+            }
+
             //NURSE FEES
             $items = PatientNursing::where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
@@ -308,48 +418,20 @@ class PatientSessionController extends Controller
                 ";
             }
 
-            if($patientSession->patient_type == 'INPATIENT') {
-                //BED FEES
-                $items = WardRound::with(['bed.ward'])->where('session_id', $id)->get();
-                foreach($items as $item) {
-                    $ward = $item->bed->ward;
-                    $totalInvoiceAmount += $item->bed_price;
+            //INVOICE ADDITIONS: NURSE
+            $items = InvoiceAddition::where('session_id', $id)->where('category', 'NURSE')->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalPrice = $item->quantity * $item->rate;
+                $totalInvoiceAmount += $totalPrice;
 
-                    $itemsHTML .= "
-                        <tr class='item'>
-                            <td style='width:35%;'>Bed Charges ($ward->name)</td>
-                            <td style='width:20%; text-align:center;'>1</td>
-                            <td style='width:25%; text-align:right;'>$item->bed_price</td>
-                            <td style='width:20%; text-align:right;'>$item->bed_price</td>
-                        </tr>
-                    ";
-
-                    if($item->doctor_price) {
-                        $totalInvoiceAmount += $item->doctor_price;
-
-                        $itemsHTML .= "
-                            <tr class='item'>
-                                <td style='width:35%;'>Ward Round (Doctor)</td>
-                                <td style='width:20%; text-align:center;'>1</td>
-                                <td style='width:25%; text-align:right;'>$item->doctor_price</td>
-                                <td style='width:20%; text-align:right;'>$item->doctor_price</td>
-                            </tr>
-                        ";
-                    }
-
-                    if($item->nurse_price) {
-                        $totalInvoiceAmount += $item->nurse_price;
-
-                        $itemsHTML .= "
-                            <tr class='item'>
-                                <td style='width:35%;'>Ward Round (Nurse)</td>
-                                <td style='width:20%; text-align:center;'>1</td>
-                                <td style='width:25%; text-align:right;'>$item->nurse_price</td>
-                                <td style='width:20%; text-align:right;'>$item->nurse_price</td>
-                            </tr>
-                        ";
-                    }
-                }
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
             }
 
             //NON-PHARMACEUTICALS
@@ -364,6 +446,22 @@ class PatientSessionController extends Controller
                         <td style='width:35%;'>$nonPharmaceutical->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$item->unit_price</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
+            }
+
+            //INVOICE ADDITIONS: NON_PHARMACEUTICALS
+            $items = InvoiceAddition::where('session_id', $id)->where('category', 'NON_PHARMACEUTICALS')->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalPrice = $item->quantity * $item->rate;
+                $totalInvoiceAmount += $totalPrice;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -385,6 +483,22 @@ class PatientSessionController extends Controller
                 ";
             }
 
+            //INVOICE ADDITIONS: LAB
+            $items = InvoiceAddition::where('session_id', $id)->where('category', 'LAB')->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalPrice = $item->quantity * $item->rate;
+                $totalInvoiceAmount += $totalPrice;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
+            }
+
             //PHARMACY FEES
             $items = PatientDrug::where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
@@ -397,6 +511,38 @@ class PatientSessionController extends Controller
                         <td style='width:35%;'>$pharmaceutical->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$item->unit_price</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
+            }
+
+            //INVOICE ADDITIONS: PHARMACEUTICALS
+            $items = InvoiceAddition::where('session_id', $id)->where('category', 'PHARMACEUTICALS')->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalPrice = $item->quantity * $item->rate;
+                $totalInvoiceAmount += $totalPrice;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
+            }
+
+            //INVOICE ADDITIONS: OTHER
+            $items = InvoiceAddition::where('session_id', $id)->where('category', 'OTHER')->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalPrice = $item->quantity * $item->rate;
+                $totalInvoiceAmount += $totalPrice;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -418,7 +564,7 @@ class PatientSessionController extends Controller
                                         PRICE
                                     </th>
                                     <th style='width:20%; text-align:right;'>
-                                        TOTAL AMOUNT
+                                        TOTAL
                                     </th>
                                 </tr>
                             </thead>
@@ -524,13 +670,12 @@ class PatientSessionController extends Controller
                 $lab_test = $test->lab_test;
                 $lab_result = $test->lab_result;
                 if($lab_result) {
-                    $description = $lab_result->description ? "<br>" . $lab_result->description : "";
-                    $testResult = "<i>$lab_result->result</i> $description";
+                    $description = $lab_result->description ? $lab_result->description : "";
+                    $testResult = "<i>$lab_result->result</i> <div>$description</div>";
                 }
 
                 $testsString .= "
-                    <b>$lab_test->test: </b> <br><br>
-                    <p>$testResult</p>
+                    <li><b>$lab_test->test: </b>$testResult</li>
                 ";
             }
             $testsString .= "</ul>";
@@ -664,13 +809,12 @@ class PatientSessionController extends Controller
                 $lab_test = $test->lab_test;
                 $lab_result = $test->lab_result;
                 if($lab_result) {
-                    $description = $lab_result->description ? "<br>" . $lab_result->description : "";
-                    $testResult = "<i>$lab_result->result</i> $description";
+                    $description = $lab_result->description ? $lab_result->description : "";
+                    $testResult = "<i>$lab_result->result</i> <div>$description</div>";
                 }
 
                 $testsString .= "
-                    <b>$lab_test->test: </b> <br><br>
-                    <p>$testResult</p>
+                    <li><b>$lab_test->test: </b>$testResult</li>
                 ";
             }
             $testsString .= "</ul>";

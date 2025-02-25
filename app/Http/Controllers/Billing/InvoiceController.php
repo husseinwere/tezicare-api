@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Billing;
 
 use App\Http\Controllers\Controller;
-use App\Models\Billing\PaymentRequest;
+use App\Models\Billing\InvoiceAddition;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
 use App\Models\Patient\PatientNursing;
@@ -12,6 +12,7 @@ use App\Models\Patient\PatientTest;
 use App\Models\Patient\WardRound;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -54,20 +55,37 @@ class InvoiceController extends Controller
                 $totalInvoiceAmount += $item->price;
             }
 
-            $ward_rounds = array();
+            $bedRecords = array();
+            $doctorRecords = array();
+            $nurseRecords = array();
+            
             if($patientSession->patient_type == 'INPATIENT') {
                 //BED FEES
-                $ward_rounds = WardRound::with('ward')->where('session_id', $sessionId)->get();
-                foreach($ward_rounds as $item) {
-                    $totalInvoiceAmount += $item->bed_price;
+                $bedRecords = WardRound::with('bed.ward')
+                                        ->select('bed_id', 'bed_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(bed_price) as total'))
+                                        ->where('session_id', $sessionId)
+                                        ->groupBy('bed_id', 'bed_price')
+                                        ->get();
+                foreach($bedRecords as $item) {
+                    $totalInvoiceAmount += $item->total;
+                }
 
-                    if($item->doctor_price) {
-                        $totalInvoiceAmount += $item->doctor_price;
-                    }
+                //DOCTOR ROUND FEES
+                $doctorRecords = WardRound::select('doctor_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(doctor_price) as total'))
+                                        ->where('session_id', $sessionId)
+                                        ->groupBy('doctor_price')
+                                        ->get();
+                foreach($doctorRecords as $item) {
+                    $totalInvoiceAmount += $item->total;
+                }
 
-                    if($item->nurse_price) {
-                        $totalInvoiceAmount += $item->nurse_price;
-                    }
+                //NURSE ROUND FEES
+                $nurseRecords = WardRound::select('nurse_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(nurse_price) as total'))
+                                        ->where('session_id', $sessionId)
+                                        ->groupBy('nurse_price')
+                                        ->get();
+                foreach($nurseRecords as $item) {
+                    $totalInvoiceAmount += $item->total;
                 }
             }
 
@@ -92,6 +110,13 @@ class InvoiceController extends Controller
                 $totalInvoiceAmount += $totalPrice;
             }
 
+            //INVOICE ADDITIONS
+            $additions = InvoiceAddition::where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
+            foreach($additions as $item) {
+                $totalPrice = $item->quantity * $item->rate;
+                $totalInvoiceAmount += $totalPrice;
+            }
+
             return [
                 'invoice_total' => $totalInvoiceAmount,
                 'reception' => $reception,
@@ -99,29 +124,14 @@ class InvoiceController extends Controller
                 'nonPharmaceuticals' => $nonPharmaceuticals,
                 'lab' => $lab,
                 'pharmacy' => $pharmacy,
-                'ward' => $ward_rounds
+                'bed' => $bedRecords,
+                'doctor_rounds' => $doctorRecords,
+                'nurse_rounds' => $nurseRecords,
+                'invoice_additions' => $additions
             ];
         }
         else {
             return response(['message' => 'Patient session not found.'], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $data = $request->all();
-
-        $paymentRequest = PaymentRequest::find($id);
-        $updatedRequest = $paymentRequest->update($data);
-
-        if($updatedRequest){
-            return response(null, Response::HTTP_OK);
-        }
-        else {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
