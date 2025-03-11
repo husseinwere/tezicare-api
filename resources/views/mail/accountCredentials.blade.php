@@ -28,7 +28,7 @@
             }
 
             button {
-                background-color: #00a8ff;
+                background-color: #009688;
                 color: #fff;
                 cursor: pointer;
                 width: 200px;
@@ -40,7 +40,7 @@
             }
 
             button:hover {
-                background-color: #0097e6;
+                background-color: #017D71;
             }
         </style>
     </head>

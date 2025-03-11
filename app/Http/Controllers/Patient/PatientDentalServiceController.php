@@ -1,31 +1,23 @@
 <?php
 
-namespace App\Http\Controllers\Lab;
+namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lab\LabTest;
+use App\Models\Patient\PatientDentalService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
-class LabTestController extends Controller
+class PatientDentalServiceController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $pageSize = $request->query('page_size', 20);
-        $pageIndex = $request->query('page_index', 1);
-        $lab = ucfirst($request->query('lab'));
-        
-        $query = LabTest::where('status', 'ACTIVE');
+        $sessionId = $request->query('session_id');
 
-        if($lab) {
-            $query->where('lab', $lab);
-        }
-
-        return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
+        return PatientDentalService::with(['dental_service', 'created_by'])->where('session_id', $sessionId)->get();
     }
 
     /**
@@ -34,16 +26,17 @@ class LabTestController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'lab' => 'required',
-            'test' => 'required',
+            'session_id' => 'required',
+            'service_id' => 'required',
             'price' => 'required'
         ]);
+
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        $createdTest = LabTest::create($data);
+        $createdService = PatientDentalService::create($data);
 
-        if($createdTest){
+        if($createdService){
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -58,10 +51,11 @@ class LabTestController extends Controller
     {
         $data = $request->all();
 
-        $test = LabTest::find($id);
-        $updatedTest = $test->update($data);
+        $service = PatientDentalService::find($id);
 
-        if($updatedTest){
+        $updatedService = $service->update($data);
+
+        if($updatedService){
             return response(null, Response::HTTP_OK);
         }
         else {
@@ -74,14 +68,18 @@ class LabTestController extends Controller
      */
     public function destroy(string $id)
     {
-        $test = LabTest::find($id);
-        $test->status = 'DELETED';
+        $service = PatientDentalService::find($id);
 
-        if($test->save()) {
-            return response(null, Response::HTTP_NO_CONTENT);
+        if($service['payment_status'] == "PAID" || $service['status'] == "CLEARED") {
+            return response(['message' => 'You cannot delete paid for or cleared services.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            if(PatientDentalService::destroy($id)) {
+                return response(null, Response::HTTP_NO_CONTENT);
+            }
+            else {
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
         }
     }
 }

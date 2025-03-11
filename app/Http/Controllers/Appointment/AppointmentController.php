@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Lab;
+namespace App\Http\Controllers\Appointment;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lab\LabTest;
+use App\Models\Appointment\Appointment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
-class LabTestController extends Controller
+class AppointmentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,15 +17,15 @@ class LabTestController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
-        $lab = ucfirst($request->query('lab'));
-        
-        $query = LabTest::where('status', 'ACTIVE');
+        $patient_id = $request->query('patient_id');
 
-        if($lab) {
-            $query->where('lab', $lab);
+        $query = Appointment::with(['patient', 'created_by'])->where('status', 'ACTIVE');
+
+        if($patient_id) {
+            $query->where('patient_id', $patient_id);
         }
 
-        return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
+        return $query->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -34,16 +34,17 @@ class LabTestController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'lab' => 'required',
-            'test' => 'required',
-            'price' => 'required'
+            'patient_id' => 'required',
+            'appointment_date' => 'required',
+            'duration' => 'required',
+            'description' => 'required'
         ]);
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        $createdTest = LabTest::create($data);
+        $createdAppointment = Appointment::create($data);
 
-        if($createdTest){
+        if($createdAppointment){
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -58,10 +59,10 @@ class LabTestController extends Controller
     {
         $data = $request->all();
 
-        $test = LabTest::find($id);
-        $updatedTest = $test->update($data);
+        $appointment = Appointment::find($id);
+        $updatedAppointment = $appointment->update($data);
 
-        if($updatedTest){
+        if($updatedAppointment){
             return response(null, Response::HTTP_OK);
         }
         else {
@@ -74,10 +75,10 @@ class LabTestController extends Controller
      */
     public function destroy(string $id)
     {
-        $test = LabTest::find($id);
-        $test->status = 'DELETED';
+        $appointment = Appointment::find($id);
+        $appointment->status = 'DELETED';
 
-        if($test->save()) {
+        if($appointment->save()) {
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {

@@ -126,6 +126,7 @@ class PatientSessionController extends Controller
 
         $session = PatientSession::find($id);
         $session->status = 'CLEARED';
+        if(!$session->discharged) $session->discharged = Carbon::now();
 
         if($session->save()){
             return response(null, Response::HTTP_OK);

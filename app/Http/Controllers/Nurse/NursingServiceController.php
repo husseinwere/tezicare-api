@@ -17,14 +17,8 @@ class NursingServiceController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
-        $shouldPaginate = $request->query('paginate', 'true');
 
-        if($shouldPaginate == 'true') {
-            return NursingService::paginate($pageSize, ['*'], 'page', $pageIndex);
-        }
-        else {
-            return NursingService::get();
-        }
+        return NursingService::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -72,7 +66,10 @@ class NursingServiceController extends Controller
      */
     public function destroy(string $id)
     {
-        if(NursingService::destroy($id)) {
+        $service = NursingService::find($id);
+        $service->status = 'DELETED';
+
+        if($service->save()) {
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {

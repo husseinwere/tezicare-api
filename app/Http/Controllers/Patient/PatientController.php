@@ -43,6 +43,7 @@ class PatientController extends Controller
             'last_name' => 'required',
             'gender' => 'required',
             'dob' => 'required',
+            'national_id' => 'required',
             'phone' => 'required'
         ]);
         $data = $request->all();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Queues;
 
 use App\Models\Patient\NurseInstruction;
+use App\Models\Patient\PatientSession;
 use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\NurseQueue;
 use Illuminate\Http\Request;
@@ -26,9 +27,10 @@ class NurseQueueController extends QueueBaseController
 
         $queuePresent = NurseQueue::where('session_id', $data['session_id'])->first();
         if(!$queuePresent) {
+            $session = PatientSession::find($data['session_id']);
             $instructions = NurseInstruction::where('session_id', $data['session_id'])->get();
 
-            if(!$instructions->isEmpty()) {
+            if(!$instructions->isEmpty() || $session->patient_type == 'DIRECT_SERVICE') {
                 $nurseQueue = NurseQueue::create($data);
             }
             else {

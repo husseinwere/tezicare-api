@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Queues;
 
+use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientTest;
 use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\LabQueue;
@@ -26,6 +27,7 @@ class LabQueueController extends QueueBaseController
 
         $queuePresent = LabQueue::where('session_id', $data['session_id'])->first();
         if(!$queuePresent) {
+            $session = PatientSession::find($data['session_id']);
             $generalTests = PatientTest::with('lab_test')
                                         ->where('session_id', $data['session_id'])
                                         ->whereHas('lab_test', function ($query) {
@@ -33,7 +35,7 @@ class LabQueueController extends QueueBaseController
                                         })
                                         ->get();
 
-            if(!$generalTests->isEmpty()) {
+            if(!$generalTests->isEmpty() || $session->patient_type == 'DIRECT_SERVICE') {
                 $generalQueue = LabQueue::create($data);
             }
             else {

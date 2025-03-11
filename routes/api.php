@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Appointment\AppointmentController;
 use App\Http\Controllers\Billing\InvoiceAdditionController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentRecordController;
 use App\Http\Controllers\Billing\PaymentRequestController;
+use App\Http\Controllers\Dental\DentalServiceController;
 use App\Http\Controllers\Doctor\DoctorConsultationController;
 use App\Http\Controllers\Hospital\ConfigurationController;
 use App\Http\Controllers\Hospital\ConsultationTypeController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\Nurse\NursingServiceController;
 use App\Http\Controllers\Patient\NurseInstructionController;
 use App\Http\Controllers\Patient\PatientConditionController;
 use App\Http\Controllers\Patient\PatientController;
+use App\Http\Controllers\Patient\PatientDentalServiceController;
 use App\Http\Controllers\Patient\PatientDiagnosisController;
 use App\Http\Controllers\Patient\PatientDrugController;
 use App\Http\Controllers\Patient\PatientImpressionController;
@@ -152,6 +155,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //PATIENT NURSING
     Route::resource('patient-nursing', PatientNursingController::class);
 
+    //PATIENT DENTAL SERVICES
+    Route::resource('patient-dental-services', PatientDentalServiceController::class);
+
     //LAB TESTS
     Route::resource('lab-tests', LabTestController::class);
 
@@ -199,6 +205,12 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //INVOICE
     Route::get('/invoices', [InvoiceController::class, 'index']);
     Route::resource('invoice-additions', InvoiceAdditionController::class);
+
+    //DENTAL SERVICES
+    Route::resource('dental-services', DentalServiceController::class);
+
+    //APPOINTMENTS
+    Route::resource('appointments', AppointmentController::class);
 
     //HOSPITAL CONFIG
     Route::resource('hospital-configs', ConfigurationController::class);

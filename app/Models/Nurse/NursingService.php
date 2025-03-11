@@ -12,6 +12,7 @@ class NursingService extends Model
     protected $fillable = [
         'service',
         'price',
-        'created_by'
+        'created_by',
+        'status'
     ];
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Queues;
 
 use App\Models\Patient\PatientPrescription;
+use App\Models\Patient\PatientSession;
 use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\PharmacyQueue;
 use Illuminate\Http\Request;
@@ -26,9 +27,10 @@ class PharmacyQueueController extends QueueBaseController
 
         $queuePresent = PharmacyQueue::where('session_id', $data['session_id'])->first();
         if(!$queuePresent) {
+            $session = PatientSession::find($data['session_id']);
             $prescription = PatientPrescription::where('session_id', $data['session_id'])->get();
 
-            if(!$prescription->isEmpty()) {
+            if(!$prescription->isEmpty() || $session->patient_type == 'DIRECT_SERVICE') {
                 $pharmacyQueue = PharmacyQueue::create($data);
             }
             else {
@@ -43,7 +45,7 @@ class PharmacyQueueController extends QueueBaseController
             }
         }
         else {
-            return response(['message' => 'Patient is already in nurse queue.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'Patient is already in pharmacy queue.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 

@@ -13,6 +13,7 @@ class LabTest extends Model
         'lab',
         'test',
         'price',
-        'created_by'
+        'created_by',
+        'status'
     ];
 }
