@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\UserCreated;
+use App\Models\Hospital\Configuration;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -58,10 +59,13 @@ class UserController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        $token = $user->createToken('okoyana')->plainTextToken;
+
+        $configuration = Configuration::first();
 
         $response = [
             'user' => $user,
+            'hospital' => $configuration,
             'token' => $token
         ];
 

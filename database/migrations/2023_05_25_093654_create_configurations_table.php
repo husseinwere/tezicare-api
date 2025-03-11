@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('logo')->nullable();
             $table->string('stamp')->nullable();
             $table->decimal('registration_fee', 10, 2);
+            $table->string('modules')->nullable();
             $table->decimal('rate_per_visit', 10, 2)->nullable();
             $table->timestamps();
         });

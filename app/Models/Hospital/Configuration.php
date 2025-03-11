@@ -17,6 +17,7 @@ class Configuration extends Model
         'logo',
         'stamp',
         'registration_fee',
+        'modules',
         'rate_per_visit'
     ];
 }
