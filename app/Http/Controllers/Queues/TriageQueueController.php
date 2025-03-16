@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Queues;
 
-use App\Models\Patient\PatientSession;
 use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\TriageQueue;
 use Illuminate\Http\Response;
@@ -15,24 +14,20 @@ class TriageQueueController extends QueueBaseController
         parent::__construct($model);
     }
 
-    public function sendToDoctor(string $session_id) {
-        $session = PatientSession::find($session_id);
+    public function sendToDoctor(string $session_id) {        
         $data['session_id'] = $session_id;
+        $data['created_by'] = Auth::id();
 
-        if($session['consultation_type'] == "General") {
-            $data['created_by'] = Auth::id();
+        $createdItem = DoctorQueue::create($data);
 
-            $createdItem = DoctorQueue::create($data);
+        if($createdItem){
+            $triage = TriageQueue::where('session_id', $session_id)->first();
+            $triage->delete();
 
-            if($createdItem){
-                $triage = TriageQueue::where('session_id', $session_id)->first();
-                $triage->delete();
-
-                return response(['message' => 'Patient now in doctor queue'], Response::HTTP_CREATED);
-            }
-            else {
-                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+            return response(['message' => 'Patient is now in doctor queue'], Response::HTTP_CREATED);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\Inventory\PharmaceuticalController;
 use App\Http\Controllers\Lab\LabResultController;
 use App\Http\Controllers\Lab\LabTestController;
 use App\Http\Controllers\Nurse\NursingServiceController;
+use App\Http\Controllers\Patient\ClinicalSummaryRecordController;
 use App\Http\Controllers\Patient\NurseInstructionController;
 use App\Http\Controllers\Patient\PatientConditionController;
 use App\Http\Controllers\Patient\PatientController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\Patient\PatientRecommendationController;
 use App\Http\Controllers\Patient\PatientSessionController;
 use App\Http\Controllers\Patient\PatientSymptomController;
 use App\Http\Controllers\Patient\PatientTestController;
+use App\Http\Controllers\Patient\PatientVisitController;
 use App\Http\Controllers\Patient\PatientVitalsController;
 use App\Http\Controllers\Patient\WardRoundController;
 use App\Http\Controllers\Queues\AdmissionQueueController;
@@ -76,6 +78,8 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::get('/sessions/print/discharge-summary/{id}', [PatientSessionController::class, 'printDischargeSummary']);
     Route::get('/sessions/print/lab-report/{id}', [PatientSessionController::class, 'printLabReport']);
     Route::get('/sessions/print/prescription/{id}', [PatientSessionController::class, 'printPrescription']);
+
+    Route::resource('patient-visits', PatientVisitController::class);
 
     //TRIAGE QUEUE
     Route::resource('queue/triage', TriageQueueController::class);
@@ -129,6 +133,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //PATIENT IMPRESSIONS
     Route::resource('patient-impressions', PatientImpressionController::class);
+
+    //CLINICAL SUMMARY RECORDS
+    Route::resource('clinical-summary', ClinicalSummaryRecordController::class);
 
     //PATIENT RECOMMENDATIONS
     Route::resource('patient-recommendations', PatientRecommendationController::class);

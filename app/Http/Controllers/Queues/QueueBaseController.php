@@ -26,8 +26,17 @@ class QueueBaseController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $consultation_type = $request->query('consultation_type');
 
-        return $this->model::with(['session.patient', 'created_by'])->paginate($pageSize, ['*'], 'page', $pageIndex);
+        $query = $this->model::with(['session.patient', 'session.consultation', 'created_by']);
+
+        if($consultation_type) {
+            $query->whereHas('session', function($q) use ($consultation_type) {
+                $q->where('consultation_type', $consultation_type);
+            });
+        }
+
+        return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**

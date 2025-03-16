@@ -15,4 +15,8 @@ class ConsultationType extends Model
         'inpatient_nurse_rate',
         'inpatient_doctor_rate'
     ];
+
+    protected $casts = [
+        'can_delete' => 'boolean'
+    ];
 }

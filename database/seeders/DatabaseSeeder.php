@@ -23,8 +23,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('consultation_types')->insert([
-            ['name' => 'General', 'price' => '2000', 'inpatient_doctor_rate' => '1000', 'inpatient_nurse_rate' => '500'],
-            ['name' => 'Pediatrician', 'price' => '2000', 'inpatient_doctor_rate' => '1500', 'inpatient_nurse_rate' => '500']
+            ['name' => 'General', 'price' => '500', 'inpatient_doctor_rate' => '500', 'inpatient_nurse_rate' => '300', 'can_delete' => 0],
+            ['name' => 'Dentist', 'price' => '1000', 'inpatient_doctor_rate' => NULL, 'inpatient_nurse_rate' => NULL, 'can_delete' => 0],
+            ['name' => 'Pediatrician', 'price' => '2000', 'inpatient_doctor_rate' => '1500', 'inpatient_nurse_rate' => '500', 'can_delete' => 1]
         ]);
 
         DB::table('insurance_covers')->insert([

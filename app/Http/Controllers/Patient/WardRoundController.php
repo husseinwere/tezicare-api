@@ -56,10 +56,9 @@ class WardRoundController extends Controller
         $bed = Bed::find($data['bed_id']);
         $data['bed_price'] = $bed->ward->price;
 
-        $session = PatientSession::find($data['session_id']);
-        $consultation_type = ConsultationType::where('name', $session->consultation_type)->first();
-        $data['doctor_price'] = $consultation_type->inpatient_doctor_rate;
-        $data['nurse_price'] = $consultation_type->inpatient_nurse_rate;
+        $session = PatientSession::with('consultation')->find($data['session_id']);
+        $data['doctor_price'] = $session->consultation->inpatient_doctor_rate;
+        $data['nurse_price'] = $session->consultation->inpatient_nurse_rate;
 
         $createdRound = WardRound::create($data);
 

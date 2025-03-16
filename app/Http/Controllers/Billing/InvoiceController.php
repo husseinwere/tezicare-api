@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Billing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Billing\InvoiceAddition;
+use App\Models\Patient\PatientDentalService;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
 use App\Models\Patient\PatientNursing;
@@ -52,6 +53,12 @@ class InvoiceController extends Controller
             //NURSE FEES
             $nurse = PatientNursing::where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
             foreach($nurse as $item) {
+                $totalInvoiceAmount += $item->price;
+            }
+
+            //DENTAL FEES
+            $dental = PatientDentalService::with('dental_service')->where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
+            foreach($dental as $item) {
                 $totalInvoiceAmount += $item->price;
             }
 
@@ -123,6 +130,7 @@ class InvoiceController extends Controller
                 'nurse' => $nurse,
                 'nonPharmaceuticals' => $nonPharmaceuticals,
                 'lab' => $lab,
+                'dental' => $dental,
                 'pharmacy' => $pharmacy,
                 'bed' => $bedRecords,
                 'doctor_rounds' => $doctorRecords,

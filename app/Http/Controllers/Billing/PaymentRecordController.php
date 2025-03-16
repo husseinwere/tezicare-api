@@ -150,8 +150,10 @@ class PaymentRecordController extends Controller
 
         if($request['source'] == 'Reception consultation') {
             $queue = TriageQueue::where('session_id', $request['session_id'])->first();
-            $queue->status = 'ACTIVE';
-            $queue->save();
+            if($queue) {
+                $queue->status = 'ACTIVE';
+                $queue->save();
+            }
         }
         else if($request['source'] == 'Admission deposit') {
             $queue = AdmissionQueue::where('session_id', $request['session_id'])->first();

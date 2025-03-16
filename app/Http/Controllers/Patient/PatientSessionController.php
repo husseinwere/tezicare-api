@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment\Appointment;
 use App\Models\Billing\InvoiceAddition;
 use App\Models\Hospital\Configuration;
 use App\Models\Inventory\NonPharmaceutical;
 use App\Models\Inventory\Pharmaceutical;
+use App\Models\Patient\Patient;
 use App\Models\Patient\PatientDiagnosis;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
@@ -16,6 +18,7 @@ use App\Models\Patient\PatientRecommendation;
 use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientSymptom;
 use App\Models\Patient\PatientTest;
+use App\Models\Patient\PatientVisit;
 use App\Models\Patient\WardRound;
 use App\Models\Queues\ClearanceQueue;
 use App\Models\Queues\DoctorQueue;
@@ -43,10 +46,11 @@ class PatientSessionController extends Controller
         $patient_id = $request->input('patient_id');
         $status = $request->input('status');
         $patient_type = $request->input('patient_type');
+        $consultation_type = $request->input('consultation_type');
         $startAt = $request->input('startAt');
         $endAt = $request->input('endAt');
 
-        $query = PatientSession::with('patient');
+        $query = PatientSession::with(['patient', 'consultation']);
 
         if($patient_id) {
             $query->where('patient_id', $patient_id);
@@ -58,6 +62,10 @@ class PatientSessionController extends Controller
 
         if($patient_type) {
             $query->where('patient_type', $patient_type);
+        }
+
+        if($consultation_type) {
+            $query->where('consultation_type', $consultation_type);
         }
 
         if($startAt && $endAt) {
@@ -91,6 +99,12 @@ class PatientSessionController extends Controller
         $createdSession = PatientSession::create($data);
 
         if($createdSession){
+            $visit = [
+                'session_id' => $createdSession->id,
+                'created_by' => Auth::id()
+            ];
+            PatientVisit::create($visit);
+
             return response($createdSession, Response::HTTP_CREATED);
         }
         else {
@@ -100,7 +114,7 @@ class PatientSessionController extends Controller
 
     public function show(string $id)
     {
-        return PatientSession::with('doctor')->where('patient_sessions.id', $id)->first();
+        return PatientSession::with(['patient', 'consultation', 'doctor'])->where('patient_sessions.id', $id)->first();
     }
 
     public function update(Request $request, string $id)
@@ -126,9 +140,15 @@ class PatientSessionController extends Controller
 
         $session = PatientSession::find($id);
         $session->status = 'CLEARED';
+
         if(!$session->discharged) $session->discharged = Carbon::now();
 
         if($session->save()){
+            $visit = PatientVisit::where('session_id', $session->id)->latest()->first();
+            $visit->status = 'CLEARED';
+            $visit->discharged = Carbon::now();
+            $visit->save();
+
             return response(null, Response::HTTP_OK);
         }
         else {
@@ -138,7 +158,9 @@ class PatientSessionController extends Controller
 
     public function destroy(string $id)
     {
+        //not functional now
         $session = PatientSession::find($id);
+        //add logic to delete patient visit
         $session->status = 'DELETED';
         $session->save();
 
@@ -151,11 +173,15 @@ class PatientSessionController extends Controller
         $visitsToday = PatientSession::whereDate('created_at', Carbon::today())->count();
         $activeSessions = PatientSession::where('status', 'ACTIVE')->count();
         $inpatients = PatientSession::where('patient_type', 'INPATIENT')->where('status', 'ACTIVE')->count();
+        $patients = Patient::where('status', 'ACTIVE')->count();
+        $appointments = Appointment::where('status', 'ACTIVE')->whereDate('appointment_date', Carbon::today())->count();
 
         return [
             'visits_today' => $visitsToday,
             'active_sessions' => $activeSessions,
-            'inpatients' => $inpatients
+            'inpatients' => $inpatients,
+            'patients' => $patients,
+            'appointments' => $appointments
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models\Patient;
 
+use App\Models\Hospital\ConsultationType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +23,11 @@ class PatientSession extends Model
         'created_by',
         'status'
     ];
+
+    public function consultation(): BelongsTo
+    {
+        return $this->belongsTo(ConsultationType::class, 'consultation_type');
+    }
 
     public function patient(): BelongsTo
     {
