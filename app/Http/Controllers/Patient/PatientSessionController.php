@@ -9,6 +9,7 @@ use App\Models\Hospital\Configuration;
 use App\Models\Inventory\NonPharmaceutical;
 use App\Models\Inventory\Pharmaceutical;
 use App\Models\Patient\Patient;
+use App\Models\Patient\PatientDentalService;
 use App\Models\Patient\PatientDiagnosis;
 use App\Models\Patient\PatientDrug;
 use App\Models\Patient\PatientNonPharmaceutical;
@@ -142,6 +143,11 @@ class PatientSessionController extends Controller
         $session->status = 'CLEARED';
 
         if(!$session->discharged) $session->discharged = Carbon::now();
+
+        $visitCount = PatientVisit::where('session_id', $id)->count();
+        if($visitCount > 1) {
+            $session->discharged = Carbon::now();
+        }
 
         if($session->save()){
             $visit = PatientVisit::where('session_id', $session->id)->latest()->first();
@@ -325,20 +331,28 @@ class PatientSessionController extends Controller
             $totalInvoiceAmount += $consultation_fee;
             $totalInvoiceAmount += $registration_fee;
 
-            $itemsHTML = "
-                <tr class='item'>
-                    <td style='width:35%;'>Registration fee</td>
-                    <td style='width:20%; text-align:center;'>1</td>
-                    <td style='width:25%; text-align:right;'>$registration_fee</td>
-                    <td style='width:20%; text-align:right;'>$registration_fee</td>
-                </tr>
-                <tr class='item'>
-                    <td style='width:35%;'>Consultation fee</td>
-                    <td style='width:20%; text-align:center;'>1</td>
-                    <td style='width:25%; text-align:right;'>$consultation_fee</td>
-                    <td style='width:20%; text-align:right;'>$consultation_fee</td>
-                </tr>
-            ";
+            $itemsHTML = "";
+
+            if($registration_fee > 0) {
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>Registration fee</td>
+                        <td style='width:20%; text-align:center;'>1</td>
+                        <td style='width:25%; text-align:right;'>$registration_fee</td>
+                        <td style='width:20%; text-align:right;'>$registration_fee</td>
+                    </tr>
+                ";
+            }
+            if($consultation_fee > 0) {
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>Consultation fee</td>
+                        <td style='width:20%; text-align:center;'>1</td>
+                        <td style='width:25%; text-align:right;'>$consultation_fee</td>
+                        <td style='width:20%; text-align:right;'>$consultation_fee</td>
+                    </tr>
+                ";
+            }
 
             //INVOICE ADDITIONS: GENERAL
             $items = InvoiceAddition::where('session_id', $id)->where('category', 'GENERAL')->where('status', 'ACTIVE')->get();
@@ -447,6 +461,38 @@ class PatientSessionController extends Controller
 
             //INVOICE ADDITIONS: NURSE
             $items = InvoiceAddition::where('session_id', $id)->where('category', 'NURSE')->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalPrice = $item->quantity * $item->rate;
+                $totalInvoiceAmount += $totalPrice;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$item->name</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                    </tr>
+                ";
+            }
+
+            //DENTAL FEES
+            $items = PatientDentalService::with('dental_service')->where('session_id', $id)->where('status', 'ACTIVE')->get();
+            foreach($items as $item) {
+                $totalInvoiceAmount += $item->price;
+                $service = $item->dental_service;
+
+                $itemsHTML .= "
+                    <tr class='item'>
+                        <td style='width:35%;'>$service->name</td>
+                        <td style='width:20%; text-align:center;'>1</td>
+                        <td style='width:25%; text-align:right;'>$item->price</td>
+                        <td style='width:20%; text-align:right;'>$item->price</td>
+                    </tr>
+                ";
+            }
+
+            //INVOICE ADDITIONS: DENTAL
+            $items = InvoiceAddition::where('session_id', $id)->where('category', 'DENTAL')->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
                 $totalPrice = $item->quantity * $item->rate;
                 $totalInvoiceAmount += $totalPrice;

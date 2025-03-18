@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientVisit;
 use App\Models\Queues\DoctorQueue;
 use Illuminate\Http\Request;
@@ -30,6 +31,10 @@ class PatientVisitController extends Controller
 
         if($createdVisit){
             DoctorQueue::create($data);
+
+            $session = PatientSession::find($data['session_id']);
+            $session->status = 'ACTIVE';
+            $session->save();
 
             return response($createdVisit, Response::HTTP_CREATED);
         }
