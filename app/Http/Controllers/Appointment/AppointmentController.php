@@ -25,7 +25,7 @@ class AppointmentController extends Controller
             $query->where('patient_id', $patient_id);
         }
 
-        return $query->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
+        return $query->orderBy('appointment_date', 'desc')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
