@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment\Appointment;
 use App\Models\Billing\InvoiceAddition;
 use App\Models\Hospital\Configuration;
+use App\Models\Hospital\DocumentTemplate;
 use App\Models\Inventory\NonPharmaceutical;
 use App\Models\Inventory\Pharmaceutical;
+use App\Models\Patient\ClinicalSummaryRecord;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientDentalService;
 use App\Models\Patient\PatientDiagnosis;
@@ -622,48 +624,70 @@ class PatientSessionController extends Controller
             }
 
             $content = "
-                <tr>
-                    <td colspan='3'>
-                        <table cellspacing='0px' cellpadding='2px'>
-                            <thead>
-                                <tr class='heading'>
-                                    <th style='width:35%;'>
-                                        ITEM
-                                    </th>
-                                    <th style='width:20%; text-align:center;'>
-                                        QTY.
-                                    </th>
-                                    <th style='width:25%; text-align:right;'>
-                                        PRICE
-                                    </th>
-                                    <th style='width:20%; text-align:right;'>
-                                        TOTAL
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                $itemsHTML
-                                <tr class='item'>
-                                    <td style='width:35%;'></td>
-                                    <td style='width:20%; text-align:center;'></td>
-                                    <td style='width:25%; text-align:right;'><b> Grand Total </b></td>
-                                    <td style='width:20%; text-align:right;'>$totalInvoiceAmount</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
+                <table cellspacing='0px' cellpadding='2px'>
+                    <thead>
+                        <tr class='heading'>
+                            <th style='width:35%;'>
+                                ITEM
+                            </th>
+                            <th style='width:20%; text-align:center;'>
+                                QTY.
+                            </th>
+                            <th style='width:25%; text-align:right;'>
+                                PRICE
+                            </th>
+                            <th style='width:20%; text-align:right;'>
+                                TOTAL
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        $itemsHTML
+                        <tr class='item'>
+                            <td style='width:35%;'></td>
+                            <td style='width:20%; text-align:center;'></td>
+                            <td style='width:25%; text-align:right;'><b> Grand Total </b></td>
+                            <td style='width:20%; text-align:right;'>$totalInvoiceAmount</td>
+                        </tr>
+                    </tbody>
+                </table>
             ";
 
             $hospital = Configuration::first();
 
+            $variables = [
+                'hospital_name' => $hospital->name,
+                'hospital_address' => $hospital->address,
+                'hospital_phone' => $hospital->phone,
+                'hospital_email' => $hospital->email,
+                'hospital_stamp' => $hospital->stamp,
+                'hospital_logo' => $hospital->logo,
+                'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
+                'patient_email' => $patientSession->patient->email,
+                'patient_phone' => $patientSession->patient->phone,
+                'patient_residence' => $patientSession->patient->residence,
+                'patient_id' => $patientSession->patient->id,
+                'patient_age' => $patientSession->patient->age,
+                'patient_gender' => $patientSession->patient->gender,
+                'patient_type' => $patientSession->patient_type,
+                'invoice_id' => $patientSession->id,
+                'invoice_date' => Carbon::now()->format('d/m/Y'),
+                'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
+                'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : 'N/A',
+                'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
+                'invoice_grid' => $content
+            ];
+
+            $template = DocumentTemplate::where('hospital_id', $hospital->id)->where('title', 'INVOICE')->first();
+            $html = $template->html;
+            $css = $template->css;
+            foreach ($variables as $key => $value) {
+                $html = str_replace("{{ $key }}", $value, $html);
+            }
+            $pdfContent = "<style>$css</style>" . $html;
+
             // Create PDF instance
-            $pdf = Pdf::loadView('docs.document', [
-                'title' => 'HOSPITAL INVOICE',
-                'patientSession' => $patientSession,
-                'hospital' => $hospital,
-                'content' => $content,
-            ]);
+            $pdf = Pdf::loadHTML($pdfContent);
             
             $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
             $response->header('Access-Control-Allow-Origin', '*');
@@ -673,7 +697,7 @@ class PatientSessionController extends Controller
             return $response;
         }
         else {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response(['message' => 'Invoice not found.'], Response::HTTP_NOT_FOUND);
         }
     }
 
@@ -692,6 +716,30 @@ class PatientSessionController extends Controller
                 ";
             }
             $symptomsString .= "</ul>";
+            if(count($symptoms) == 0) {
+                $symptomsString = "";
+            }
+
+            //CLINICAL SUMMARY
+            $summary = ClinicalSummaryRecord::where('session_id', $id)->pluck('summary')->toArray();
+            $summaryString = "<ul>";
+            foreach($summary as $record) {
+                $summaryString .= "
+                    <li>$record</li>
+                ";
+            }
+            $summaryString .= "</ul>";
+            if(count($summary) == 0) {
+                $summaryString = "";
+            }
+
+            $summaryString = "
+                <p>
+                    <b>CLINICAL SUMMARY: </b> <br>
+                    $symptomsString
+                    $summaryString
+                </p>
+            ";
 
             //PATIENT DIAGNOSIS
             $diagnosis = PatientDiagnosis::where('session_id', $id)->pluck('diagnosis')->toArray();
@@ -702,6 +750,17 @@ class PatientSessionController extends Controller
                 ";
             }
             $diagnosisString .= "</ul>";
+            if(count($diagnosis) == 0) {
+                $diagnosisString = "";
+            }
+            else {
+                $diagnosisString = "
+                    <p>
+                        <b>DIAGNOSIS: </b> <br>
+                        $diagnosisString
+                    </p>
+                ";
+            }
 
             //RECOMMENDATION
             $recommendations = PatientRecommendation::where('session_id', $id)->pluck('recommendation')->toArray();
@@ -712,19 +771,42 @@ class PatientSessionController extends Controller
                 ";
             }
             $recommendationsString .= "</ul>";
-
-            //DOCTOR PRESCRIPTION
-            $prescriptions = PatientPrescription::where('session_id', $id)->get();
-            $prescriptionString = "<ul>";
-            foreach($prescriptions as $prescription) {
-                $prescriptionString .= "
-                    <li>$prescription->drug: <i>$prescription->dosage</i></li>
+            if(count($recommendations) == 0) {
+                $recommendationsString = "";
+            }
+            else {
+                $recommendationsString = "
+                    <p>
+                        <b>RECOMMENDATIONS: </b> <br>
+                        $recommendationsString
+                    </p>
                 ";
             }
-            $prescriptionString .= "</ul>";
+
+            //TREATMENT
+            $drugs = PatientDrug::with('pharmaceutical')->where('session_id', $id)->where('treatment', 'INPATIENT')->get();
+            $treatmentString = "<ul>";
+            foreach($drugs as $drug) {
+                $pharmaceutical = $drug->pharmaceutical;
+                $treatmentString .= "
+                    <li>$pharmaceutical->name: <i>$drug->dosage</i></li>
+                ";
+            }
+            $treatmentString .= "</ul>";
+            if(count($drugs) == 0) {
+                $treatmentString = "";
+            }
+            else {
+                $treatmentString = "
+                    <p>
+                        <b>TREATMENT: </b> <br>
+                        $treatmentString
+                    </p>
+                ";
+            }
 
             //DRUGS
-            $drugs = PatientDrug::with('pharmaceutical')->where('session_id', $id)->get();
+            $drugs = PatientDrug::with('pharmaceutical')->where('session_id', $id)->where('treatment', 'DISCHARGE')->get();
             $drugsString = "<ul>";
             foreach($drugs as $drug) {
                 $pharmaceutical = $drug->pharmaceutical;
@@ -733,6 +815,17 @@ class PatientSessionController extends Controller
                 ";
             }
             $drugsString .= "</ul>";
+            if(count($drugs) == 0) {
+                $drugsString = "";
+            }
+            else {
+                $drugsString = "
+                    <p>
+                        <b>DISCHARGE TREATMENT: </b> <br>
+                        $drugsString
+                    </p>
+                ";
+            }
 
             //LAB REPORT
             $tests = PatientTest::with(['lab_test', 'lab_result'])->where('session_id', $patientSession->id)->where('status', 'ACTIVE')->get();
@@ -752,46 +845,58 @@ class PatientSessionController extends Controller
                 ";
             }
             $testsString .= "</ul>";
-            $content = "
-                <tr>
-                    <td colspan='3'>
-                        <p>
-                            <b>SYMPTOMS: </b> <br>
-                            $symptomsString
-                        </p>
-                        <p>
-                            <b>DIAGNOSIS: </b> <br>
-                            $diagnosisString
-                        </p>
-                        <p>
-                            <b>LAB REPORT: </b> <br>
-                            $testsString
-                        </p>
-                        <p>
-                            <b>PRESCRIPTION: </b> <br>
-                            $prescriptionString
-                        </p>
-                        <p>
-                            <b>TREATMENT: </b> <br>
-                            $drugsString
-                        </p>
-                        <p>
-                            <b>RECOMMENDATIONS: </b> <br>
-                            $recommendationsString
-                        </p>
-                    </td>
-                </tr>
-            ";
+            if(count($tests) == 0) {
+                $testsString = "";
+            }
+            else {
+                $testsString = "
+                    <p>
+                        <b>LAB REPORT: </b> <br>
+                        $testsString
+                    </p>
+                ";
+            }
 
             $hospital = Configuration::first();
 
+            $variables = [
+                'hospital_name' => $hospital->name,
+                'hospital_address' => $hospital->address,
+                'hospital_phone' => $hospital->phone,
+                'hospital_email' => $hospital->email,
+                'hospital_stamp' => $hospital->stamp,
+                'hospital_logo' => $hospital->logo,
+                'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
+                'patient_email' => $patientSession->patient->email,
+                'patient_phone' => $patientSession->patient->phone,
+                'patient_residence' => $patientSession->patient->residence,
+                'patient_id' => $patientSession->patient->id,
+                'patient_age' => $patientSession->patient->age,
+                'patient_gender' => $patientSession->patient->gender,
+                'patient_type' => $patientSession->patient_type,
+                'invoice_id' => $patientSession->id,
+                'invoice_date' => Carbon::now()->format('d/m/Y'),
+                'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
+                'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : 'N/A',
+                'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
+                'clinical_summary' => $summaryString,
+                'diagnosis' => $diagnosisString,
+                'lab_report' => $testsString,
+                'treatment' => $treatmentString,
+                'discharge_treatment' => $drugsString,
+                'recommendation' => $recommendationsString
+            ];
+
+            $template = DocumentTemplate::where('hospital_id', $hospital->id)->where('title', 'DISCHARGE SUMMARY')->first();
+            $html = $template->html;
+            $css = $template->css;
+            foreach ($variables as $key => $value) {
+                $html = str_replace("{{ $key }}", $value, $html);
+            }
+            $pdfContent = "<style>$css</style>" . $html;
+
             // Create PDF instance
-            $pdf = Pdf::loadView('docs.document', [
-                'title' => 'DISCHARGE SUMMARY',
-                'patientSession' => $patientSession,
-                'hospital' => $hospital,
-                'content' => $content,
-            ]);
+            $pdf = Pdf::loadHTML($pdfContent);
             
             $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
             $response->header('Access-Control-Allow-Origin', '*');
@@ -820,6 +925,16 @@ class PatientSessionController extends Controller
                 ";
             }
             $prescriptionString .= "</ul>";
+            if(count($prescriptions) == 0) {
+                $prescriptionString = "No drugs prescribed.";
+            }
+            else {
+                $prescriptionString = "
+                    <p>
+                        $prescriptionString
+                    </p>
+                ";
+            }
 
             //RECOMMENDATION
             $recommendations = PatientRecommendation::where('session_id', $id)->pluck('recommendation')->toArray();
@@ -830,30 +945,54 @@ class PatientSessionController extends Controller
                 ";
             }
             $recommendationsString .= "</ul>";
-
-            $content = "
-                <tr>
-                    <td colspan='3'>
-                        <p>
-                            $prescriptionString
-                        </p>
-                        <p>
-                            <b>RECOMMENDATIONS: </b> <br>
-                            $recommendationsString
-                        </p>
-                    </td>
-                </tr>
-            ";
+            if(count($recommendations) == 0) {
+                $recommendationsString = "";
+            }
+            else {
+                $recommendationsString = "
+                    <p>
+                        <b>RECOMMENDATIONS: </b> <br>
+                        $recommendationsString
+                    </p>
+                ";
+            }
 
             $hospital = Configuration::first();
 
+            $variables = [
+                'hospital_name' => $hospital->name,
+                'hospital_address' => $hospital->address,
+                'hospital_phone' => $hospital->phone,
+                'hospital_email' => $hospital->email,
+                'hospital_stamp' => $hospital->stamp,
+                'hospital_logo' => $hospital->logo,
+                'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
+                'patient_email' => $patientSession->patient->email,
+                'patient_phone' => $patientSession->patient->phone,
+                'patient_residence' => $patientSession->patient->residence,
+                'patient_id' => $patientSession->patient->id,
+                'patient_age' => $patientSession->patient->age,
+                'patient_gender' => $patientSession->patient->gender,
+                'patient_type' => $patientSession->patient_type,
+                'invoice_id' => $patientSession->id,
+                'invoice_date' => Carbon::now()->format('d/m/Y'),
+                'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
+                'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : 'N/A',
+                'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
+                'prescription' => $prescriptionString,
+                'recommendation' => $recommendationsString
+            ];
+
+            $template = DocumentTemplate::where('hospital_id', $hospital->id)->where('title', 'PRESCRIPTION')->first();
+            $html = $template->html;
+            $css = $template->css;
+            foreach ($variables as $key => $value) {
+                $html = str_replace("{{ $key }}", $value, $html);
+            }
+            $pdfContent = "<style>$css</style>" . $html;
+
             // Create PDF instance
-            $pdf = Pdf::loadView('docs.document', [
-                'title' => 'PRESCRIPTION',
-                'patientSession' => $patientSession,
-                'hospital' => $hospital,
-                'content' => $content,
-            ]);
+            $pdf = Pdf::loadHTML($pdfContent);
             
             $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
             $response->header('Access-Control-Allow-Origin', '*');
@@ -891,25 +1030,53 @@ class PatientSessionController extends Controller
                 ";
             }
             $testsString .= "</ul>";
-            $content = "
-                <tr>
-                    <td colspan='3'>
-                        <p>
-                            $testsString
-                        </p>
-                    </td>
-                </tr>
-            ";
+            if(count($tests) == 0) {
+                $testsString = "";
+            }
+            else {
+                $testsString = "
+                    <p>
+                        <b>LAB REPORT: </b> <br>
+                        $testsString
+                    </p>
+                ";
+            }
 
             $hospital = Configuration::first();
 
+            $variables = [
+                'hospital_name' => $hospital->name,
+                'hospital_address' => $hospital->address,
+                'hospital_phone' => $hospital->phone,
+                'hospital_email' => $hospital->email,
+                'hospital_stamp' => $hospital->stamp,
+                'hospital_logo' => $hospital->logo,
+                'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
+                'patient_email' => $patientSession->patient->email,
+                'patient_phone' => $patientSession->patient->phone,
+                'patient_residence' => $patientSession->patient->residence,
+                'patient_id' => $patientSession->patient->id,
+                'patient_age' => $patientSession->patient->age,
+                'patient_gender' => $patientSession->patient->gender,
+                'patient_type' => $patientSession->patient_type,
+                'invoice_id' => $patientSession->id,
+                'invoice_date' => Carbon::now()->format('d/m/Y'),
+                'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
+                'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : 'N/A',
+                'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
+                'lab_report' => $testsString
+            ];
+
+            $template = DocumentTemplate::where('hospital_id', $hospital->id)->where('title', 'LAB REPORT')->first();
+            $html = $template->html;
+            $css = $template->css;
+            foreach ($variables as $key => $value) {
+                $html = str_replace("{{ $key }}", $value, $html);
+            }
+            $pdfContent = "<style>$css</style>" . $html;
+
             // Create PDF instance
-            $pdf = Pdf::loadView('docs.document', [
-                'title' => 'LAB REPORT',
-                'patientSession' => $patientSession,
-                'hospital' => $hospital,
-                'content' => $content,
-            ]);
+            $pdf = Pdf::loadHTML($pdfContent);
             
             $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
             $response->header('Access-Control-Allow-Origin', '*');

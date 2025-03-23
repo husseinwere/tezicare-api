@@ -9,6 +9,7 @@ use App\Http\Controllers\Dental\DentalServiceController;
 use App\Http\Controllers\Doctor\DoctorConsultationController;
 use App\Http\Controllers\Hospital\ConfigurationController;
 use App\Http\Controllers\Hospital\ConsultationTypeController;
+use App\Http\Controllers\Hospital\DocumentTemplateController;
 use App\Http\Controllers\Hospital\InsuranceCoverController;
 use App\Http\Controllers\Inventory\NonPharmaceuticalController;
 use App\Http\Controllers\Inventory\PharmaceuticalController;
@@ -221,4 +222,8 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //HOSPITAL CONFIG
     Route::resource('hospital-configs', ConfigurationController::class);
+
+    //DOCUMENT TEMPLATES
+    Route::resource('document-templates', DocumentTemplateController::class);
+    Route::get('/document-templates/render/{id}', [DocumentTemplateController::class, 'renderTemplate']);
 });
