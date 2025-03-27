@@ -18,14 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('bed_id');
             $table->foreign('bed_id')->references('id')->on('beds');
             $table->decimal('bed_price', 10, 2);
-            $table->unsignedBigInteger('doctor_id')->nullable();
-            $table->foreign('doctor_id')->references('id')->on('users');
-            $table->string('doctor_notes')->nullable();
-            $table->decimal('doctor_price', 10, 2)->nullable();
-            $table->unsignedBigInteger('nurse_id')->nullable();
-            $table->foreign('nurse_id')->references('id')->on('users');
-            $table->string('nurse_notes')->nullable();
-            $table->decimal('nurse_price', 10, 2)->nullable();
+            $table->decimal('doctor_price', 10, 2);
+            $table->decimal('nurse_price', 10, 2);
             $table->timestamps();
         });
     }

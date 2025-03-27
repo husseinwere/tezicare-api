@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Hospital\ConsultationType;
 use App\Models\Patient\PatientSession;
 use App\Models\Patient\WardRound;
 use App\Models\Queues\InpatientQueue;
@@ -22,7 +21,7 @@ class WardRoundController extends Controller
         $pageIndex = $request->query('page_index', 1);
         $sessionId = $request->query('session_id');
 
-        return WardRound::with(['session.patient', 'bed.ward', 'doctor', 'nurse'])
+        return WardRound::with(['session.patient', 'bed.ward', 'records.created_by'])
                         ->where('session_id', $sessionId)->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 

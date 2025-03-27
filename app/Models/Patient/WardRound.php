@@ -2,7 +2,6 @@
 
 namespace App\Models\Patient;
 
-use App\Models\User;
 use App\Models\Ward\Bed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,11 +15,7 @@ class WardRound extends Model
         'session_id',
         'bed_id',
         'bed_price',
-        'doctor_id',
-        'doctor_notes',
         'doctor_price',
-        'nurse_id',
-        'nurse_notes',
         'nurse_price'
     ];
 
@@ -32,11 +27,7 @@ class WardRound extends Model
         return $this->belongsTo(Bed::class);
     }
 
-    public function doctor(): BelongsTo {
-        return $this->belongsTo(User::class, 'doctor_id');
-    }
-
-    public function nurse(): BelongsTo {
-        return $this->belongsTo(User::class, 'nurse_id');
+    public function records() {
+        return $this->hasMany(WardRoundRecord::class);
     }
 }

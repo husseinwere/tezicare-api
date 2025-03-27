@@ -35,6 +35,7 @@ use App\Http\Controllers\Patient\PatientTestController;
 use App\Http\Controllers\Patient\PatientVisitController;
 use App\Http\Controllers\Patient\PatientVitalsController;
 use App\Http\Controllers\Patient\WardRoundController;
+use App\Http\Controllers\Patient\WardRoundRecordController;
 use App\Http\Controllers\Queues\AdmissionQueueController;
 use App\Http\Controllers\Queues\ClearanceQueueController;
 use App\Http\Controllers\Queues\DoctorQueueController;
@@ -44,6 +45,7 @@ use App\Http\Controllers\Queues\NurseQueueController;
 use App\Http\Controllers\Queues\PharmacyQueueController;
 use App\Http\Controllers\Queues\RadiologyQueueController;
 use App\Http\Controllers\Queues\TriageQueueController;
+use App\Http\Controllers\StorageLinkController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Ward\BedController;
 use App\Http\Controllers\Ward\WardController;
@@ -61,6 +63,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/auth/login', [UserController::class, 'login']);
+
+//STORAGE LINK
+Route::get('/link-storage', [StorageLinkController::class, 'create']);
 
 Route::group(['middleware' => ['auth:sanctum']], function() {
 
@@ -115,6 +120,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //WARD ROUNDS
     Route::resource('ward-rounds', WardRoundController::class);
     Route::get('/ward-rounds/info/{sessionId}', [WardRoundController::class, 'getWardDetails']);
+    Route::resource('ward-round-records', WardRoundRecordController::class);
 
     //CLEARANCE QUEUE
     Route::resource('queue/clearance', ClearanceQueueController::class);

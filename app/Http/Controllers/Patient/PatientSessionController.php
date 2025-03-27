@@ -138,7 +138,6 @@ class PatientSessionController extends Controller
         NurseQueue::where('session_id', $id)->delete();
         LabQueue::where('session_id', $id)->delete();
         RadiologyQueue::where('session_id', $id)->delete();
-        InpatientQueue::where('session_id', $id)->delete();
         ClearanceQueue::where('session_id', $id)->delete();
 
         $session = PatientSession::find($id);
