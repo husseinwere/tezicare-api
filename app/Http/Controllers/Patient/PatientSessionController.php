@@ -337,7 +337,7 @@ class PatientSessionController extends Controller
             if($registration_fee > 0) {
                 $itemsHTML .= "
                     <tr class='item'>
-                        <td style='width:35%;'>Registration fee</td>
+                        <td style='width:35%;'>Registration</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$registration_fee</td>
                         <td style='width:20%; text-align:right;'>$registration_fee</td>
@@ -347,7 +347,7 @@ class PatientSessionController extends Controller
             if($consultation_fee > 0) {
                 $itemsHTML .= "
                     <tr class='item'>
-                        <td style='width:35%;'>Consultation fee</td>
+                        <td style='width:35%;'>Consultation</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$consultation_fee</td>
                         <td style='width:20%; text-align:right;'>$consultation_fee</td>
@@ -542,8 +542,7 @@ class PatientSessionController extends Controller
             }
 
             //LAB FEES
-            $items = PatientTest::join('lab_results', 'patient_tests.id', '=', 'lab_results.patient_test_id')
-                                ->where('session_id', $id)->where('status', 'ACTIVE')->get();
+            $items = PatientTest::where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
                 $totalInvoiceAmount += $item->price;
 
