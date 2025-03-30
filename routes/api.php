@@ -219,6 +219,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     //INVOICE
     Route::get('/invoices', [InvoiceController::class, 'index']);
     Route::resource('invoice-additions', InvoiceAdditionController::class);
+    Route::post('/edit-invoice-item', [InvoiceController::class, 'editInvoice']);
 
     //DENTAL SERVICES
     Route::resource('dental-services', DentalServiceController::class);

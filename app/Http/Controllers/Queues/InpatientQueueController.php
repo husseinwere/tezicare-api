@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Queues;
 
 use App\Models\Patient\PatientSession;
+use App\Models\Patient\WardRound;
 use App\Models\Queues\AdmissionQueue;
 use App\Models\Queues\InpatientQueue;
 use App\Models\Ward\Bed;
@@ -35,9 +36,6 @@ class InpatientQueueController extends QueueBaseController
         $data = $request->all();
         $data['created_by'] = Auth::id();
 
-        $session = PatientSession::find($data['session_id']);
-        $data['doctor_id'] = $session->doctor_id;
-
         $queuePresent = InpatientQueue::where('session_id', $data['session_id'])->first();
         if(!$queuePresent) {
             $createdQueue = InpatientQueue::create($data);
@@ -48,6 +46,7 @@ class InpatientQueueController extends QueueBaseController
                 AdmissionQueue::destroy($admissionQueue->id);
 
                 //CHANGE SESSION TO INPATIENT
+                $session = PatientSession::with('consultation')->find($data['session_id']);
                 $session->patient_type = 'INPATIENT';
                 $session->save();
 
@@ -55,6 +54,16 @@ class InpatientQueueController extends QueueBaseController
                 $bed = Bed::find($data['bed_id']);
                 $bed->status = 'OCCUPIED';
                 $bed->save();
+
+                //CREATE WARD ROUND
+                WardRound::create([
+                    'session_id' => $data['session_id'],
+                    'bed_id' => $data['bed_id'],
+                    'bed_price' => $bed->ward->price,
+                    'nurse_price' => $session->consultation->inpatient_nurse_rate,
+                    'doctor_price' => $session->consultation->inpatient_doctor_rate,
+                    'created_by' => Auth::id()
+                ]);
 
                 return response(null, Response::HTTP_CREATED);
             }

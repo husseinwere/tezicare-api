@@ -104,8 +104,7 @@ class InvoiceController extends Controller
             }
 
             //LAB FEES
-            $lab = PatientTest::join('lab_results', 'patient_tests.id', '=', 'lab_results.patient_test_id')
-                                ->where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
+            $lab = PatientTest::where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
             foreach($lab as $item) {
                 $totalInvoiceAmount += $item->price;
             }
@@ -140,6 +139,93 @@ class InvoiceController extends Controller
         }
         else {
             return response(['message' => 'Patient session not found.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    public function editInvoice(Request $request) {
+        $request->validate([
+            'session_id' => 'required',
+            'source' => 'required',
+            'amount' => 'required'
+        ]);
+        $data = $request->all();
+
+        if($data['source'] == 'Reception Consultation') {
+            $session = PatientSession::where('id', $data['session_id'])->where('status', 'ACTIVE')->first();
+            $session->consultation_fee = $data['amount'];
+            $this->sendResponse($session->save());
+        }
+
+        if($data['source'] == 'Reception Registration') {
+            $session = PatientSession::where('id', $data['session_id'])->where('status', 'ACTIVE')->first();
+            $session->registration_fee = $data['amount'];
+            $this->sendResponse($session->save());
+        }
+
+        if($data['source'] == 'Bed') {
+            $wardRounds = WardRound::where('session_id', $data['session_id'])->where('bed_price', $data['previous_amount'])->get();
+            foreach($wardRounds as $round) {
+                $round->bed_price = $data['amount'];
+                $round->save();
+            }
+            $this->sendResponse(true);
+        }
+
+        if($data['source'] == 'Doctor Inpatient') {
+            $wardRounds = WardRound::where('session_id', $data['session_id'])->where('doctor_price', $data['previous_amount'])->get();
+            foreach($wardRounds as $round) {
+                $round->doctor_price = $data['amount'];
+                $round->save();
+            }
+            $this->sendResponse(true);
+        }
+
+        if($data['source'] == 'Nurse Inpatient') {
+            $wardRounds = WardRound::where('session_id', $data['session_id'])->where('nurse_price', $data['previous_amount'])->get();
+            foreach($wardRounds as $round) {
+                $round->nurse_price = $data['amount'];
+                $round->save();
+            }
+            $this->sendResponse(true);
+        }
+
+        if($data['source'] == 'Lab') {
+            $test = PatientTest::where('id', $data['item_id'])->where('status', 'ACTIVE')->first();
+            $test->price = $data['amount'];
+            $this->sendResponse($test->save());
+        }
+
+        if($data['source'] == 'Dental') {
+            $service = PatientDentalService::where('id', $data['item_id'])->where('status', 'ACTIVE')->first();
+            $service->price = $data['amount'];
+            $this->sendResponse($service->save());
+        }
+
+        if($data['source'] == 'Pharmaceuticals') {
+            $drug = PatientDrug::where('id', $data['item_id'])->where('status', 'ACTIVE')->first();
+            $drug->unit_price = $data['amount'];
+            $this->sendResponse($drug->save());
+        }
+        
+        if($data['source'] == 'Non-Pharmaceuticals') {
+            $nonPharm = PatientNonPharmaceutical::where('id', $data['item_id'])->where('status', 'ACTIVE')->first();
+            $nonPharm->unit_price = $data['amount'];
+            $this->sendResponse($nonPharm->save());
+        }
+
+        if($data['source'] == 'Nurse') {
+            $nurse = PatientNursing::where('id', $data['item_id'])->where('status', 'ACTIVE')->first();
+            $nurse->price = $data['amount'];
+            $this->sendResponse($nurse->save());
+        }
+    }
+
+    private function sendResponse($success) {
+        if($success){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
