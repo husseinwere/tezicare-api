@@ -143,6 +143,12 @@ class PatientSessionController extends Controller
         $session = PatientSession::find($id);
         $session->status = 'CLEARED';
 
+        if($session->patient_type == 'INPATIENT') {
+            $inpatient = InpatientQueue::where('session_id', $id)->first();
+            $inpatient->status = 'CLEARED';
+            $inpatient->save();
+        }
+
         if(!$session->discharged) $session->discharged = Carbon::now();
 
         $visitCount = PatientVisit::where('session_id', $id)->count();

@@ -23,7 +23,7 @@ class InpatientQueueController extends QueueBaseController
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
 
-        return InpatientQueue::with(['session.patient', 'session.doctor', 'bed.ward', 'created_by'])
+        return InpatientQueue::with(['session.patient', 'session.doctor', 'bed.ward', 'created_by'])->whereIn('status', ['ACTIVE', 'CLEARANCE'])
                             ->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
