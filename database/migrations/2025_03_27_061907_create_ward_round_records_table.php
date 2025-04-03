@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('ward_round_id');
             $table->foreign('ward_round_id')->references('id')->on('ward_rounds');
             $table->string('record_type');
-            $table->string('description');
+            $table->text('description');
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();

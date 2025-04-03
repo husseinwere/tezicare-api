@@ -7,7 +7,7 @@ use App\Models\Patient\WardRound;
 use App\Models\Queues\InpatientQueue;
 use App\Models\Ward\Bed;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class IncrementInpatientDays extends Command
 {
@@ -30,7 +30,13 @@ class IncrementInpatientDays extends Command
      */
     public function handle()
     {
-        $inpatients = InpatientQueue::where('status', 'ACTIVE')->get();
+        Log::channel('scheduler')->info('app:increment-inpatient-days command is running.');
+
+        $inpatients = InpatientQueue::with('session')
+                                    ->whereHas('session', function($q) {
+                                        $q->where('discharged', NULL);
+                                    })
+                                    ->where('status', 'ACTIVE')->get();
 
         foreach($inpatients as $inpatient){
             $bed = Bed::find($inpatient->bed_id);
@@ -42,7 +48,6 @@ class IncrementInpatientDays extends Command
             $wardRound->bed_price = $bed->ward->price;
             $wardRound->nurse_price = $session->consultation->inpatient_nurse_rate;
             $wardRound->doctor_price = $session->consultation->inpatient_doctor_rate;
-            $wardRound->created_by = Auth::id();
             $wardRound->save();
         }
     }
