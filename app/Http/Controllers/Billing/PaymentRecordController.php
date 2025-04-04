@@ -249,8 +249,8 @@ class PaymentRecordController extends Controller
         $startAt = $request->query('startAt');
         $endAt = $request->query('endAt');
 
-        $query = PaymentRecord::with(['request', 'session.patient', 'created_by', 'insurance'])
-            ->whereNotNull('insurance_id');
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by', 'patient_insurance.insurance'])
+                            ->whereNotNull('insurance_id');
 
         if($startAt && $endAt) {
             $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
@@ -260,12 +260,14 @@ class PaymentRecordController extends Controller
         }
 
         $records = $query->get();
-        $insurancePayments = $records->groupBy('insurance_id');
+        $insurancePayments = $records->groupBy(function($record) {
+            return optional($record->patient_insurance->insurance)->id;
+        });
 
         $report = [];
         foreach($insurancePayments as $key => $payments) {
             $totalAmount = $payments->sum('amount');
-            $insuranceName = $payments->first()->insurance->insurance;
+            $insuranceName = $payments[0]->patient_insurance->insurance->insurance;
             $report[] = [
                 'insurance' => $insuranceName,
                 'total_amount' => $totalAmount
