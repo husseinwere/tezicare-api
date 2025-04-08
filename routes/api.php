@@ -119,7 +119,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //WARD ROUNDS
     Route::resource('ward-rounds', WardRoundController::class);
-    Route::get('/ward-rounds/info/{sessionId}', [WardRoundController::class, 'getWardDetails']);
+    Route::post('/ward-rounds/transfer', [WardRoundController::class, 'transferPatient']);
     Route::resource('ward-round-records', WardRoundRecordController::class);
 
     //CLEARANCE QUEUE

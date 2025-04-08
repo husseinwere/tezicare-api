@@ -6,6 +6,11 @@ use App\Models\Patient\PatientSession;
 use App\Models\Queues\ClearanceQueue;
 use App\Models\Queues\DoctorQueue;
 use App\Models\Queues\InpatientQueue;
+use App\Models\Queues\LabQueue;
+use App\Models\Queues\NurseQueue;
+use App\Models\Queues\PharmacyQueue;
+use App\Models\Queues\RadiologyQueue;
+use App\Models\Queues\TriageQueue;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -18,35 +23,45 @@ class DoctorQueueController extends QueueBaseController
     }
 
     public function completeSession(string $sessionId) {
-        $doctorQueue = DoctorQueue::where('session_id', $sessionId)->first();
-        if($doctorQueue) {
-            $doctorQueue->status = 'CLEARANCE';
-            $doctorQueue->save();
-        }
+        $activeQueues = [];
+        
+        if(TriageQueue::where('session_id', $sessionId)->exists()) $activeQueues[] = 'triage';
+        if(PharmacyQueue::where('session_id', $sessionId)->exists()) $activeQueues[] = 'pharmacy';
+        if(NurseQueue::where('session_id', $sessionId)->exists()) $activeQueues[] = 'nurse';
+        if(LabQueue::where('session_id', $sessionId)->exists()) $activeQueues[] = 'lab';
+        if(RadiologyQueue::where('session_id', $sessionId)->exists()) $activeQueues[] = 'radiology';
 
-        $inpatientsQueue = InpatientQueue::where('session_id', $sessionId)->first();
-        if($inpatientsQueue) {
-            $inpatientsQueue->status = 'CLEARANCE';
-            $inpatientsQueue->save();
-        }
-
-        $createdItem = ClearanceQueue::create([
-            'session_id' => $sessionId,
-            'created_by' => Auth::id()
-        ]);
-
-        //UPDATE DISCHARGE DATE TIME
-        $currentDateTime = Carbon::now();
-
-        $session = PatientSession::find($sessionId);
-        $session->discharged = $currentDateTime;
-        $session->save();
-
-        if($createdItem){
-            return response(null, Response::HTTP_CREATED);
+        if(count($activeQueues) > 0) {
+            return response(['message' => 'Please complete the patient sessions in the following stations before discharging: '. implode(', ', $activeQueues)], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $doctorQueue = DoctorQueue::where('session_id', $sessionId)->first();
+            if($doctorQueue) {
+                $doctorQueue->status = 'CLEARANCE';
+                $doctorQueue->save();
+            }
+
+            $inpatientsQueue = InpatientQueue::where('session_id', $sessionId)->first();
+            if($inpatientsQueue) {
+                $inpatientsQueue->status = 'CLEARANCE';
+                $inpatientsQueue->save();
+            }
+
+            $createdItem = ClearanceQueue::create([
+                'session_id' => $sessionId,
+                'created_by' => Auth::id()
+            ]);
+
+            $session = PatientSession::find($sessionId);
+            $session->discharged = Carbon::now();
+            $session->save();
+
+            if($createdItem){
+                return response(null, Response::HTTP_CREATED);
+            }
+            else {
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
         }
     }
 }

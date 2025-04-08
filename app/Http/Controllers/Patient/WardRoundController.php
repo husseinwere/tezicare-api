@@ -21,24 +21,8 @@ class WardRoundController extends Controller
         $pageIndex = $request->query('page_index', 1);
         $sessionId = $request->query('session_id');
 
-        return WardRound::with(['session.patient', 'bed.ward', 'records.created_by'])
+        return WardRound::with(['session.patient', 'session.consultation', 'bed.ward', 'records.created_by'])
                         ->where('session_id', $sessionId)->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
-    }
-
-    public function getWardDetails(string $id)
-    {
-        $currentDate = date('Y-m-d');
-
-        $inpatient = InpatientQueue::with(['session.patient', 'bed.ward'])->where('session_id', $id)->latest()->first();
-
-        $currentRound = WardRound::where('session_id', $id)->where('created_at', 'like', $currentDate . '%')->latest()->first();
-        
-        return [
-            'patient' => $inpatient->session->patient,
-            'current_day' => $currentDate,
-            'bed' => $inpatient->bed,
-            'current_round' => $currentRound
-        ];
     }
 
     /**
@@ -48,24 +32,29 @@ class WardRoundController extends Controller
     {
         $request->validate([
             'session_id' => 'required',
-            'bed_id' => 'required'
+            'bed_id' => 'required',
+            'bed_price' => 'required',
+            'doctor_price' => 'required',
+            'nurse_price' => 'required',
+            'created_at' => 'required'
         ]);
         $data = $request->all();
 
-        $bed = Bed::find($data['bed_id']);
-        $data['bed_price'] = $bed->ward->price;
-
-        $session = PatientSession::with('consultation')->find($data['session_id']);
-        $data['doctor_price'] = $session->consultation->inpatient_doctor_rate;
-        $data['nurse_price'] = $session->consultation->inpatient_nurse_rate;
-
-        $createdRound = WardRound::create($data);
-
-        if($createdRound){
-            return response(null, Response::HTTP_CREATED);
+        //check if round with the same date already exists
+        $existingRound = WardRound::where('session_id', $data['session_id'])->whereDate('created_at', $data['created_at'])->exists();
+        
+        if($existingRound){
+            return response(['message' => 'Ward round for this date already exists'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $createdRound = WardRound::create($data);
+
+            if($createdRound){
+                return response(null, Response::HTTP_CREATED);
+            }
+            else {
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
@@ -80,6 +69,35 @@ class WardRoundController extends Controller
         $updatedRound = $round->update($data);
 
         if($updatedRound){
+            return response(null, Response::HTTP_OK);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy(string $id)
+    {
+        if(WardRound::destroy($id)) {
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function transferPatient(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required',
+            'bed_id' => 'required'
+        ]);
+        $data = $request->all();
+
+        $inpatient = InpatientQueue::where('session_id', $data['session_id']);
+        $inpatient->bed_id = $data['bed_id'];
+
+        if($inpatient->save()){
             return response(null, Response::HTTP_OK);
         }
         else {

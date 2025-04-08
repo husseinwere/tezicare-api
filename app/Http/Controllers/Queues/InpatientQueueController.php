@@ -27,6 +27,10 @@ class InpatientQueueController extends QueueBaseController
                             ->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
+    public function show(string $id) {
+        return InpatientQueue::with(['session.patient', 'bed.ward'])->where('session_id', $id)->latest()->first();
+    }
+
     public function store(Request $request) {
         $request->validate([
             'session_id' => 'required',
@@ -61,8 +65,7 @@ class InpatientQueueController extends QueueBaseController
                     'bed_id' => $data['bed_id'],
                     'bed_price' => $bed->ward->price,
                     'nurse_price' => $session->consultation->inpatient_nurse_rate,
-                    'doctor_price' => $session->consultation->inpatient_doctor_rate,
-                    'created_by' => Auth::id()
+                    'doctor_price' => $session->consultation->inpatient_doctor_rate
                 ]);
 
                 return response(null, Response::HTTP_CREATED);

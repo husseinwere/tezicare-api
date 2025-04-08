@@ -16,7 +16,8 @@ class WardRound extends Model
         'bed_id',
         'bed_price',
         'doctor_price',
-        'nurse_price'
+        'nurse_price',
+        'created_at'
     ];
 
     public function session(): BelongsTo {
