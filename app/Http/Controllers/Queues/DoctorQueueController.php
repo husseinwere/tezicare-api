@@ -11,6 +11,7 @@ use App\Models\Queues\NurseQueue;
 use App\Models\Queues\PharmacyQueue;
 use App\Models\Queues\RadiologyQueue;
 use App\Models\Queues\TriageQueue;
+use App\Models\Ward\Bed;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -45,6 +46,10 @@ class DoctorQueueController extends QueueBaseController
             if($inpatientsQueue) {
                 $inpatientsQueue->status = 'CLEARANCE';
                 $inpatientsQueue->save();
+
+                $bed = Bed::find($inpatientsQueue->bed_id);
+                $bed->status = 'UNOCCUPIED';
+                $bed->save();
             }
 
             $createdItem = ClearanceQueue::create([
