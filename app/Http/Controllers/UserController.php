@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Mail\UserCreated;
 use App\Models\User;
-use App\Services\HospitalService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -14,13 +13,6 @@ use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
-    protected $hospitalService;
-
-    public function __construct(HospitalService $hospitalService)
-    {
-        $this->hospitalService = $hospitalService;
-    }
-
     public function store(Request $request) {
         $fields = $request->validate([
             'first_name' => 'required|string',
@@ -33,7 +25,7 @@ class UserController extends Controller
         //password is a random 4 digit string that should as well be sent to email
         $password = str_pad(random_int(11, 9999), 4, '0', STR_PAD_LEFT);
         $fields['password'] = bcrypt($password);
-        $fields['hospital_id'] = $this->hospitalService->getHospitalIdByUser(Auth::id());
+        $fields['hospital_id'] = Auth::user()->hospital_id;
 
         $user = User::create($fields);
 
@@ -101,7 +93,7 @@ class UserController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
-        $hospitalId = $this->hospitalService->getHospitalIdByUser(Auth::id());
+        $hospitalId = Auth::user()->hospital_id;
         
         return User::where('hospital_id', $hospitalId)->where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
@@ -155,7 +147,7 @@ class UserController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
-        $hospitalId = $this->hospitalService->getHospitalIdByUser(Auth::id());
+        $hospitalId = Auth::user()->hospital_id;
 
         return User::where('hospital_id', $hospitalId)->where('status', 'ACTIVE')
                     ->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%')

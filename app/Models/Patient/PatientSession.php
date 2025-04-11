@@ -3,6 +3,7 @@
 namespace App\Models\Patient;
 
 use App\Models\Hospital\ConsultationType;
+use App\Models\Hospital\Hospital;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ class PatientSession extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'patient_id',
         'patient_type',
         'consultation_type',
@@ -23,6 +25,11 @@ class PatientSession extends Model
         'created_by',
         'status'
     ];
+
+    public function hospital(): BelongsTo
+    {
+        return $this->belongsTo(Hospital::class);
+    }
 
     public function consultation(): BelongsTo
     {
