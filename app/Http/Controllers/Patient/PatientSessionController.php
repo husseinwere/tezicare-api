@@ -677,7 +677,7 @@ class PatientSessionController extends Controller
                 'invoice_id' => $patientSession->id,
                 'invoice_date' => Carbon::now()->format('d/m/Y'),
                 'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
-                'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : 'N/A',
+                'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : Carbon::now()->format('d M Y, h:i A'),
                 'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
                 'invoice_grid' => $content
             ];
@@ -881,7 +881,7 @@ class PatientSessionController extends Controller
                 'invoice_id' => $patientSession->id,
                 'invoice_date' => Carbon::now()->format('d/m/Y'),
                 'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
-                'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : 'N/A',
+                'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : Carbon::now()->format('d M Y, h:i A'),
                 'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
                 'clinical_summary' => $summaryString,
                 'diagnosis' => $diagnosisString,
