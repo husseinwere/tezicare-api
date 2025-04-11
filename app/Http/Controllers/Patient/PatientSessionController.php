@@ -330,7 +330,7 @@ class PatientSessionController extends Controller
 
     public function printInvoice(string $id) {
         $hospital_id = Auth::user()->hospital_id;
-        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->find($id);
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->first($id);
 
         if($patientSession){
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);
@@ -710,7 +710,7 @@ class PatientSessionController extends Controller
 
     public function printDischargeSummary(string $id) {
         $hospital_id = Auth::user()->hospital_id;
-        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->find($id);
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->first($id);
 
         if($patientSession) {
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);
@@ -918,7 +918,7 @@ class PatientSessionController extends Controller
 
     public function printPrescription(string $id) {
         $hospital_id = Auth::user()->hospital_id;
-        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->find($id);
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->first($id);
 
         if($patientSession) {
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);
@@ -1013,7 +1013,7 @@ class PatientSessionController extends Controller
 
     public function printLabReport(string $id) {
         $hospital_id = Auth::user()->hospital_id;
-        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->find($id);
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->first($id);
 
         if($patientSession) {
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);

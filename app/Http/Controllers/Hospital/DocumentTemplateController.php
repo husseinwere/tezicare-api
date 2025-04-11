@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Hospital\DocumentTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class DocumentTemplateController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $hospital_id = $request->query('hospital_id');
+        $hospital_id = Auth::user()->hospital_id;
 
         return DocumentTemplate::where('hospital_id', $hospital_id)->get();
     }
