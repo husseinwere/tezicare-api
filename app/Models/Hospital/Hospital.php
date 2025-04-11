@@ -5,7 +5,7 @@ namespace App\Models\Hospital;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Configuration extends Model
+class Hospital extends Model
 {
     use HasFactory;
 
@@ -18,6 +18,7 @@ class Configuration extends Model
         'stamp',
         'registration_fee',
         'modules',
-        'rate_per_visit'
+        'rate_per_visit',
+        'status'
     ];
 }

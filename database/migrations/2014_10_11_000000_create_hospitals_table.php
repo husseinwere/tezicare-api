@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('configurations', function (Blueprint $table) {
+        Schema::create('hospitals', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email');
@@ -22,6 +22,7 @@ return new class extends Migration
             $table->decimal('registration_fee', 10, 2);
             $table->string('modules')->nullable();
             $table->decimal('rate_per_visit', 10, 2)->nullable();
+            $table->string('status')->default('ACTIVE');
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('configurations');
+        Schema::dropIfExists('hospitals');
     }
 };
