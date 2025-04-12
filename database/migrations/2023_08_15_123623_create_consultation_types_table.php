@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('consultation_types', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('hospital_id');
+            $table->foreign('hospital_id')->references('id')->on('hospitals');
             $table->string('name');
             $table->decimal('price', 10, 2);
             $table->decimal('inpatient_nurse_rate', 10, 2)->nullable();
             $table->decimal('inpatient_doctor_rate', 10, 2)->nullable();
             $table->boolean('can_delete')->default(true);
+            $table->string('status')->default('ACTIVE');
             $table->timestamps();
         });
     }

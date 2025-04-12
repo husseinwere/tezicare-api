@@ -17,7 +17,7 @@ class BedController extends Controller
     {
         $wardId = $request->query('ward_id');
 
-        return Bed::where('ward_id', $wardId)->get();
+        return Bed::where('ward_id', $wardId)->whereIn('status', ['UNOCCUPIED', 'OCCUPIED'])->get();
     }
 
     /**
@@ -94,8 +94,10 @@ class BedController extends Controller
     {
         $bed = Bed::find($id);
 
-        if($bed['status'] == "UNOCCUPIED"){
-            if(Bed::destroy($id)) {
+        if($bed->status == "UNOCCUPIED") {
+            $bed->status = "DELETED";
+
+            if($bed->save()) {
                 return response(null, Response::HTTP_NO_CONTENT);
             }
             else {

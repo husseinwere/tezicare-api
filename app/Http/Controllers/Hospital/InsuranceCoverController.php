@@ -14,8 +14,10 @@ class InsuranceCoverController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {   
-        return InsuranceCover::where('status', 'ACTIVE')->get();
+    {
+        $hospital_id = Auth::user()->hospital_id;
+
+        return InsuranceCover::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
     }
 
     /**
@@ -27,6 +29,7 @@ class InsuranceCoverController extends Controller
             'insurance' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdCover = InsuranceCover::create($data);
@@ -67,6 +70,7 @@ class InsuranceCoverController extends Controller
     {
         $cover = InsuranceCover::find($id);
         $cover->status = 'DELETED';
+
         if($cover->save()) {
             return response(null, Response::HTTP_NO_CONTENT);
         }

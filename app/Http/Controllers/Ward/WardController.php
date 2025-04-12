@@ -15,7 +15,9 @@ class WardController extends Controller
      */
     public function index()
     {
-        return Ward::all();
+        $hospital_id = Auth::user()->hospital_id;
+
+        return Ward::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
     }
 
     public function show(string $id)
@@ -33,6 +35,7 @@ class WardController extends Controller
             'price' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdWard = Ward::create($data);
@@ -68,7 +71,11 @@ class WardController extends Controller
      */
     public function destroy(string $id)
     {
-        if(Ward::destroy($id)) {
+        $ward = Ward::find($id);
+
+        $ward->status = "DELETED";
+
+        if($ward->save()) {
             return response(null, Response::HTTP_NO_CONTENT);
         }
         else {

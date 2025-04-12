@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('wards', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('hospital_id');
+            $table->foreign('hospital_id')->references('id')->on('hospitals');
             $table->string('name');
             $table->string('description')->nullable();
             $table->decimal('price', 10, 2);
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
+            $table->string('status')->default('ACTIVE');
             $table->timestamps();
         });
     }

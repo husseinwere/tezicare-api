@@ -15,7 +15,9 @@ class ConsultationTypeController extends Controller
      */
     public function index()
     {
-        return ConsultationType::all();
+        $hospital_id = Auth::user()->hospital_id;
+
+        return ConsultationType::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
     }
 
     /**
@@ -28,6 +30,7 @@ class ConsultationTypeController extends Controller
             'price' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdType = ConsultationType::create($data);
@@ -63,11 +66,20 @@ class ConsultationTypeController extends Controller
      */
     public function destroy(string $id)
     {
-        if(ConsultationType::destroy($id)) {
-            return response(null, Response::HTTP_NO_CONTENT);
+        $type = ConsultationType::find($id);
+
+        if($type->can_delete == 0){
+            return response(['message' => 'This consultation type cannot be deleted'], Response::HTTP_FORBIDDEN);
         }
         else {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $type->status = "DELETED";
+
+            if($type->save()) {
+                return response(null, Response::HTTP_NO_CONTENT);
+            }
+            else {
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
         }
     }
 }
