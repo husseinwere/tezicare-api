@@ -24,10 +24,11 @@ class InventoryBaseController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospital_id = Auth::user()->hospital_id;
         $search = $request->query('search');
         $shouldPaginate = $request->query('paginate', 'true');
 
-        $query = $this->model::where('status', 'ACTIVE');
+        $query = $this->model::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if($search) {
             $query->where('name', 'like', '%' . $search . '%');
@@ -53,6 +54,7 @@ class InventoryBaseController extends Controller
             'quantity' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdItem = $this->model::create($data);

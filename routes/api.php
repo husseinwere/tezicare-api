@@ -64,9 +64,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [UserController::class, 'login']);
 
-//STORAGE LINK
-Route::get('/link-storage', [StorageLinkController::class, 'create']);
-
 Route::group(['middleware' => ['auth:sanctum']], function() {
 
     //AUTH/USERS

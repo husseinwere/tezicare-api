@@ -17,8 +17,16 @@ class NursingServiceController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospital_id = Auth::user()->hospital_id;
+        $service = $request->query('name');
 
-        return NursingService::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
+        $query = NursingService::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
+
+        if ($service) {
+            $query->where('service', 'LIKE', '%' . $service . '%');
+        }
+
+        return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -31,6 +39,7 @@ class NursingServiceController extends Controller
             'price' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdService = NursingService::create($data);
