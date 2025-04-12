@@ -14,6 +14,7 @@ class PaymentRecord extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'request_id',
         'payment_method',

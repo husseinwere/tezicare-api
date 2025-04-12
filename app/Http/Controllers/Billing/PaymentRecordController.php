@@ -26,13 +26,13 @@ class PaymentRecordController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
 
+        $hospitalId = Auth::user()->hospital_id;
         $patient_id = $request->query('opno');
         $startAt = $request->query('startAt');
         $endAt = $request->query('endAt');
 
-        $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
-
-        // add status check if you allow record deletion in future
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by'])->where('hospital_id', $hospitalId)
+                            ->where('status', '<>', 'DELETED');
 
         if($patient_id) {
             $query->whereHas('session', function($q) use ($patient_id) {
@@ -55,7 +55,9 @@ class PaymentRecordController extends Controller
      */
     public function sessionRecords(string $id)
     {
-        $records = PaymentRecord::with(['request', 'created_by'])->where('session_id', $id)->where('status', '<>', 'DELETED')->get();
+        $hospitalId = Auth::user()->hospital_id;
+        $records = PaymentRecord::with(['request', 'created_by'])->where('hospital_id', $hospitalId)
+                                ->where('session_id', $id)->where('status', '<>', 'DELETED')->get();
         $totalAmountPaid = $records->sum('amount');
 
         return [
@@ -75,6 +77,7 @@ class PaymentRecordController extends Controller
             'payments' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $payments = $data['payments'];
@@ -192,6 +195,10 @@ class PaymentRecordController extends Controller
     public function paymentTypeReport(Request $request) {
         $startAt = $request->query('startAt');
         $endAt = $request->query('endAt');
+        $hospitalId = Auth::user()->hospital_id;
+
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by'])->where('hospital_id', $hospitalId)
+                            ->where('status', '<>', 'DELETED');
 
         $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
 
@@ -220,8 +227,10 @@ class PaymentRecordController extends Controller
     public function paymentSourceReport(Request $request) {
         $startAt = $request->query('startAt');
         $endAt = $request->query('endAt');
+        $hospitalId = Auth::user()->hospital_id;
 
-        $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by'])->where('hospital_id', $hospitalId)
+                            ->where('status', '<>', 'DELETED');
 
         if($startAt && $endAt) {
             $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
@@ -248,9 +257,10 @@ class PaymentRecordController extends Controller
     public function insuranceTypeReport(Request $request) {
         $startAt = $request->query('startAt');
         $endAt = $request->query('endAt');
+        $hospitalId = Auth::user()->hospital_id;
 
-        $query = PaymentRecord::with(['request', 'session.patient', 'created_by', 'patient_insurance.insurance'])
-                            ->whereNotNull('insurance_id');
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by', 'patient_insurance.insurance'])->where('hospital_id', $hospitalId)
+                             ->where('status', '<>', 'DELETED')->whereNotNull('insurance_id');
 
         if($startAt && $endAt) {
             $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
@@ -279,8 +289,10 @@ class PaymentRecordController extends Controller
 
     public function annualPaymentReport(Request $request) {
         $year = $request->query('year', date('Y'));
+        $hospitalId = Auth::user()->hospital_id;
 
-        $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
+        $query = PaymentRecord::with(['request', 'session.patient', 'created_by'])->where('hospital_id', $hospitalId)
+                            ->where('status', '<>', 'DELETED');
 
         $records = $query->whereYear('created_at', $year)->get();
         $months = $records->groupBy(function($record) {
