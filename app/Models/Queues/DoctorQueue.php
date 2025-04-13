@@ -14,6 +14,7 @@ class DoctorQueue extends Model
     protected $table = 'doctor_queue';
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'created_by',
         'status'

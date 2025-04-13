@@ -14,6 +14,7 @@ class LabQueue extends Model
     protected $table = 'lab_queue';
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'created_by',
         'status'

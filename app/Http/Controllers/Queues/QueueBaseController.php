@@ -27,8 +27,9 @@ class QueueBaseController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
         $consultation_type = $request->query('consultation_type');
+        $hospital_id = Auth::user()->hospital_id;
 
-        $query = $this->model::with(['session.patient', 'session.consultation', 'created_by']);
+        $query = $this->model::with(['session.patient', 'session.consultation', 'created_by'])->where('hospital_id', $hospital_id);
 
         if($consultation_type) {
             $query->whereHas('session', function($q) use ($consultation_type) {
@@ -49,6 +50,7 @@ class QueueBaseController extends Controller
         ]);
         
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdItem = $this->model::create($data);

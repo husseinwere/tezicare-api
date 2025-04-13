@@ -23,6 +23,7 @@ class LabQueueController extends QueueBaseController
         ]);
         
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $queuePresent = LabQueue::where('session_id', $data['session_id'])->first();
