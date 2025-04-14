@@ -44,7 +44,7 @@ class PatientSession extends Model
 
                 // Get the latest scoped_id for this hospital
                 $latestScopedId = self::where('hospital_id', $hospitalId)->max('invoice_number') ?? 0;
-                $model->scoped_id = $latestScopedId + 1;
+                $model->invoice_number = $latestScopedId + 1;
 
                 try {
                     // Try saving manually here so we catch duplication early

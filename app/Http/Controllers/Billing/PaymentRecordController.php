@@ -199,9 +199,7 @@ class PaymentRecordController extends Controller
 
         $query = PaymentRecord::with(['request', 'session.patient', 'created_by'])->where('hospital_id', $hospitalId)
                             ->where('status', '<>', 'DELETED');
-
-        $query = PaymentRecord::with(['request', 'session.patient', 'created_by']);
-
+                            
         if($startAt && $endAt) {
             $startAt = Carbon::createFromFormat('Y-m-d', $startAt)->startOfDay();
             $endAt = Carbon::createFromFormat('Y-m-d', $endAt)->endOfDay();

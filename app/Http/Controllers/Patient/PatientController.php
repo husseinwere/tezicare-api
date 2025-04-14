@@ -68,7 +68,7 @@ class PatientController extends Controller
     {
         $hospital_id = Auth::user()->hospital_id;
 
-        $patient = Patient::where('hospital_id', $hospital_id)->first($id);
+        $patient = Patient::where('hospital_id', $hospital_id)->where('id', $id)->first();
         if($patient){
             return response($patient);
         }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('hospital_id');
             $table->foreign('hospital_id')->references('id')->on('hospitals');
-            $table->unsignedBigInteger('invoice_number')->unique();
+            $table->unsignedBigInteger('invoice_number');
             $table->unique(['hospital_id', 'invoice_number']);
             $table->unsignedBigInteger('patient_id');
             $table->foreign('patient_id')->references('id')->on('patients');

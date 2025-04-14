@@ -20,12 +20,12 @@ class DocumentTemplateController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'hospital_id' => 'required',
             'title' => 'required',
             'html' => 'required',
             'css' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
 
         $createdTemplate = DocumentTemplate::create($data);
 

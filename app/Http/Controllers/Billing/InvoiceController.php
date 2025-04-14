@@ -25,7 +25,7 @@ class InvoiceController extends Controller
     {
         $sessionId = $request->query('session_id');
         $hospitalId = Auth::user()->hospital_id;
-        $patientSession = PatientSession::where('hospital_id', $hospitalId)->first($sessionId);
+        $patientSession = PatientSession::where('hospital_id', $hospitalId)->where('id', $sessionId)->first();
         
         if($patientSession) {
             $totalInvoiceAmount = 0;
