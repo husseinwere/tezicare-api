@@ -14,6 +14,7 @@ class ClearanceQueue extends Model
     protected $table = 'clearance_queue';
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'created_by',
         'status'

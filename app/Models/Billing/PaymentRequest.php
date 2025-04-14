@@ -13,6 +13,7 @@ class PaymentRequest extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'source',
         'amount',

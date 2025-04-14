@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('nursing_services', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('hospital_id');
+            $table->foreign('hospital_id')->references('id')->on('hospitals');
             $table->string('service');
             $table->decimal('price', 10, 2);
             $table->unsignedBigInteger('created_by');

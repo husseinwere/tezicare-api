@@ -12,6 +12,7 @@ class DentalService extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'name',
         'description',
         'price',

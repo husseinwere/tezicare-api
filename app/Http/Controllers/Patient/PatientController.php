@@ -18,10 +18,11 @@ class PatientController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospital_id = Auth::user()->hospital_id;
         $search = $request->query('search');
         $searchId = $request->query('searchId');
         
-        $query = Patient::where('status', 'ACTIVE');
+        $query = Patient::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if($search) {
             $query->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $search . '%');
@@ -47,6 +48,7 @@ class PatientController extends Controller
             'phone' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdPatient = Patient::create($data);
@@ -64,7 +66,9 @@ class PatientController extends Controller
      */
     public function show(string $id)
     {
-        $patient = Patient::find($id);
+        $hospital_id = Auth::user()->hospital_id;
+
+        $patient = Patient::where('hospital_id', $hospital_id)->where('id', $id)->first();
         if($patient){
             return response($patient);
         }

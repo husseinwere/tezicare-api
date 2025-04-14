@@ -33,6 +33,7 @@ class PatientDiagnosisController extends Controller
             'diagnosis' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $records = explode(';', $data['diagnosis']);

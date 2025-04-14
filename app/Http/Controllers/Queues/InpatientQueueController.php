@@ -22,8 +22,11 @@ class InpatientQueueController extends QueueBaseController
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospital_id = Auth::user()->hospital_id;
 
-        return InpatientQueue::with(['session.patient', 'session.doctor', 'bed.ward', 'created_by'])->whereIn('status', ['ACTIVE', 'CLEARANCE'])
+        return InpatientQueue::with(['session.patient', 'session.doctor', 'bed.ward', 'created_by'])
+                            ->where('hospital_id', $hospital_id)
+                            ->whereIn('status', ['ACTIVE', 'CLEARANCE'])
                             ->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
@@ -38,6 +41,7 @@ class InpatientQueueController extends QueueBaseController
         ]);
         
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $queuePresent = InpatientQueue::where('session_id', $data['session_id'])->first();

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment\Appointment;
 use App\Models\Billing\InvoiceAddition;
-use App\Models\Hospital\Configuration;
 use App\Models\Hospital\DocumentTemplate;
 use App\Models\Inventory\NonPharmaceutical;
 use App\Models\Inventory\Pharmaceutical;
@@ -46,6 +45,7 @@ class PatientSessionController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospital_id = Auth::user()->hospital_id;
         $patient_id = $request->input('patient_id');
         $status = $request->input('status');
         $patient_type = $request->input('patient_type');
@@ -53,7 +53,7 @@ class PatientSessionController extends Controller
         $startAt = $request->input('startAt');
         $endAt = $request->input('endAt');
 
-        $query = PatientSession::with(['patient', 'consultation']);
+        $query = PatientSession::with(['patient', 'consultation'])->where('hospital_id', $hospital_id);
 
         if($patient_id) {
             $query->where('patient_id', $patient_id);
@@ -97,6 +97,7 @@ class PatientSessionController extends Controller
             return response(['message' => 'A session has already been started with this patient.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdSession = PatientSession::create($data);
@@ -117,7 +118,8 @@ class PatientSessionController extends Controller
 
     public function show(string $id)
     {
-        return PatientSession::with(['patient', 'consultation', 'doctor'])->where('patient_sessions.id', $id)->first();
+        return PatientSession::with(['patient', 'consultation', 'doctor'])
+                            ->where('patient_sessions.id', $id)->where('hospital_id', Auth::user()->hospital_id)->first();
     }
 
     public function update(Request $request, string $id)
@@ -183,11 +185,12 @@ class PatientSessionController extends Controller
     //REPORTS
     public function dashboardToday()
     {
-        $visitsToday = PatientSession::whereDate('created_at', Carbon::today())->count();
-        $activeSessions = PatientSession::where('status', 'ACTIVE')->count();
-        $inpatients = PatientSession::where('patient_type', 'INPATIENT')->where('status', 'ACTIVE')->count();
-        $patients = Patient::where('status', 'ACTIVE')->count();
-        $appointments = Appointment::where('status', 'ACTIVE')->whereDate('appointment_date', Carbon::today())->count();
+        $hospital_id = Auth::user()->hospital_id;
+        $visitsToday = PatientSession::where('hospital_id', $hospital_id)->whereDate('created_at', Carbon::today())->count();
+        $activeSessions = PatientSession::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->count();
+        $inpatients = PatientSession::where('hospital_id', $hospital_id)->where('patient_type', 'INPATIENT')->where('status', 'ACTIVE')->count();
+        $patients = Patient::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->count();
+        $appointments = Appointment::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->whereDate('appointment_date', Carbon::today())->count();
 
         return [
             'visits_today' => $visitsToday,
@@ -214,14 +217,15 @@ class PatientSessionController extends Controller
         $year = $request->input('year');
         $month = $request->input('month');
         $date = $request->input('date');
+        $hospital_id = Auth::user()->hospital_id;
 
-        $query = PatientSession::where('status', 'CLEARED');
+        $query = PatientSession::where('hospital_id', $hospital_id)->where('status', 'CLEARED');
         if ($year) { $query->whereYear('created_at', $year); }
         if ($month) { $query->whereMonth('created_at', $month); }
         if ($date) { $query->whereDate('created_at', $date); }
         $totalPatientCount = $query->count();
 
-        $query = PatientSession::where('patient_sessions.patient_type', 'OUTPATIENT')->where('patient_sessions.status', 'CLEARED');
+        $query = PatientSession::where('hospital_id', $hospital_id)->where('patient_sessions.patient_type', 'OUTPATIENT')->where('patient_sessions.status', 'CLEARED');
         if ($year) { $query->whereYear('created_at', $year); }
         if ($month) { $query->whereMonth('created_at', $month); }
         if ($date) { $query->whereDate('created_at', $date); }
@@ -229,7 +233,7 @@ class PatientSessionController extends Controller
 
         $totalInpatientCount = $totalPatientCount - $totalOutpatientCount;
 
-        $query = PatientSession::where('patient_sessions.patient_type', 'OUTPATIENT')->where('patient_sessions.status', 'CLEARED')
+        $query = PatientSession::where('patient_sessions.hospital_id', $hospital_id)->where('patient_sessions.patient_type', 'OUTPATIENT')->where('patient_sessions.status', 'CLEARED')
                                 ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
                                 ->where('patients.gender', 'Male');
         if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
@@ -239,7 +243,7 @@ class PatientSessionController extends Controller
 
         $femaleOutpatientCount = $totalOutpatientCount - $maleOutpatientCount;
 
-        $query = PatientSession::where('patient_sessions.patient_type', 'OUTPATIENT')->where('patient_sessions.status', 'CLEARED')
+        $query = PatientSession::where('patient_sessions.hospital_id', $hospital_id)->where('patient_sessions.patient_type', 'OUTPATIENT')->where('patient_sessions.status', 'CLEARED')
                                 ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
                                 ->where(DB::raw('YEAR(CURRENT_DATE) - YEAR(patients.dob)'), '>', 5);
         if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
@@ -252,7 +256,7 @@ class PatientSessionController extends Controller
         if($date) { $startDate = date('Y-m-d', strtotime("$year-$month-$date")); }
         else { $startDate = date('Y-m-d', strtotime("$year-$month-01")); }
 
-        $query = PatientSession::where('patient_sessions.patient_type', 'OUTPATIENT')->where('patient_sessions.status', 'CLEARED')
+        $query = PatientSession::where('patient_sessions.hospital_id', $hospital_id)->where('patient_sessions.patient_type', 'OUTPATIENT')->where('patient_sessions.status', 'CLEARED')
                                 ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
                                 ->where('patients.created_at', '>', $startDate);
         if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
@@ -262,7 +266,7 @@ class PatientSessionController extends Controller
 
         $revisitOutpatientCount = $totalOutpatientCount - $newOutpatientCount;
 
-        $query = PatientSession::where('patient_sessions.patient_type', 'INPATIENT')->where('patient_sessions.status', 'CLEARED')
+        $query = PatientSession::where('patient_sessions.hospital_id', $hospital_id)->where('patient_sessions.patient_type', 'INPATIENT')->where('patient_sessions.status', 'CLEARED')
                                 ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
                                 ->where('patients.gender', 'Male');
         if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
@@ -272,7 +276,7 @@ class PatientSessionController extends Controller
 
         $femaleInpatientCount = $totalInpatientCount - $maleInpatientCount;
 
-        $query = PatientSession::where('patient_sessions.patient_type', 'INPATIENT')->where('patient_sessions.status', 'CLEARED')
+        $query = PatientSession::where('patient_sessions.hospital_id', $hospital_id)->where('patient_sessions.patient_type', 'INPATIENT')->where('patient_sessions.status', 'CLEARED')
                                 ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
                                 ->where(DB::raw('YEAR(CURRENT_DATE) - YEAR(patients.dob)'), '>', 5);
         if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
@@ -282,7 +286,7 @@ class PatientSessionController extends Controller
 
         $under5InpatientCount = $totalInpatientCount - $over5InpatientCount;
 
-        $query = PatientSession::where('patient_sessions.patient_type', 'INPATIENT')->where('patient_sessions.status', 'CLEARED')
+        $query = PatientSession::where('patient_sessions.hospital_id', $hospital_id)->where('patient_sessions.patient_type', 'INPATIENT')->where('patient_sessions.status', 'CLEARED')
                                 ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
                                 ->where('patients.created_at', '>', $startDate);
         if ($year) { $query->whereYear('patient_sessions.created_at', $year); }
@@ -293,7 +297,7 @@ class PatientSessionController extends Controller
         $revisitInpatientCount = $totalInpatientCount - $newInpatientCount;
 
         //DIAGNOSIS
-        $query = PatientDiagnosis::whereYear('created_at', $year)->whereMonth('created_at', $month);
+        $query = PatientDiagnosis::where('hospital_id', $hospital_id)->whereYear('created_at', $year)->whereMonth('created_at', $month);
         if ($date) { $query->whereDate('created_at', $date); }
         
         $diagnosisCounts = $query->select('diagnosis', DB::raw('COUNT(*) as count'))
@@ -325,7 +329,8 @@ class PatientSessionController extends Controller
     }
 
     public function printInvoice(string $id) {
-        $patientSession = PatientSession::with(['patient', 'doctor'])->find($id);
+        $hospital_id = Auth::user()->hospital_id;
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->where('id', $id)->first();
 
         if($patientSession){
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);
@@ -657,24 +662,22 @@ class PatientSessionController extends Controller
                 </table>
             ";
 
-            $hospital = Configuration::first();
-
             $variables = [
-                'hospital_name' => $hospital->name,
-                'hospital_address' => $hospital->address,
-                'hospital_phone' => $hospital->phone,
-                'hospital_email' => $hospital->email,
-                'hospital_stamp' => $hospital->stamp,
-                'hospital_logo' => $hospital->logo,
+                'hospital_name' => $patientSession->hospital->name,
+                'hospital_address' => $patientSession->hospital->address,
+                'hospital_phone' => $patientSession->hospital->phone,
+                'hospital_email' => $patientSession->hospital->email,
+                'hospital_stamp' => $patientSession->hospital->stamp,
+                'hospital_logo' => $patientSession->hospital->logo,
                 'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
                 'patient_email' => $patientSession->patient->email,
                 'patient_phone' => $patientSession->patient->phone,
                 'patient_residence' => $patientSession->patient->residence,
-                'patient_id' => $patientSession->patient->id,
+                'patient_id' => $patientSession->patient->outpatient_number,
                 'patient_age' => $patientSession->patient->age,
                 'patient_gender' => $patientSession->patient->gender,
                 'patient_type' => $patientSession->patient_type,
-                'invoice_id' => $patientSession->id,
+                'invoice_id' => $patientSession->invoice_number,
                 'invoice_date' => Carbon::now()->format('d/m/Y'),
                 'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
                 'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : Carbon::now()->format('d M Y, h:i A'),
@@ -682,23 +685,28 @@ class PatientSessionController extends Controller
                 'invoice_grid' => $content
             ];
 
-            $template = DocumentTemplate::where('hospital_id', $hospital->id)->where('title', 'INVOICE')->first();
-            $html = $template->html;
-            $css = $template->css;
-            foreach ($variables as $key => $value) {
-                $html = str_replace("{{ $key }}", $value, $html);
+            $template = DocumentTemplate::where('hospital_id', $hospital_id)->where('title', 'INVOICE')->first();
+            if($template) {
+                $html = $template->html;
+                $css = $template->css;
+                foreach ($variables as $key => $value) {
+                    $html = str_replace("{{ $key }}", $value, $html);
+                }
+                $pdfContent = "<style>$css</style>" . $html;
+
+                // Create PDF instance
+                $pdf = Pdf::loadHTML($pdfContent);
+                
+                $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
+                $response->header('Access-Control-Allow-Origin', '*');
+                $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+                $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+                return $response;
             }
-            $pdfContent = "<style>$css</style>" . $html;
-
-            // Create PDF instance
-            $pdf = Pdf::loadHTML($pdfContent);
-            
-            $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
-            $response->header('Access-Control-Allow-Origin', '*');
-            $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-            $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-            return $response;
+            else {
+                return response(['message' => 'Invoice template not found.'], Response::HTTP_NOT_FOUND);
+            }
         }
         else {
             return response(['message' => 'Invoice not found.'], Response::HTTP_NOT_FOUND);
@@ -706,7 +714,8 @@ class PatientSessionController extends Controller
     }
 
     public function printDischargeSummary(string $id) {
-        $patientSession = PatientSession::with(['patient', 'doctor'])->find($id);
+        $hospital_id = Auth::user()->hospital_id;
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->where('id', $id)->first();
 
         if($patientSession) {
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);
@@ -861,24 +870,22 @@ class PatientSessionController extends Controller
                 ";
             }
 
-            $hospital = Configuration::first();
-
             $variables = [
-                'hospital_name' => $hospital->name,
-                'hospital_address' => $hospital->address,
-                'hospital_phone' => $hospital->phone,
-                'hospital_email' => $hospital->email,
-                'hospital_stamp' => $hospital->stamp,
-                'hospital_logo' => $hospital->logo,
+                'hospital_name' => $patientSession->hospital->name,
+                'hospital_address' => $patientSession->hospital->address,
+                'hospital_phone' => $patientSession->hospital->phone,
+                'hospital_email' => $patientSession->hospital->email,
+                'hospital_stamp' => $patientSession->hospital->stamp,
+                'hospital_logo' => $patientSession->hospital->logo,
                 'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
                 'patient_email' => $patientSession->patient->email,
                 'patient_phone' => $patientSession->patient->phone,
                 'patient_residence' => $patientSession->patient->residence,
-                'patient_id' => $patientSession->patient->id,
+                'patient_id' => $patientSession->patient->outpatient_number,
                 'patient_age' => $patientSession->patient->age,
                 'patient_gender' => $patientSession->patient->gender,
                 'patient_type' => $patientSession->patient_type,
-                'invoice_id' => $patientSession->id,
+                'invoice_id' => $patientSession->invoice_number,
                 'invoice_date' => Carbon::now()->format('d/m/Y'),
                 'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
                 'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : Carbon::now()->format('d M Y, h:i A'),
@@ -891,23 +898,28 @@ class PatientSessionController extends Controller
                 'recommendation' => $recommendationsString
             ];
 
-            $template = DocumentTemplate::where('hospital_id', $hospital->id)->where('title', 'DISCHARGE SUMMARY')->first();
-            $html = $template->html;
-            $css = $template->css;
-            foreach ($variables as $key => $value) {
-                $html = str_replace("{{ $key }}", $value, $html);
+            $template = DocumentTemplate::where('hospital_id', $hospital_id)->where('title', 'DISCHARGE SUMMARY')->first();
+            if($template) {
+                $html = $template->html;
+                $css = $template->css;
+                foreach ($variables as $key => $value) {
+                    $html = str_replace("{{ $key }}", $value, $html);
+                }
+                $pdfContent = "<style>$css</style>" . $html;
+
+                // Create PDF instance
+                $pdf = Pdf::loadHTML($pdfContent);
+                
+                $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
+                $response->header('Access-Control-Allow-Origin', '*');
+                $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+                $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+                return $response;
             }
-            $pdfContent = "<style>$css</style>" . $html;
-
-            // Create PDF instance
-            $pdf = Pdf::loadHTML($pdfContent);
-            
-            $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
-            $response->header('Access-Control-Allow-Origin', '*');
-            $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-            $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-            return $response;
+            else {
+                return response(['message' => 'Discharge summary template not found.'], Response::HTTP_NOT_FOUND);
+            }
         }
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -915,7 +927,8 @@ class PatientSessionController extends Controller
     }
 
     public function printPrescription(string $id) {
-        $patientSession = PatientSession::with(['patient', 'doctor'])->find($id);
+        $hospital_id = Auth::user()->hospital_id;
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->where('id', $id)->first();
 
         if($patientSession) {
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);
@@ -961,24 +974,22 @@ class PatientSessionController extends Controller
                 ";
             }
 
-            $hospital = Configuration::first();
-
             $variables = [
-                'hospital_name' => $hospital->name,
-                'hospital_address' => $hospital->address,
-                'hospital_phone' => $hospital->phone,
-                'hospital_email' => $hospital->email,
-                'hospital_stamp' => $hospital->stamp,
-                'hospital_logo' => $hospital->logo,
+                'hospital_name' => $patientSession->hospital->name,
+                'hospital_address' => $patientSession->hospital->address,
+                'hospital_phone' => $patientSession->hospital->phone,
+                'hospital_email' => $patientSession->hospital->email,
+                'hospital_stamp' => $patientSession->hospital->stamp,
+                'hospital_logo' => $patientSession->hospital->logo,
                 'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
                 'patient_email' => $patientSession->patient->email,
                 'patient_phone' => $patientSession->patient->phone,
                 'patient_residence' => $patientSession->patient->residence,
-                'patient_id' => $patientSession->patient->id,
+                'patient_id' => $patientSession->patient->outpatient_number,
                 'patient_age' => $patientSession->patient->age,
                 'patient_gender' => $patientSession->patient->gender,
                 'patient_type' => $patientSession->patient_type,
-                'invoice_id' => $patientSession->id,
+                'invoice_id' => $patientSession->invoice_number,
                 'invoice_date' => Carbon::now()->format('d/m/Y'),
                 'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
                 'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : 'N/A',
@@ -987,23 +998,28 @@ class PatientSessionController extends Controller
                 'recommendation' => $recommendationsString
             ];
 
-            $template = DocumentTemplate::where('hospital_id', $hospital->id)->where('title', 'PRESCRIPTION')->first();
-            $html = $template->html;
-            $css = $template->css;
-            foreach ($variables as $key => $value) {
-                $html = str_replace("{{ $key }}", $value, $html);
+            $template = DocumentTemplate::where('hospital_id', $hospital_id)->where('title', 'PRESCRIPTION')->first();
+            if($template) {
+                $html = $template->html;
+                $css = $template->css;
+                foreach ($variables as $key => $value) {
+                    $html = str_replace("{{ $key }}", $value, $html);
+                }
+                $pdfContent = "<style>$css</style>" . $html;
+
+                // Create PDF instance
+                $pdf = Pdf::loadHTML($pdfContent);
+                
+                $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
+                $response->header('Access-Control-Allow-Origin', '*');
+                $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+                $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+                return $response;
             }
-            $pdfContent = "<style>$css</style>" . $html;
-
-            // Create PDF instance
-            $pdf = Pdf::loadHTML($pdfContent);
-            
-            $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
-            $response->header('Access-Control-Allow-Origin', '*');
-            $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-            $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-            return $response;
+            else {
+                return response(['message' => 'Prescription template not found.'], Response::HTTP_NOT_FOUND);
+            }
         }
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -1011,7 +1027,8 @@ class PatientSessionController extends Controller
     }
 
     public function printLabReport(string $id) {
-        $patientSession = PatientSession::with(['patient', 'doctor'])->find($id);
+        $hospital_id = Auth::user()->hospital_id;
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->where('id', $id)->first();
 
         if($patientSession) {
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);
@@ -1046,24 +1063,22 @@ class PatientSessionController extends Controller
                 ";
             }
 
-            $hospital = Configuration::first();
-
             $variables = [
-                'hospital_name' => $hospital->name,
-                'hospital_address' => $hospital->address,
-                'hospital_phone' => $hospital->phone,
-                'hospital_email' => $hospital->email,
-                'hospital_stamp' => $hospital->stamp,
-                'hospital_logo' => $hospital->logo,
+                'hospital_name' => $patientSession->hospital->name,
+                'hospital_address' => $patientSession->hospital->address,
+                'hospital_phone' => $patientSession->hospital->phone,
+                'hospital_email' => $patientSession->hospital->email,
+                'hospital_stamp' => $patientSession->hospital->stamp,
+                'hospital_logo' => $patientSession->hospital->logo,
                 'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
                 'patient_email' => $patientSession->patient->email,
                 'patient_phone' => $patientSession->patient->phone,
                 'patient_residence' => $patientSession->patient->residence,
-                'patient_id' => $patientSession->patient->id,
+                'patient_id' => $patientSession->patient->outpatient_number,
                 'patient_age' => $patientSession->patient->age,
                 'patient_gender' => $patientSession->patient->gender,
                 'patient_type' => $patientSession->patient_type,
-                'invoice_id' => $patientSession->id,
+                'invoice_id' => $patientSession->invoice_number,
                 'invoice_date' => Carbon::now()->format('d/m/Y'),
                 'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
                 'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : 'N/A',
@@ -1071,23 +1086,28 @@ class PatientSessionController extends Controller
                 'lab_report' => $testsString
             ];
 
-            $template = DocumentTemplate::where('hospital_id', $hospital->id)->where('title', 'LAB REPORT')->first();
-            $html = $template->html;
-            $css = $template->css;
-            foreach ($variables as $key => $value) {
-                $html = str_replace("{{ $key }}", $value, $html);
+            $template = DocumentTemplate::where('hospital_id', $hospital_id)->where('title', 'LAB REPORT')->first();
+            if($template) {
+                $html = $template->html;
+                $css = $template->css;
+                foreach ($variables as $key => $value) {
+                    $html = str_replace("{{ $key }}", $value, $html);
+                }
+                $pdfContent = "<style>$css</style>" . $html;
+
+                // Create PDF instance
+                $pdf = Pdf::loadHTML($pdfContent);
+                
+                $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
+                $response->header('Access-Control-Allow-Origin', '*');
+                $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+                $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+                return $response;
             }
-            $pdfContent = "<style>$css</style>" . $html;
-
-            // Create PDF instance
-            $pdf = Pdf::loadHTML($pdfContent);
-            
-            $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
-            $response->header('Access-Control-Allow-Origin', '*');
-            $response->header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-            $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-            return $response;
+            else {
+                return response(['message' => 'Lab report template not found.'], Response::HTTP_NOT_FOUND);
+            }
         }
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);

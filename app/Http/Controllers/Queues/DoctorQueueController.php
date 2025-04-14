@@ -53,6 +53,7 @@ class DoctorQueueController extends QueueBaseController
             }
 
             $createdItem = ClearanceQueue::create([
+                'hospital_id' => Auth::user()->hospital_id,
                 'session_id' => $sessionId,
                 'created_by' => Auth::id()
             ]);

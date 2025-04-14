@@ -14,6 +14,7 @@ class TriageQueue extends Model
     protected $table = 'triage_queue';
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'created_by',
         'status'

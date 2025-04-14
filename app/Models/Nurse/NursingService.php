@@ -10,6 +10,7 @@ class NursingService extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'service',
         'price',
         'created_by',

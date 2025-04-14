@@ -10,6 +10,7 @@ class Pharmaceutical extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'name',
         'price',
         'quantity',

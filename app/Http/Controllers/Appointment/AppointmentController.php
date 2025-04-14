@@ -18,8 +18,9 @@ class AppointmentController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
         $patient_id = $request->query('patient_id');
+        $hospital_id = Auth::user()->hospital_id;
 
-        $query = Appointment::with(['patient', 'created_by'])->where('status', 'ACTIVE');
+        $query = Appointment::with(['patient', 'created_by'])->where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if($patient_id) {
             $query->where('patient_id', $patient_id);
@@ -40,6 +41,7 @@ class AppointmentController extends Controller
             'description' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdAppointment = Appointment::create($data);

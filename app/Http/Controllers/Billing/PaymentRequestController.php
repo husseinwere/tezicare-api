@@ -18,8 +18,9 @@ class PaymentRequestController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospitalId = Auth::user()->hospital_id;
         
-        return PaymentRequest::with(['session.patient', 'created_by'])->where('payment_requests.status', 'NOT_PAID')
+        return PaymentRequest::with(['session.patient', 'created_by'])->where('hospital_id', $hospitalId)->where('status', 'NOT_PAID')
                             ->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
@@ -34,6 +35,7 @@ class PaymentRequestController extends Controller
             'amount' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdRequest = PaymentRequest::create($data);

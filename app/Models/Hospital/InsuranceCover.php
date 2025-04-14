@@ -10,6 +10,7 @@ class InsuranceCover extends Model
     use HasFactory;
     
     protected $fillable = [
+        'hospital_id',
         'insurance',
         'cap',
         'created_by',

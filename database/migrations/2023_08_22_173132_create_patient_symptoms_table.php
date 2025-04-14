@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('session_id');
             $table->foreign('session_id')->references('id')->on('patient_sessions');
-            $table->string('symptom');
+            $table->text('symptom');
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();

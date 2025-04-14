@@ -17,9 +17,10 @@ class LabTestController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospital_id = Auth::user()->hospital_id;
         $lab = ucfirst($request->query('lab'));
         
-        $query = LabTest::where('status', 'ACTIVE');
+        $query = LabTest::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if($lab) {
             $query->where('lab', $lab);
@@ -39,6 +40,7 @@ class LabTestController extends Controller
             'price' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdTest = LabTest::create($data);

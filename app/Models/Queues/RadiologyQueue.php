@@ -14,6 +14,7 @@ class RadiologyQueue extends Model
     protected $table = 'radiology_queue';
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'created_by',
         'status'

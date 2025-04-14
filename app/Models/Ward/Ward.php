@@ -10,9 +10,11 @@ class Ward extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'name',
         'description',
         'price',
-        'created_by'
+        'created_by',
+        'status'
     ];
 }

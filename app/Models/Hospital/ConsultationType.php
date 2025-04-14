@@ -10,10 +10,12 @@ class ConsultationType extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'name',
         'price',
         'inpatient_nurse_rate',
-        'inpatient_doctor_rate'
+        'inpatient_doctor_rate',
+        'status'
     ];
 
     protected $casts = [

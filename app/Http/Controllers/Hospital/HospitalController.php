@@ -3,19 +3,34 @@
 namespace App\Http\Controllers\Hospital;
 
 use App\Http\Controllers\Controller;
-use App\Models\Hospital\Configuration;
+use App\Models\Hospital\Hospital;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
-class ConfigurationController extends Controller
+class HospitalController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Configuration::first();
+        $pageSize = $request->query('page_size', 20);
+        $pageIndex = $request->query('page_index', 1);
+        $name = $request->query('name');
+
+        $query = Hospital::whereIn('status', ['ACTIVE', 'INACTIVE']);
+
+        if($name) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+
+        return $query->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
+    }
+
+    public function show(string $id)
+    {
+        return Hospital::find($id);
     }
 
     /**
@@ -46,9 +61,9 @@ class ConfigurationController extends Controller
             $data['stamp'] = $imageUrl;
         }
 
-        $createdConfig = Configuration::create($data);
+        $createdHospital = Hospital::create($data);
 
-        if($createdConfig){
+        if($createdHospital){
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -63,10 +78,10 @@ class ConfigurationController extends Controller
     {
         $data = $request->all();
 
-        $config = Configuration::find($id);
+        $hospital = Hospital::find($id);
 
         if($request->hasFile('logo_file')) {
-            $oldImage = $config->logo;
+            $oldImage = $hospital->logo;
             if($oldImage) {
                 $splitPath = explode('/', $oldImage);
                 $imageName = end($splitPath);
@@ -80,7 +95,7 @@ class ConfigurationController extends Controller
         }
 
         if($request->hasFile('stamp_file')) {
-            $oldImage = $config->stamp;
+            $oldImage = $hospital->stamp;
             if($oldImage) {
                 $splitPath = explode('/', $oldImage);
                 $imageName = end($splitPath);
@@ -93,9 +108,9 @@ class ConfigurationController extends Controller
             $data['stamp'] = $imageUrl;
         }
 
-        $updatedConfig = $config->update($data);
+        $updatedHospital = $hospital->update($data);
 
-        if($updatedConfig){
+        if($updatedHospital){
             return response(null, Response::HTTP_OK);
         }
         else {

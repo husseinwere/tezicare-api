@@ -13,6 +13,7 @@ use App\Models\Patient\PatientTest;
 use App\Models\Patient\WardRound;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
@@ -23,7 +24,8 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $sessionId = $request->query('session_id');
-        $patientSession = PatientSession::find($sessionId);
+        $hospitalId = Auth::user()->hospital_id;
+        $patientSession = PatientSession::where('hospital_id', $hospitalId)->where('id', $sessionId)->first();
         
         if($patientSession) {
             $totalInvoiceAmount = 0;

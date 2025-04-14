@@ -17,8 +17,16 @@ class DentalServiceController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospital_id = Auth::user()->hospital_id;
+        $name = $request->query('name');
 
-        return DentalService::paginate($pageSize, ['*'], 'page', $pageIndex);
+        $query = DentalService::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
+
+        if($name) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+
+        return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -31,6 +39,7 @@ class DentalServiceController extends Controller
             'price' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdService = DentalService::create($data);

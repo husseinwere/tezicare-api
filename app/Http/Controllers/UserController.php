@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Mail\UserCreated;
-use App\Models\Hospital\Configuration;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -25,6 +25,7 @@ class UserController extends Controller
         //password is a random 4 digit string that should as well be sent to email
         $password = str_pad(random_int(11, 9999), 4, '0', STR_PAD_LEFT);
         $fields['password'] = bcrypt($password);
+        $fields['hospital_id'] = Auth::user()->hospital_id;
 
         $user = User::create($fields);
 
@@ -50,7 +51,7 @@ class UserController extends Controller
         ]);
 
         //CHECK EMAIL
-        $user = User::where('email', $fields['email'])->where('status', 'ACTIVE')->first();
+        $user = User::with('hospital')->where('email', $fields['email'])->where('status', 'ACTIVE')->first();
 
         //CHECK PASSWORD
         if(!$user || !Hash::check($fields['password'], $user->password)) {
@@ -59,17 +60,22 @@ class UserController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('okoyana')->plainTextToken;
+        //CHECK IF HOSPITAL IS ACTIVE
+        if($user->hospital->status != 'ACTIVE') {
+            return response([
+                'message' => 'Your hospital account is inactive. Please contact your administrator'
+            ], 401);
+        }
+        else {
+            $token = $user->createToken('okoyana')->plainTextToken;
 
-        $configuration = Configuration::first();
+            $response = [
+                'user' => $user,
+                'token' => $token
+            ];
 
-        $response = [
-            'user' => $user,
-            'hospital' => $configuration,
-            'token' => $token
-        ];
-
-        return response($response, 201);
+            return response($response, 201);
+        }
     }
 
     public function logout(Request $request) {
@@ -87,8 +93,9 @@ class UserController extends Controller
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospitalId = Auth::user()->hospital_id;
         
-        return User::where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
+        return User::where('hospital_id', $hospitalId)->where('status', 'ACTIVE')->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
@@ -136,11 +143,14 @@ class UserController extends Controller
     /**
      * Search the specified resource by name.
      */
-    public function search(Request $request, string $name)
+    public function search(Request $request, string $name,)
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $hospitalId = Auth::user()->hospital_id;
 
-        return User::where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%')->paginate($pageSize, ['*'], 'page', $pageIndex);
+        return User::where('hospital_id', $hospitalId)->where('status', 'ACTIVE')
+                    ->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $name . '%')
+                    ->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 }

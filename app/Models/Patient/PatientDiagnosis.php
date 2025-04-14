@@ -12,6 +12,7 @@ class PatientDiagnosis extends Model
     protected $table = 'patient_diagnosis';
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'diagnosis',
         'created_by'

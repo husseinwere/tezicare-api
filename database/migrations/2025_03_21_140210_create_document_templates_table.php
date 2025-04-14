@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('document_templates', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('hospital_id');
-            $table->foreign('hospital_id')->references('id')->on('configurations');
+            $table->foreign('hospital_id')->references('id')->on('hospitals');
             $table->string('title');
             $table->text('html');
             $table->text('css');

@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('hospital_id');
+            $table->foreign('hospital_id')->references('id')->on('hospitals');
+            $table->unsignedBigInteger('outpatient_number');
+            $table->unique(['hospital_id', 'outpatient_number']);
             $table->string('first_name');
             $table->string('last_name');
             $table->string('gender');

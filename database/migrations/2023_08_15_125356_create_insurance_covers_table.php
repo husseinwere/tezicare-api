@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('insurance_covers', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('hospital_id');
+            $table->foreign('hospital_id')->references('id')->on('hospitals');
             $table->string('insurance');
             $table->decimal('cap', 10, 2)->nullable();
             $table->unsignedBigInteger('created_by');
