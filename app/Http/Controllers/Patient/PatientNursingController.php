@@ -35,7 +35,7 @@ class PatientNursingController extends Controller
 
         $service = NursingService::find($data['service_id']);
 
-        $data['service'] = $service['service'];
+        $data['service_name'] = $service['service'];
         $data['price'] = $service['price'];
         $data['created_by'] = Auth::id();
 

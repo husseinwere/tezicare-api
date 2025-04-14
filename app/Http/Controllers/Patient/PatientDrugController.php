@@ -38,6 +38,7 @@ class PatientDrugController extends Controller
 
         $drug = Pharmaceutical::find($data['drug_id']);
 
+        $data['drug_name'] = $drug['name'];
         $data['unit_price'] = $drug['price'];
         $data['created_by'] = Auth::id();
 

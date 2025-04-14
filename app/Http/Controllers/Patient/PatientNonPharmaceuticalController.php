@@ -37,6 +37,7 @@ class PatientNonPharmaceuticalController extends Controller
 
         $nonPharmaceutical = NonPharmaceutical::find($data['non_pharmaceutical_id']);
 
+        $data['non_pharmaceutical_name'] = $nonPharmaceutical['name'];
         $data['unit_price'] = $nonPharmaceutical['price'];
         $data['created_by'] = Auth::id();
 

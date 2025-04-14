@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreign('session_id')->references('id')->on('patient_sessions');
             $table->unsignedBigInteger('service_id');
             $table->foreign('service_id')->references('id')->on('dental_services');
+            $table->string('service_name');
             $table->decimal('price', 10, 2);
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');

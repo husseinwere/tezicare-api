@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dental\DentalService;
 use App\Models\Patient\PatientDentalService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,6 +33,10 @@ class PatientDentalServiceController extends Controller
         ]);
 
         $data = $request->all();
+
+        $service = DentalService::find($data['service_id']);
+
+        $data['service_name'] = $service['name'];
         $data['created_by'] = Auth::id();
 
         $createdService = PatientDentalService::create($data);

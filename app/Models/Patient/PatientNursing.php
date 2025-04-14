@@ -15,7 +15,7 @@ class PatientNursing extends Model
     protected $fillable = [
         'session_id',
         'service_id',
-        'service',
+        'service_name',
         'price',
         'created_by',
         'payment_status',

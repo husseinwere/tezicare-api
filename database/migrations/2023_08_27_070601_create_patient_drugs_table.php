@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreign('session_id')->references('id')->on('patient_sessions');
             $table->unsignedBigInteger('drug_id');
             $table->foreign('drug_id')->references('id')->on('pharmaceuticals');
+            $table->string('drug_name');
             $table->string('dosage');
             $table->integer('quantity')->unsigned();
             $table->decimal('unit_price', 10, 2);

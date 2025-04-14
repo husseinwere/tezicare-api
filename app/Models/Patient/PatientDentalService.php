@@ -15,6 +15,7 @@ class PatientDentalService extends Model
     protected $fillable = [
         'session_id',
         'service_id',
+        'service_name',
         'price',
         'created_by',
         'created_by',

@@ -16,7 +16,7 @@ class PatientTest extends Model
     protected $fillable = [
         'session_id',
         'test_id',
-        'test',
+        'test_name',
         'price',
         'additional_info',
         'created_by',

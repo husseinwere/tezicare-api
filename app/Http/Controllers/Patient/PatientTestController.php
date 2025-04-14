@@ -36,7 +36,7 @@ class PatientTestController extends Controller
 
         $test = LabTest::find($data['test_id']);
 
-        $data['test'] = $test['test'];
+        $data['test_name'] = $test['test'];
         $data['price'] = $test['price'];
         $data['created_by'] = Auth::id();
 

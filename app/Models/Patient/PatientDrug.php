@@ -15,6 +15,7 @@ class PatientDrug extends Model
     protected $fillable = [
         'session_id',
         'drug_id',
+        'drug_name',
         'dosage',
         'quantity',
         'unit_price',

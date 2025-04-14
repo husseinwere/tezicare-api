@@ -15,6 +15,7 @@ class PatientNonPharmaceutical extends Model
     protected $fillable = [
         'session_id',
         'non_pharmaceutical_id',
+        'non_pharmaceutical_name',
         'quantity',
         'unit_price',
         'created_by',
