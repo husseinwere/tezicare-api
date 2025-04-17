@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  app:
+    image: php:8.2-fpm
+    container_name: tezicare-app
+    working_dir: /var/www/tezicare.tezi.co.ke
+    volumes:
+      - .:/var/www/tezicare.tezi.co.ke
+    depends_on:
+      - db
+    networks:
+      - tezicare
+
+  web:
+    image: nginx:alpine
+    container_name: tezicare-web
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/tezicare.tezi.co.ke
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - tezicare
+
+  db:
+    image: mysql:8.0
+    container_name: tezicare-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - tezicare
+
+  composer:
+    image: composer:latest
+    container_name: tezicare-composer
+    working_dir: /var/www/tezicare.tezi.co.ke
+    volumes:
+      - .:/var/www/tezicare.tezi.co.ke
+    entrypoint: ["composer", "install"]
+    networks:
+      - tezicare
+
+volumes:
+  dbdata:
+
+networks:
+  tezicare:
