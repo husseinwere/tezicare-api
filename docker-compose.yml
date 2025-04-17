@@ -30,10 +30,10 @@ services:
     container_name: tezicare-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: laravel
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: s)|]wTB,**
+      MYSQL_DATABASE: tezicare_db
+      MYSQL_USER: tezicare_app
+      MYSQL_PASSWORD: s)|]wTB,**
     volumes:
       - dbdata:/var/lib/mysql
     ports:
