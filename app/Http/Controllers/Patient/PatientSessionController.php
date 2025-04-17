@@ -87,7 +87,8 @@ class PatientSessionController extends Controller
             'patient_id' => 'required',
             'consultation_type' => 'required',
             'consultation_fee' => 'required',
-            'registration_fee' => 'required'
+            'registration_fee' => 'required',
+            'primary_payment_method' => 'required'
         ]);
         $data = $request->all();
 
@@ -463,7 +464,7 @@ class PatientSessionController extends Controller
 
                 $itemsHTML .= "
                     <tr class='item'>
-                        <td style='width:35%;'>$item->service</td>
+                        <td style='width:35%;'>$item->service_name</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$item->price</td>
                         <td style='width:20%; text-align:right;'>$item->price</td>
@@ -488,14 +489,13 @@ class PatientSessionController extends Controller
             }
 
             //DENTAL FEES
-            $items = PatientDentalService::with('dental_service')->where('session_id', $id)->where('status', 'ACTIVE')->get();
+            $items = PatientDentalService::where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
                 $totalInvoiceAmount += $item->price;
-                $service = $item->dental_service;
 
                 $itemsHTML .= "
                     <tr class='item'>
-                        <td style='width:35%;'>$service->name</td>
+                        <td style='width:35%;'>$item->service_name</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$item->price</td>
                         <td style='width:20%; text-align:right;'>$item->price</td>
@@ -522,13 +522,12 @@ class PatientSessionController extends Controller
             //NON-PHARMACEUTICALS
             $items = PatientNonPharmaceutical::where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
-                $nonPharmaceutical = NonPharmaceutical::find($item->non_pharmaceutical_id);
                 $totalPrice = $item->quantity * $item->unit_price;
                 $totalInvoiceAmount += $totalPrice;
 
                 $itemsHTML .= "
                     <tr class='item'>
-                        <td style='width:35%;'>$nonPharmaceutical->name</td>
+                        <td style='width:35%;'>$item->non_pharmaceutical_name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$item->unit_price</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
@@ -559,7 +558,7 @@ class PatientSessionController extends Controller
 
                 $itemsHTML .= "
                     <tr class='item'>
-                        <td style='width:35%;'>$item->test</td>
+                        <td style='width:35%;'>$item->test_name</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$item->price</td>
                         <td style='width:20%; text-align:right;'>$item->price</td>
@@ -586,13 +585,12 @@ class PatientSessionController extends Controller
             //PHARMACY FEES
             $items = PatientDrug::where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
-                $pharmaceutical = Pharmaceutical::find($item->drug_id);
                 $totalPrice = $item->quantity * $item->unit_price;
                 $totalInvoiceAmount += $totalPrice;
 
                 $itemsHTML .= "
                     <tr class='item'>
-                        <td style='width:35%;'>$pharmaceutical->name</td>
+                        <td style='width:35%;'>$item->drug_name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$item->unit_price</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>

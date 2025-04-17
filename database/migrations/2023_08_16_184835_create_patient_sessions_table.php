@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('patient_type')->default('OUTPATIENT');
             $table->unsignedBigInteger('consultation_type');
             $table->foreign('consultation_type')->references('id')->on('consultation_types');
+            $table->string('primary_payment_method');
             $table->decimal('registration_fee', 10, 2)->nullable();
             $table->decimal('consultation_fee', 10, 2)->nullable();
             $table->unsignedBigInteger('doctor_id')->nullable();

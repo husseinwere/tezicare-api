@@ -68,7 +68,7 @@ class QueueBaseController extends Controller
      */
     public function show(string $id)
     {
-        return $this->model::with(['session.patient', 'created_by'])->find($id);
+        return $this->model::with(['session.patient', 'created_by'])->where('session_id', $id)->first();
     }
 
     /**
