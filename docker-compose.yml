@@ -5,6 +5,9 @@ services:
       dockerfile: Dockerfile
     container_name: tezicare-app
     working_dir: /var/www/tezicare-api.tezi.co.ke
+    args:
+      UID: ${UID}
+      GID: ${GID}
     volumes:
       - .:/var/www/tezicare-api.tezi.co.ke
     depends_on:
@@ -45,6 +48,9 @@ services:
     image: composer:latest
     container_name: tezicare-composer
     working_dir: /var/www/tezicare-api.tezi.co.ke
+    args:
+      UID: ${UID}
+      GID: ${GID}
     volumes:
       - .:/var/www/tezicare-api.tezi.co.ke
     entrypoint: ["composer", "install"]
