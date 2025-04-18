@@ -49,7 +49,6 @@ services:
     user: "${UID}:${GID}"
     volumes:
       - .:/var/www/tezicare-api.tezi.co.ke
-    entrypoint: ["composer", "install"]
     networks:
       - tezicare
 
