@@ -1,6 +1,8 @@
 services:
   app:
-    image: php:8.1-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: tezicare-app
     working_dir: /var/www/tezicare-api.tezi.co.ke
     volumes:
