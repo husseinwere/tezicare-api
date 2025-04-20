@@ -64,7 +64,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [UserController::class, 'login']);
 
-Route::group(['middleware' => ['auth:sanctum']], function() {
+Route::group(['middleware' => ['api', 'auth:sanctum']], function() {
 
     //AUTH/USERS
     Route::get('/auth/logout', [UserController::class, 'logout']);
