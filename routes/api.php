@@ -61,6 +61,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('/test', function() {
+    return response()->json(['message' => 'API working']);
+});
 
 Route::post('/auth/login', [UserController::class, 'login']);
 
