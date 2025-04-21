@@ -6,6 +6,8 @@ services:
     container_name: tezicare-app
     working_dir: /var/www/tezicare-api.tezi.co.ke
     user: "${UID}:${GID}"
+    ports:
+      - "9000:9000"
     volumes:
       - .:/var/www/tezicare-api.tezi.co.ke
     depends_on:
