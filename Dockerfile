@@ -31,6 +31,8 @@ USER appuser
 # Set working directory to the app directory
 WORKDIR /var/www/tezicare-api.tezi.co.ke
 
+COPY ./docker/php/php.ini /usr/local/etc/php/php.ini
+
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
 
