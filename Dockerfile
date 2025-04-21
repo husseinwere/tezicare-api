@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
     zip \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
 
+# Create the run directory for the PHP-FPM socket
+RUN mkdir -p /var/run/php
+
 # Copy composer from the composer image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
