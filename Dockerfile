@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     zip \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -22,3 +22,7 @@ RUN groupadd -g $GID appgroup && \
 USER appuser
 
 WORKDIR /var/www/tezicare-api.tezi.co.ke
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
