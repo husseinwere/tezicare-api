@@ -45,7 +45,6 @@ use App\Http\Controllers\Queues\NurseQueueController;
 use App\Http\Controllers\Queues\PharmacyQueueController;
 use App\Http\Controllers\Queues\RadiologyQueueController;
 use App\Http\Controllers\Queues\TriageQueueController;
-use App\Http\Controllers\StorageLinkController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Ward\BedController;
 use App\Http\Controllers\Ward\WardController;
