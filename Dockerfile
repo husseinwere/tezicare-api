@@ -15,14 +15,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
 
-# Create the run directory for the PHP-FPM socket
-RUN mkdir -p /var/run/php
-
 # Copy composer from the composer image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Modify the PHP-FPM listen address to allow external access (0.0.0.0)
-RUN sed -i 's/^listen = 127.0.0.1:9000$/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf
 
 # Create a user and group with specified UID and GID
 RUN groupadd -g $GID appgroup && \
