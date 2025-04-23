@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('ward_rounds', function (Blueprint $table) {
-            $table->unsignedBigInteger('hospital_id')->after('id');
+            // $table->unsignedBigInteger('hospital_id')->after('id');
             $table->foreign('hospital_id')->references('id')->on('hospitals');
-            $table->unsignedBigInteger('created_by')->after('nurse_price');
+            // $table->unsignedBigInteger('created_by')->after('nurse_price');
             $table->foreign('created_by')->references('id')->on('users');
         });
     }
@@ -26,9 +26,9 @@ return new class extends Migration
     {
         Schema::table('ward_rounds', function (Blueprint $table) {
             $table->dropForeign(['hospital_id']);
-            $table->dropColumn('hospital_id');
+            // $table->dropColumn('hospital_id');
             $table->dropForeign(['created_by']);
-            $table->dropColumn('created_by');
+            // $table->dropColumn('created_by');
         });
     }
 };
