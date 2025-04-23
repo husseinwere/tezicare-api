@@ -660,13 +660,19 @@ class PatientSessionController extends Controller
                 </table>
             ";
 
+            $relativePathLogo = str_replace('http://tezicare-api.tezi.co.ke/storage/', '', $patientSession->hospital->logo);
+            $logo = '/var/www/tezicare-api.tezi.co.ke/storage/app/public/' . $relativePathLogo;
+
+            $relativePathStamp = str_replace('http://tezicare-api.tezi.co.ke/storage/', '', $patientSession->hospital->stamp);
+            $stamp = '/var/www/tezicare-api.tezi.co.ke/storage/app/public/' . $relativePathStamp;
+
             $variables = [
                 'hospital_name' => $patientSession->hospital->name,
                 'hospital_address' => $patientSession->hospital->address,
                 'hospital_phone' => $patientSession->hospital->phone,
                 'hospital_email' => $patientSession->hospital->email,
-                'hospital_stamp' => $patientSession->hospital->stamp,
-                'hospital_logo' => $patientSession->hospital->logo,
+                'hospital_stamp' => $stamp,
+                'hospital_logo' => $logo,
                 'patient_name' => $patientSession->patient->first_name . ' ' . $patientSession->patient->last_name,
                 'patient_email' => $patientSession->patient->email,
                 'patient_phone' => $patientSession->patient->phone,
