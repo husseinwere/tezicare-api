@@ -2,6 +2,7 @@
 
 namespace App\Models\Patient;
 
+use App\Models\User;
 use App\Models\Ward\Bed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,11 +13,13 @@ class WardRound extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hospital_id',
         'session_id',
         'bed_id',
         'bed_price',
         'doctor_price',
         'nurse_price',
+        'created_by',
         'created_at'
     ];
 
@@ -30,5 +33,9 @@ class WardRound extends Model
 
     public function records() {
         return $this->hasMany(WardRoundRecord::class);
+    }
+
+    public function created_by() {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Queues\InpatientQueue;
 use App\Models\Ward\Bed;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class WardRoundController extends Controller
 {
@@ -39,6 +40,8 @@ class WardRoundController extends Controller
             'created_at' => 'required'
         ]);
         $data = $request->all();
+        $data['hospital_id'] = Auth::user()->hospital_id;
+        $data['created_by'] = Auth::id();
 
         //check if round with the same date already exists
         $existingRound = WardRound::where('session_id', $data['session_id'])->whereDate('created_at', $data['created_at'])->exists();

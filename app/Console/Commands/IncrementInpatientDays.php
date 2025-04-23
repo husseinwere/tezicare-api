@@ -43,11 +43,13 @@ class IncrementInpatientDays extends Command
             $session = PatientSession::with('consultation')->find($inpatient->session_id);
 
             $wardRound = new WardRound();
+            $wardRound->hospital_id = $session->hospital_id;
             $wardRound->session_id = $inpatient->session_id;
             $wardRound->bed_id = $inpatient->bed_id;
             $wardRound->bed_price = $bed->ward->price;
             $wardRound->nurse_price = $session->consultation->inpatient_nurse_rate;
             $wardRound->doctor_price = $session->consultation->inpatient_doctor_rate;
+            $wardRound->created_by = 1;
             $wardRound->save();
         }
     }
