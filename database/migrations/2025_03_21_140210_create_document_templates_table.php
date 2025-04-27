@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('html');
             $table->text('css');
+            $table->string('paper_size')->default('A4');
             $table->timestamps();
         });
     }

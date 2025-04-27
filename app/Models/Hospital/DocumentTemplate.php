@@ -13,6 +13,7 @@ class DocumentTemplate extends Model
         'hospital_id',
         'title',
         'html',
-        'css'
+        'css',
+        'paper_size'
     ];
 }

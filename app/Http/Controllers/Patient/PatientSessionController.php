@@ -344,6 +344,9 @@ class PatientSessionController extends Controller
             $totalInvoiceAmount += $consultation_fee;
             $totalInvoiceAmount += $registration_fee;
 
+            $consultation_fee = number_format($consultation_fee, 2);
+            $registration_fee = number_format($registration_fee, 2);
+
             $itemsHTML = "";
 
             if($registration_fee > 0) {
@@ -373,11 +376,14 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->rate;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->rate, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -394,12 +400,15 @@ class PatientSessionController extends Controller
                     $ward = $item->bed->ward;
                     $totalInvoiceAmount += $item->total;
 
+                    $rate = number_format($item->bed_price, 2);
+                    $total = number_format($item->total, 2);
+
                     $itemsHTML .= "
                         <tr class='item'>
                             <td style='width:35%;'>Bed Charges ($ward->name)</td>
                             <td style='width:20%; text-align:center;'>$item->quantity</td>
-                            <td style='width:25%; text-align:right;'>$item->bed_price</td>
-                            <td style='width:20%; text-align:right;'>$item->total</td>
+                            <td style='width:25%; text-align:right;'>$rate</td>
+                            <td style='width:20%; text-align:right;'>$total</td>
                         </tr>
                     ";
                 }
@@ -412,12 +421,15 @@ class PatientSessionController extends Controller
                 foreach($doctorRecords as $item) {
                     $totalInvoiceAmount += $item->total;
 
+                    $rate = number_format($item->doctor_price, 2);
+                    $total = number_format($item->total, 2);
+
                     $itemsHTML .= "
                         <tr class='item'>
                             <td style='width:35%;'>Ward Rounds (Doctor)</td>
                             <td style='width:20%; text-align:center;'>$item->quantity</td>
-                            <td style='width:25%; text-align:right;'>$item->doctor_price</td>
-                            <td style='width:20%; text-align:right;'>$item->total</td>
+                            <td style='width:25%; text-align:right;'>$rate</td>
+                            <td style='width:20%; text-align:right;'>$total</td>
                         </tr>
                     ";
                 }
@@ -430,12 +442,15 @@ class PatientSessionController extends Controller
                 foreach($nurseRecords as $item) {
                     $totalInvoiceAmount += $item->total;
 
+                    $rate = number_format($item->nurse_price, 2);
+                    $total = number_format($item->total, 2);
+
                     $itemsHTML .= "
                         <tr class='item'>
                             <td style='width:35%;'>Ward Rounds (Nurse)</td>
                             <td style='width:20%; text-align:center;'>$item->quantity</td>
-                            <td style='width:25%; text-align:right;'>$item->nurse_price</td>
-                            <td style='width:20%; text-align:right;'>$item->total</td>
+                            <td style='width:25%; text-align:right;'>$rate</td>
+                            <td style='width:20%; text-align:right;'>$total</td>
                         </tr>
                     ";
                 }
@@ -446,11 +461,14 @@ class PatientSessionController extends Controller
                     $totalPrice = $item->quantity * $item->rate;
                     $totalInvoiceAmount += $totalPrice;
 
+                    $rate = number_format($item->rate, 2);
+                    $totalPrice = number_format($totalPrice, 2);
+
                     $itemsHTML .= "
                         <tr class='item'>
                             <td style='width:35%;'>$item->name</td>
                             <td style='width:20%; text-align:center;'>$item->quantity</td>
-                            <td style='width:25%; text-align:right;'>$item->rate</td>
+                            <td style='width:25%; text-align:right;'>$rate</td>
                             <td style='width:20%; text-align:right;'>$totalPrice</td>
                         </tr>
                     ";
@@ -462,12 +480,14 @@ class PatientSessionController extends Controller
             foreach($items as $item) {
                 $totalInvoiceAmount += $item->price;
 
+                $price = number_format($item->price, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->service_name</td>
                         <td style='width:20%; text-align:center;'>1</td>
-                        <td style='width:25%; text-align:right;'>$item->price</td>
-                        <td style='width:20%; text-align:right;'>$item->price</td>
+                        <td style='width:25%; text-align:right;'>$price</td>
+                        <td style='width:20%; text-align:right;'>$price</td>
                     </tr>
                 ";
             }
@@ -478,11 +498,14 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->rate;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->rate, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -493,12 +516,14 @@ class PatientSessionController extends Controller
             foreach($items as $item) {
                 $totalInvoiceAmount += $item->price;
 
+                $price = number_format($item->price, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->service_name</td>
                         <td style='width:20%; text-align:center;'>1</td>
-                        <td style='width:25%; text-align:right;'>$item->price</td>
-                        <td style='width:20%; text-align:right;'>$item->price</td>
+                        <td style='width:25%; text-align:right;'>$price</td>
+                        <td style='width:20%; text-align:right;'>$price</td>
                     </tr>
                 ";
             }
@@ -509,11 +534,14 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->rate;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->rate, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -525,11 +553,14 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->unit_price;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->unit_price, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->non_pharmaceutical_name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->unit_price</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -541,11 +572,14 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->rate;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->rate, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -556,12 +590,14 @@ class PatientSessionController extends Controller
             foreach($items as $item) {
                 $totalInvoiceAmount += $item->price;
 
+                $price = number_format($item->price, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->test_name</td>
                         <td style='width:20%; text-align:center;'>1</td>
-                        <td style='width:25%; text-align:right;'>$item->price</td>
-                        <td style='width:20%; text-align:right;'>$item->price</td>
+                        <td style='width:25%; text-align:right;'>$price</td>
+                        <td style='width:20%; text-align:right;'>$price</td>
                     </tr>
                 ";
             }
@@ -572,11 +608,14 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->rate;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->rate, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -588,11 +627,14 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->unit_price;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->unit_price, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->drug_name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->unit_price</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -604,11 +646,14 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->rate;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->rate, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
@@ -620,15 +665,20 @@ class PatientSessionController extends Controller
                 $totalPrice = $item->quantity * $item->rate;
                 $totalInvoiceAmount += $totalPrice;
 
+                $rate = number_format($item->rate, 2);
+                $totalPrice = number_format($totalPrice, 2);
+
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$item->rate</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
                         <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
+
+            $totalInvoiceAmount = number_format($totalInvoiceAmount, 2);
 
             $content = "
                 <table cellspacing='0px' cellpadding='2px'>
