@@ -750,6 +750,7 @@ class PatientSessionController extends Controller
 
                 // Create PDF instance
                 $pdf = Pdf::loadHTML($pdfContent);
+                $pdf->setPaper($template->paper_size, 'portrait');
                 
                 $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
                 $response->header('Access-Control-Allow-Origin', '*');
@@ -969,6 +970,7 @@ class PatientSessionController extends Controller
 
                 // Create PDF instance
                 $pdf = Pdf::loadHTML($pdfContent);
+                $pdf->setPaper($template->paper_size, 'portrait');
                 
                 $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
                 $response->header('Access-Control-Allow-Origin', '*');
@@ -1075,6 +1077,7 @@ class PatientSessionController extends Controller
 
                 // Create PDF instance
                 $pdf = Pdf::loadHTML($pdfContent);
+                $pdf->setPaper($template->paper_size, 'portrait');
                 
                 $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
                 $response->header('Access-Control-Allow-Origin', '*');
@@ -1169,6 +1172,7 @@ class PatientSessionController extends Controller
 
                 // Create PDF instance
                 $pdf = Pdf::loadHTML($pdfContent);
+                $pdf->setPaper($template->paper_size, 'portrait');
                 
                 $response = FacadesResponse::make($pdf->stream(), Response::HTTP_OK);
                 $response->header('Access-Control-Allow-Origin', '*');
