@@ -60,7 +60,7 @@
                 Password: <strong>{{$password}}</strong>
             </p>
             <p>Click the button below to login and access your account.</p>
-            <a href="https://care-v2.tezi.co.ke" target="_blank"><button>GO TO PORTAL</button></a>
+            <a href="https://care.tezi.co.ke" target="_blank"><button>GO TO PORTAL</button></a>
         </div>
     </body> 
 </html>
