@@ -4,6 +4,12 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Models\Patient\Patient;
+use App\Models\Patient\PatientSession;
+use App\Models\Patient\PatientVisit;
+use App\Models\Queues\LabQueue;
+use App\Models\Queues\NurseQueue;
+use App\Models\Queues\PharmacyQueue;
+use App\Models\Queues\RadiologyQueue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +60,39 @@ class PatientController extends Controller
         $createdPatient = Patient::create($data);
 
         if($createdPatient){
+            //DIRECT SERVICE PATIENT
+            if($request->has('status')) {
+                $session = [
+                    'patient_id' => $createdPatient->id,
+                    'hospital_id' => $createdPatient->hospital_id,
+                    'created_by' => $createdPatient->created_by,
+                    'patient_type' => 'DIRECT_SERVICE',
+                    'primary_payment_method' => 'Cash',
+                    'consultation_type' => 1,
+                    'consultation_fee' => 0,
+                    'registration_fee' => 0
+                ];
+                $createdSession = PatientSession::create($session);
+
+                $visit = [
+                    'session_id' => $createdSession->id,
+                    'created_by' => $createdPatient->created_by
+                ];
+                PatientVisit::create($visit);
+
+                if ($data['station'] == 'pharmacy') { $queueModel = PharmacyQueue::class; }
+                else if ($data['station'] == 'lab') { $queueModel = LabQueue::class; }
+                else if ($data['station'] == 'radiology') { $queueModel = RadiologyQueue::class; }
+                else if ($data['station'] == 'nurse') { $queueModel = NurseQueue::class; }
+
+                $queue = [
+                    'session_id' => $createdSession->id,
+                    'hospital_id' => $createdPatient->hospital_id,
+                    'created_by' => $createdPatient->created_by,
+                ];
+                $queueModel::create($queue);
+            }
+
             return response($createdPatient, Response::HTTP_CREATED);
         }
         else {

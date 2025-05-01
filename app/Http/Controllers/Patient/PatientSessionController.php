@@ -5,9 +5,8 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment\Appointment;
 use App\Models\Billing\InvoiceAddition;
+use App\Models\Billing\PaymentRequest;
 use App\Models\Hospital\DocumentTemplate;
-use App\Models\Inventory\NonPharmaceutical;
-use App\Models\Inventory\Pharmaceutical;
 use App\Models\Patient\ClinicalSummaryRecord;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientDentalService;
@@ -88,7 +87,8 @@ class PatientSessionController extends Controller
             'consultation_type' => 'required',
             'consultation_fee' => 'required',
             'registration_fee' => 'required',
-            'primary_payment_method' => 'required'
+            'primary_payment_method' => 'required',
+            'triage' => 'required'
         ]);
         $data = $request->all();
 
@@ -106,9 +106,48 @@ class PatientSessionController extends Controller
         if($createdSession){
             $visit = [
                 'session_id' => $createdSession->id,
-                'created_by' => Auth::id()
+                'created_by' => $createdSession->created_by
             ];
             PatientVisit::create($visit);
+
+            if($data['triage']) {
+                $triage = [
+                    'session_id' => $createdSession->id,
+                    'hospital_id' => $createdSession->hospital_id,
+                    'created_by' => $createdSession->created_by
+                ];
+                TriageQueue::create($triage);
+            }
+            else {
+                $doctor = [
+                    'session_id' => $createdSession->id,
+                    'hospital_id' => $createdSession->hospital_id,
+                    'created_by' => $createdSession->created_by
+                ];
+                DoctorQueue::create($doctor);
+            }
+
+            if($data['consultation_fee'] > 0) {
+                $paymentRequest = [
+                    'session_id' => $createdSession->id,
+                    'hospital_id' => $createdSession->hospital_id,
+                    'amount' => $data['consultation_fee'],
+                    'source' => 'Reception consultation',
+                    'created_by' => $createdSession->created_by
+                ];
+                PaymentRequest::create($paymentRequest);
+            }
+
+            if($data['registration_fee'] > 0) {
+                $paymentRequest = [
+                    'session_id' => $createdSession->id,
+                    'hospital_id' => $createdSession->hospital_id,
+                    'amount' => $data['registration_fee'],
+                    'source' => 'Reception registration',
+                    'created_by' => $createdSession->created_by
+                ];
+                PaymentRequest::create($paymentRequest);
+            }
 
             return response($createdSession, Response::HTTP_CREATED);
         }
