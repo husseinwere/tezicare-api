@@ -719,6 +719,26 @@ class PatientSessionController extends Controller
 
             $totalInvoiceAmount = number_format($totalInvoiceAmount, 2);
 
+            //CLINICAL SUMMARY
+            $summary = ClinicalSummaryRecord::where('session_id', $id)->pluck('summary')->toArray();
+            $summaryString = "<ul>";
+            foreach($summary as $record) {
+                $summaryString .= "
+                    <li>$record</li>
+                ";
+            }
+            $summaryString .= "</ul>";
+            if(count($summary) == 0) {
+                $summaryString = "";
+            }
+
+            $summaryString = "
+                <p>
+                    <b>CLINICAL SUMMARY: </b> <br>
+                    $summaryString
+                </p>
+            ";
+
             $content = "
                 <table cellspacing='0px' cellpadding='2px'>
                     <thead>
@@ -775,7 +795,8 @@ class PatientSessionController extends Controller
                 'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
                 'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : Carbon::now()->format('d M Y, h:i A'),
                 'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
-                'invoice_grid' => $content
+                'invoice_grid' => $content,
+                'clinical_summary' => $summaryString
             ];
 
             $template = DocumentTemplate::where('hospital_id', $hospital_id)->where('title', 'INVOICE')->first();
