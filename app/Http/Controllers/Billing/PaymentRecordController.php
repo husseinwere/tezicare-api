@@ -27,16 +27,16 @@ class PaymentRecordController extends Controller
         $pageIndex = $request->query('page_index', 1);
 
         $hospitalId = Auth::user()->hospital_id;
-        $patient_id = $request->query('opno');
+        $outpatient_number = $request->query('outpatient_number');
         $startAt = $request->query('startAt');
         $endAt = $request->query('endAt');
 
-        $query = PaymentRecord::with(['request', 'session.patient', 'created_by'])->where('hospital_id', $hospitalId)
+        $query = PaymentRecord::with(['request', 'session.patient','patient_insurance.insurance', 'created_by'])->where('hospital_id', $hospitalId)
                             ->where('status', '<>', 'DELETED');
 
-        if($patient_id) {
-            $query->whereHas('session', function($q) use ($patient_id) {
-                $q->where('patient_id', $patient_id);
+        if($outpatient_number) {
+            $query->whereHas('session', function($q) use ($outpatient_number) {
+                $q->where('outpatient_number', $outpatient_number);
             });
         }
 
