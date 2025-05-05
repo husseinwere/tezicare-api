@@ -35,7 +35,7 @@ class PaymentRecordController extends Controller
                             ->where('status', '<>', 'DELETED');
 
         if($outpatient_number) {
-            $query->whereHas('session', function($q) use ($outpatient_number) {
+            $query->whereHas('session.patient', function($q) use ($outpatient_number) {
                 $q->where('outpatient_number', $outpatient_number);
             });
         }

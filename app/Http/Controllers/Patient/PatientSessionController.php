@@ -55,7 +55,9 @@ class PatientSessionController extends Controller
         $query = PatientSession::with(['patient', 'consultation'])->where('hospital_id', $hospital_id);
 
         if($outpatient_number) {
-            $query->where('outpatient_number', $outpatient_number);
+            $query->whereHas('patient', function($q) use ($outpatient_number) {
+                $q->where('outpatient_number', $outpatient_number);
+            });
         }
 
         if($status) {
