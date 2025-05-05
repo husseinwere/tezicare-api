@@ -45,6 +45,7 @@ class PatientSessionController extends Controller
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
         $hospital_id = Auth::user()->hospital_id;
+        $patient_id = $request->input('patient_id');
         $outpatient_number = $request->input('outpatient_number');
         $status = $request->input('status');
         $patient_type = $request->input('patient_type');
@@ -58,6 +59,10 @@ class PatientSessionController extends Controller
             $query->whereHas('patient', function($q) use ($outpatient_number) {
                 $q->where('outpatient_number', $outpatient_number);
             });
+        }
+
+        if($patient_id) {
+            $query->where('patient_id', $patient_id);
         }
 
         if($status) {
