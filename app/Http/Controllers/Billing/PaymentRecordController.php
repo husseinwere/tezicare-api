@@ -28,6 +28,7 @@ class PaymentRecordController extends Controller
 
         $hospitalId = Auth::user()->hospital_id;
         $outpatient_number = $request->query('outpatient_number');
+        $invoice_number = $request->query('invoice_number');
         $startAt = $request->query('startAt');
         $endAt = $request->query('endAt');
 
@@ -37,6 +38,12 @@ class PaymentRecordController extends Controller
         if($outpatient_number) {
             $query->whereHas('session.patient', function($q) use ($outpatient_number) {
                 $q->where('outpatient_number', $outpatient_number);
+            });
+        }
+
+        if($invoice_number) {
+            $query->whereHas('session', function($q) use ($invoice_number) {
+                $q->where('invoice_number', $invoice_number);
             });
         }
 
