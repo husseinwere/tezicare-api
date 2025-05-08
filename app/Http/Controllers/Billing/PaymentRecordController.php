@@ -87,36 +87,41 @@ class PaymentRecordController extends Controller
         $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
-        $payments = $data['payments'];
-        try {
-            foreach ($payments as $payment) {
-                $data['payment_method'] = $payment['payment_method'];
-                $data['mpesa_code'] = $payment['mpesa_code'];
-                $data['insurance_id'] = $payment['insurance_id'];
-                $data['amount'] = $payment['amount'];
-
-                if($data['insurance_id']) {
-                    $data['status'] = 'UNCLAIMED';
-                }
-                else {
-                    $data['status'] = 'ACTIVE';
-                }
-
-                PaymentRecord::create($data);
-            }
-
-            //MARK REQUEST ITEMS AS PAID
-            $this->markAsPaid($data);
-
-            //MARK PAYMENT REQUEST AS PAID
-            $paymentRequest = PaymentRequest::find($data['request_id']);
-            $paymentRequest->status = 'PAID';
-            $paymentRequest->save();
-
-            return response(null, Response::HTTP_CREATED);
+        $paymentRequest = PaymentRequest::find($data['request_id']);
+        if($paymentRequest->status == 'PAID') {
+            return response(['message' => 'Payment request has already been paid'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        catch (\Exception $e) {
-            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        else {
+            $payments = $data['payments'];
+            try {
+                foreach ($payments as $payment) {
+                    $data['payment_method'] = $payment['payment_method'];
+                    $data['mpesa_code'] = $payment['mpesa_code'];
+                    $data['insurance_id'] = $payment['insurance_id'];
+                    $data['amount'] = $payment['amount'];
+
+                    if($data['insurance_id']) {
+                        $data['status'] = 'UNCLAIMED';
+                    }
+                    else {
+                        $data['status'] = 'ACTIVE';
+                    }
+
+                    PaymentRecord::create($data);
+                }
+
+                //MARK REQUEST ITEMS AS PAID
+                $this->markAsPaid($data);
+
+                //MARK PAYMENT REQUEST AS PAID
+                $paymentRequest->status = 'PAID';
+                $paymentRequest->save();
+
+                return response(null, Response::HTTP_CREATED);
+            }
+            catch (\Exception $e) {
+                return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
