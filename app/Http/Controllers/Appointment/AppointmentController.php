@@ -145,6 +145,11 @@ class AppointmentController extends Controller
                 ]
             ]);
 
+            Log::error('BulkSMS API call success', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
             if (!$response->successful()) {
                 // Handle non-successful responses
                 Log::error('BulkSMS API call failed', [

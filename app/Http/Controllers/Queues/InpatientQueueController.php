@@ -65,11 +65,13 @@ class InpatientQueueController extends QueueBaseController
 
                 //CREATE WARD ROUND
                 WardRound::create([
+                    'hospital_id' => $data['hospital_id'],
                     'session_id' => $data['session_id'],
                     'bed_id' => $data['bed_id'],
                     'bed_price' => $bed->ward->price,
                     'nurse_price' => $session->consultation->inpatient_nurse_rate,
-                    'doctor_price' => $session->consultation->inpatient_doctor_rate
+                    'doctor_price' => $session->consultation->inpatient_doctor_rate,
+                    'created_by' => $data['created_by']
                 ]);
 
                 return response(null, Response::HTTP_CREATED);
