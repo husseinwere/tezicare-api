@@ -137,12 +137,9 @@ class AppointmentController extends Controller
                 'msgType' => 'text',
                 'duplicatecheck' => 'true',
                 'sendMethod' => 'quick',
-                'sms' => [
-                    [
-                        'mobile' => [$patientPhone],
-                        'msg' => $message
-                    ]
-                ]
+                'mobile' => $patientPhone,
+                'msg' => $message,
+                'output' => 'json'
             ]);
 
             Log::error('BulkSMS API call success', [
