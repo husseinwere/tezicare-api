@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Appointment;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment\Appointment;
+use App\Models\Hospital\Hospital;
+use App\Models\Patient\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class AppointmentController extends Controller
 {
@@ -47,7 +50,14 @@ class AppointmentController extends Controller
         $createdAppointment = Appointment::create($data);
 
         if($createdAppointment){
-            return response(null, Response::HTTP_CREATED);
+            $response = $this->sendSmsNotification($createdAppointment);
+
+            if ($response->successful()) {
+                return response(['message' => 'Appointment scheduled successfully and user notified via SMS.'], Response::HTTP_CREATED);
+            }
+            else {
+                return response(['message' => 'Appointment scheduled successfully but user notification failed.'], Response::HTTP_CREATED);
+            }
         }
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -65,7 +75,14 @@ class AppointmentController extends Controller
         $updatedAppointment = $appointment->update($data);
 
         if($updatedAppointment){
-            return response(null, Response::HTTP_OK);
+            $response = $this->sendSmsNotification($updatedAppointment);
+
+            if ($response->successful()) {
+                return response(['message' => 'Appointment updated successfully and user notified via SMS.'], Response::HTTP_OK);
+            }
+            else {
+                return response(['message' => 'Appointment updated successfully but user notification failed.'], Response::HTTP_OK);
+            }
         }
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -86,5 +103,46 @@ class AppointmentController extends Controller
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private function formatPhoneNumber($phoneNumber)
+    {
+        // Remove any non-digit characters
+        $phoneNumber = preg_replace('/\D/', '', $phoneNumber);
+
+        // Check if the phone number starts with '0' and replace it with '254'
+        if (substr($phoneNumber, 0, 1) === '0') {
+            $phoneNumber = '254' . substr($phoneNumber, 1);
+        }
+
+        return $phoneNumber;
+    }
+
+    private function sendSmsNotification(Appointment $appointment)
+    {
+        $patient = Patient::find($appointment->patient_id);
+        $hospital = Hospital::find($appointment->hospital_id);
+        $appointment_date = date('l, F j, Y', strtotime($appointment->appointment_date));
+        $patientPhone = $this->formatPhoneNumber($patient->phone);
+        $message = "Hi {$patient->first_name},\n\nYour appointment has been scheduled at {$hospital->name} on {$appointment_date} for {$appointment->duration} minutes. We are looking forward to seeing you! To reschedule, please contact us at {$hospital->phone}.\n\nThank you for choosing us.";
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post('https://bulksms.vsoft.co.ke/SMSApi/send', [
+            'userid' => env('BULKSMS_USERID'),
+            'password' => env('BULKSMS_PASSWORD'),
+            'senderid' => env('BULKSMS_SENDERID'),
+            'msgType' => 'text',
+            'duplicatecheck' => 'true',
+            'sendMethod' => 'quick',
+            'sms' => [
+                [
+                    'mobile' => [$patientPhone],
+                    'msg' => $message
+                ]
+            ]
+        ]);
+
+        return $response;
     }
 }
