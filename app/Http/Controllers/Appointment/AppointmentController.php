@@ -129,8 +129,10 @@ class AppointmentController extends Controller
 
         try {
             $response = Http::withoutVerifying()->withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post('http://bulksms.vsoft.co.ke/SMSApi/send', [
+                'apikey' => env('BULKSMS_APIKEY'),
+                'cache-control' => 'no-cache',
+                'content-type' => 'application/x-www-form-urlencoded'
+            ])->asForm()->post('http://bulksms.vsoft.co.ke/SMSApi/send', [
                 'userid' => env('BULKSMS_USERID'),
                 'password' => env('BULKSMS_PASSWORD'),
                 'senderid' => env('BULKSMS_SENDERID'),
