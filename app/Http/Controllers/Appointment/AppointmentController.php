@@ -128,9 +128,9 @@ class AppointmentController extends Controller
         $message = "Hi {$patient->first_name},\n\nYour appointment has been scheduled at {$hospital->name} on {$appointment_date} for {$appointment->duration} minutes. We are looking forward to seeing you! To reschedule, please contact us at {$hospital->phone}.\n\nThank you for choosing us.";
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::withoutVerifying()->withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post('http://bulksms.vsoft.co.ke/SMSApi/send', [
+            ])->post('https://bulksms.vsoft.co.ke/SMSApi/send', [
                 'userid' => env('BULKSMS_USERID'),
                 'password' => env('BULKSMS_PASSWORD'),
                 'senderid' => env('BULKSMS_SENDERID'),
