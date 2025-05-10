@@ -53,7 +53,7 @@ class AppointmentController extends Controller
         if($createdAppointment){
             $response = $this->sendSmsNotification($createdAppointment);
 
-            if ($response && $response->successful()) {
+            if ($response) {
                 return response(['message' => 'Appointment scheduled successfully and user notified via SMS.'], Response::HTTP_CREATED);
             }
             else {
@@ -78,7 +78,7 @@ class AppointmentController extends Controller
         if($updatedAppointment){
             $response = $this->sendSmsNotification($updatedAppointment);
 
-            if ($response && $response->successful()) {
+            if ($response) {
                 return response(['message' => 'Appointment updated successfully and user notified via SMS.'], Response::HTTP_OK);
             }
             else {
@@ -125,44 +125,40 @@ class AppointmentController extends Controller
         $hospital = Hospital::find($appointment->hospital_id);
         $appointment_date = date('l, F j, Y', strtotime($appointment->appointment_date));
         $patientPhone = $this->formatPhoneNumber($patient->phone);
+        $apiKey = env('BULKSMS_APIKEY');
+        $userId = env('BULKSMS_USERID');
+        $senderId = env('BULKSMS_SENDERID');
+        $password = env('BULKSMS_PASSWORD');
         $message = "Hi {$patient->first_name},\n\nYour appointment has been scheduled at {$hospital->name} on {$appointment_date} for {$appointment->duration} minutes. We are looking forward to seeing you! To reschedule, please contact us at {$hospital->phone}.\n\nThank you for choosing us.";
 
-        try {
-            $response = Http::withoutVerifying()->withHeaders([
-                'apikey' => env('BULKSMS_APIKEY'),
-                'cache-control' => 'no-cache',
-                'content-type' => 'application/x-www-form-urlencoded'
-            ])->asForm()->post('https://bulksms.vsoft.co.ke/SMSApi/send', [
-                'userid' => env('BULKSMS_USERID'),
-                'password' => env('BULKSMS_PASSWORD'),
-                'senderid' => env('BULKSMS_SENDERID'),
-                'msgType' => 'text',
-                'duplicatecheck' => 'true',
-                'sendMethod' => 'quick',
-                'mobile' => $patientPhone,
-                'msg' => $message,
-                'output' => 'json'
-            ]);
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://bulksms.vsoft.co.ke/SMSApi/send",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_POSTFIELDS => "userid=$userId&password=$password&mobile=$patientPhone&msg=$message&senderid=$senderId&msgType=text&duplicatecheck=true&output=json&sendMethod=quick",
+            CURLOPT_HTTPHEADER => array(
+                "apikey: $apiKey",
+                "cache-control: no-cache",
+                "content-type: application/x-www-form-urlencoded"
+            ),
+        ));
 
-            Log::error('BulkSMS API call success', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
 
-            if (!$response->successful()) {
-                // Handle non-successful responses
-                Log::error('BulkSMS API call failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                    'phone' => $patientPhone,
-                    'message' => $message
-                ]);
-            }
-        }
-        catch (\Exception $e) {
+        curl_close($curl);
+
+        if ($err) {
             $response = null;
             Log::error('Exception during BulkSMS API call', [
-                'message' => $e->getMessage(),
+                'message' => $err,
             ]);
         }
 
