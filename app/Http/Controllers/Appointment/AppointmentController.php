@@ -162,6 +162,10 @@ class AppointmentController extends Controller
             ]);
         }
 
+        Log::error('response', [
+                'message' => $response,
+            ]);
+
         return $response;
     }
 }
