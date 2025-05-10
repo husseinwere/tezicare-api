@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
@@ -52,7 +53,7 @@ class AppointmentController extends Controller
         if($createdAppointment){
             $response = $this->sendSmsNotification($createdAppointment);
 
-            if ($response->successful()) {
+            if ($response && $response->successful()) {
                 return response(['message' => 'Appointment scheduled successfully and user notified via SMS.'], Response::HTTP_CREATED);
             }
             else {
@@ -77,7 +78,7 @@ class AppointmentController extends Controller
         if($updatedAppointment){
             $response = $this->sendSmsNotification($updatedAppointment);
 
-            if ($response->successful()) {
+            if ($response && $response->successful()) {
                 return response(['message' => 'Appointment updated successfully and user notified via SMS.'], Response::HTTP_OK);
             }
             else {
@@ -126,22 +127,38 @@ class AppointmentController extends Controller
         $patientPhone = $this->formatPhoneNumber($patient->phone);
         $message = "Hi {$patient->first_name},\n\nYour appointment has been scheduled at {$hospital->name} on {$appointment_date} for {$appointment->duration} minutes. We are looking forward to seeing you! To reschedule, please contact us at {$hospital->phone}.\n\nThank you for choosing us.";
 
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-        ])->post('https://bulksms.vsoft.co.ke/SMSApi/send', [
-            'userid' => env('BULKSMS_USERID'),
-            'password' => env('BULKSMS_PASSWORD'),
-            'senderid' => env('BULKSMS_SENDERID'),
-            'msgType' => 'text',
-            'duplicatecheck' => 'true',
-            'sendMethod' => 'quick',
-            'sms' => [
-                [
-                    'mobile' => [$patientPhone],
-                    'msg' => $message
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post('http://bulksms.vsoft.co.ke/SMSApi/send', [
+                'userid' => env('BULKSMS_USERID'),
+                'password' => env('BULKSMS_PASSWORD'),
+                'senderid' => env('BULKSMS_SENDERID'),
+                'msgType' => 'text',
+                'duplicatecheck' => 'true',
+                'sendMethod' => 'quick',
+                'sms' => [
+                    [
+                        'mobile' => [$patientPhone],
+                        'msg' => $message
+                    ]
                 ]
-            ]
-        ]);
+            ]);
+
+            if (!$response->successful()) {
+                // Handle non-successful responses
+                Log::error('BulkSMS API call failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+            }
+        }
+        catch (\Exception $e) {
+            $response = null;
+            Log::error('Exception during BulkSMS API call', [
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         return $response;
     }
