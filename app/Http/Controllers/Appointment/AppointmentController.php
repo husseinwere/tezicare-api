@@ -132,7 +132,7 @@ class AppointmentController extends Controller
                 'apikey' => env('BULKSMS_APIKEY'),
                 'cache-control' => 'no-cache',
                 'content-type' => 'application/x-www-form-urlencoded'
-            ])->asForm()->post('http://bulksms.vsoft.co.ke/SMSApi/send', [
+            ])->asForm()->post('https://bulksms.vsoft.co.ke/SMSApi/send', [
                 'userid' => env('BULKSMS_USERID'),
                 'password' => env('BULKSMS_PASSWORD'),
                 'senderid' => env('BULKSMS_SENDERID'),
@@ -154,6 +154,8 @@ class AppointmentController extends Controller
                 Log::error('BulkSMS API call failed', [
                     'status' => $response->status(),
                     'body' => $response->body(),
+                    'phone' => $patientPhone,
+                    'message' => $message
                 ]);
             }
         }
