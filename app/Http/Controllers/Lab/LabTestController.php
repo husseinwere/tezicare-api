@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Lab;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lab\LabTest;
+use App\Models\Lab\LabTestPrice;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ class LabTestController extends Controller
         $hospital_id = Auth::user()->hospital_id;
         $lab = ucfirst($request->query('lab'));
         
-        $query = LabTest::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
+        $query = LabTest::with(['prices'])->where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if($lab) {
             $query->where('lab', $lab);
@@ -46,6 +47,14 @@ class LabTestController extends Controller
         $createdTest = LabTest::create($data);
 
         if($createdTest){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                LabTestPrice::create([
+                    'lab_test_id' => $createdTest->id,
+                    'insurance_id' => $insuranceId,
+                    'price' => $price
+                ]);
+            }
+
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -64,6 +73,21 @@ class LabTestController extends Controller
         $updatedTest = $test->update($data);
 
         if($updatedTest){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                $existingPrice = LabTestPrice::where('lab_test_id', $test->id)->where('insurance_id', $insuranceId)->first();
+                if ($existingPrice) {
+                    $existingPrice->price = $price;
+                    $existingPrice->save();
+                }
+                else {
+                    LabTestPrice::create([
+                        'lab_test_id' => $updatedTest->id,
+                        'insurance_id' => $insuranceId,
+                        'price' => $price
+                    ]);
+                }
+            }
+
             return response(null, Response::HTTP_OK);
         }
         else {

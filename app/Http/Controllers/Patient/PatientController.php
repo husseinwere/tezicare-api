@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hospital\ConsultationType;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientVisit;
@@ -63,13 +64,14 @@ class PatientController extends Controller
         if($createdPatient){
             //DIRECT SERVICE PATIENT
             if($request->has('status')) {
+                $consultationType = ConsultationType::where('hospital_id', $createdPatient->hospital_id)->where('name', 'General')->first();
                 $session = [
                     'patient_id' => $createdPatient->id,
                     'hospital_id' => $createdPatient->hospital_id,
                     'created_by' => $createdPatient->created_by,
                     'patient_type' => 'DIRECT_SERVICE',
                     'primary_payment_method' => 'Cash',
-                    'consultation_type' => 1,
+                    'consultation_type' => $consultationType->id,
                     'consultation_fee' => 0,
                     'registration_fee' => 0
                 ];
