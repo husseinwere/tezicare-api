@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lab\LabTest;
+use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientTest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -34,11 +35,20 @@ class PatientTestController extends Controller
 
         $data = $request->all();
 
-        $test = LabTest::find($data['test_id']);
+        $session = PatientSession::find($data['session_id']);
+        $test = LabTest::with('prices')->find($data['test_id']);
 
         $data['test_name'] = $test['test'];
         $data['price'] = $test['price'];
         $data['created_by'] = Auth::id();
+
+        $prices = $test->prices;
+        if($session->insurance_id) {
+            $insurancePrice = $prices->where('insurance_id', $session->insurance_id)->first();
+            if($insurancePrice) {
+                $data['price'] = $insurancePrice['price'];
+            }
+        }
 
         $createdTest = PatientTest::create($data);
 

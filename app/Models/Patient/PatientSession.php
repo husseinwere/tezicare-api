@@ -4,6 +4,7 @@ namespace App\Models\Patient;
 
 use App\Models\Hospital\ConsultationType;
 use App\Models\Hospital\Hospital;
+use App\Models\Hospital\InsuranceCover;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,7 @@ class PatientSession extends Model
         'registration_fee',
         'consultation_fee',
         'primary_payment_method',
+        'insurance_id',
         'doctor_id',
         'discharged',
         'created_by',
@@ -81,6 +83,11 @@ class PatientSession extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'doctor_id');
+    }
+
+    public function insurance(): BelongsTo
+    {
+        return $this->belongsTo(InsuranceCover::class, 'insurance_id');
     }
 
     public function created_by(): BelongsTo
