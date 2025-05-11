@@ -89,7 +89,7 @@ class LabTestController extends Controller
                 else {
                     if($price) {
                         LabTestPrice::create([
-                            'lab_test_id' => $updatedTest->id,
+                            'lab_test_id' => $test->id,
                             'insurance_id' => $insuranceId,
                             'price' => $price
                         ]);
