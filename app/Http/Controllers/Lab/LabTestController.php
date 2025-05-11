@@ -48,11 +48,13 @@ class LabTestController extends Controller
 
         if($createdTest){
             foreach ($data['prices'] as $insuranceId => $price) {
-                LabTestPrice::create([
-                    'lab_test_id' => $createdTest->id,
-                    'insurance_id' => $insuranceId,
-                    'price' => $price
-                ]);
+                if($price) {
+                    LabTestPrice::create([
+                        'lab_test_id' => $createdTest->id,
+                        'insurance_id' => $insuranceId,
+                        'price' => $price
+                    ]);
+                }
             }
 
             return response(null, Response::HTTP_CREATED);
@@ -76,15 +78,22 @@ class LabTestController extends Controller
             foreach ($data['prices'] as $insuranceId => $price) {
                 $existingPrice = LabTestPrice::where('lab_test_id', $test->id)->where('insurance_id', $insuranceId)->first();
                 if ($existingPrice) {
-                    $existingPrice->price = $price;
-                    $existingPrice->save();
+                    if($price) {
+                        $existingPrice->price = $price;
+                        $existingPrice->save();
+                    }
+                    else {
+                        $existingPrice->delete();
+                    }
                 }
                 else {
-                    LabTestPrice::create([
-                        'lab_test_id' => $updatedTest->id,
-                        'insurance_id' => $insuranceId,
-                        'price' => $price
-                    ]);
+                    if($price) {
+                        LabTestPrice::create([
+                            'lab_test_id' => $updatedTest->id,
+                            'insurance_id' => $insuranceId,
+                            'price' => $price
+                        ]);
+                    }
                 }
             }
 
