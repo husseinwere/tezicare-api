@@ -54,23 +54,41 @@ class InpatientQueueController extends QueueBaseController
                 AdmissionQueue::destroy($admissionQueue->id);
 
                 //CHANGE SESSION TO INPATIENT
-                $session = PatientSession::with('consultation')->find($data['session_id']);
+                $session = PatientSession::with('consultation.prices')->find($data['session_id']);
                 $session->patient_type = 'INPATIENT';
                 $session->save();
 
                 //CHANGE BED STATUS TO OCCUPIED
-                $bed = Bed::find($data['bed_id']);
+                $bed = Bed::with(['ward.prices'])->find($data['bed_id']);
                 $bed->status = 'OCCUPIED';
                 $bed->save();
+
+                $bedPrice = $bed->ward->price;
+                $prices = $bed->ward->prices;
+                $nursePrice = $session->consultation->inpatient_nurse_rate;
+                $doctorPrice = $session->consultation->inpatient_doctor_rate;
+                $consultationPrices = $session->consultation->prices;
+                if($session->insurance_id) {
+                    $wardInsurancePrice = $prices->where('insurance_id', $session->insurance_id)->first();
+                    if($wardInsurancePrice) {
+                        $bedPrice = $wardInsurancePrice['price'];
+                    }
+
+                    $consultationInsurancePrice = $consultationPrices->where('insurance_id', $session->insurance_id)->first();
+                    if($consultationInsurancePrice) {
+                        if($consultationInsurancePrice['inpatient_doctor_price']) { $doctorPrice = $consultationInsurancePrice['inpatient_doctor_price']; }
+                        if($consultationInsurancePrice['inpatient_nurse_price']) { $nursePrice = $consultationInsurancePrice['inpatient_nurse_price']; }
+                    }
+                }
 
                 //CREATE WARD ROUND
                 WardRound::create([
                     'hospital_id' => $data['hospital_id'],
                     'session_id' => $data['session_id'],
                     'bed_id' => $data['bed_id'],
-                    'bed_price' => $bed->ward->price,
-                    'nurse_price' => $session->consultation->inpatient_nurse_rate,
-                    'doctor_price' => $session->consultation->inpatient_doctor_rate,
+                    'bed_price' => $bedPrice,
+                    'nurse_price' => $nursePrice,
+                    'doctor_price' => $doctorPrice,
                     'created_by' => $data['created_by']
                 ]);
 

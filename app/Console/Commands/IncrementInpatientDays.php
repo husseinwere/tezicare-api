@@ -39,16 +39,35 @@ class IncrementInpatientDays extends Command
                                     ->where('status', 'ACTIVE')->get();
 
         foreach($inpatients as $inpatient){
-            $bed = Bed::find($inpatient->bed_id);
-            $session = PatientSession::with('consultation')->find($inpatient->session_id);
+            $bed = Bed::with(['ward.prices'])->find($inpatient->bed_id);
+            $session = PatientSession::with('consultation.prices')->find($inpatient->session_id);
+
+            $bedPrice = $bed->ward->price;
+            $wardPrices = $bed->ward->prices;
+            $nursePrice = $session->consultation->inpatient_nurse_rate;
+            $doctorPrice = $session->consultation->inpatient_doctor_rate;
+            $consultationPrices = $session->consultation->prices;
+
+            if($session->insurance_id) {
+                $wardInsurancePrice = $wardPrices->where('insurance_id', $session->insurance_id)->first();
+                if($wardInsurancePrice) {
+                    $bedPrice = $wardInsurancePrice['price'];
+                }
+
+                $consultationInsurancePrice = $consultationPrices->where('insurance_id', $session->insurance_id)->first();
+                if($consultationInsurancePrice) {
+                    if($consultationInsurancePrice['inpatient_doctor_price']) { $doctorPrice = $consultationInsurancePrice['inpatient_doctor_price']; }
+                    if($consultationInsurancePrice['inpatient_nurse_price']) { $nursePrice = $consultationInsurancePrice['inpatient_nurse_price']; }
+                }
+            }
 
             $wardRound = new WardRound();
             $wardRound->hospital_id = $inpatient->hospital_id;
             $wardRound->session_id = $inpatient->session_id;
             $wardRound->bed_id = $inpatient->bed_id;
-            $wardRound->bed_price = $bed->ward->price;
-            $wardRound->nurse_price = $session->consultation->inpatient_nurse_rate;
-            $wardRound->doctor_price = $session->consultation->inpatient_doctor_rate;
+            $wardRound->bed_price = $bedPrice;
+            $wardRound->nurse_price = $nursePrice;
+            $wardRound->doctor_price = $doctorPrice;
             $wardRound->created_by = 1;
             $wardRound->save();
         }
