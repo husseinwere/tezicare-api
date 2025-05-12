@@ -21,4 +21,9 @@ class ConsultationType extends Model
     protected $casts = [
         'can_delete' => 'boolean'
     ];
+
+    public function prices()
+    {
+        return $this->hasMany(ConsultationPrice::class, 'consultation_id');
+    }
 }

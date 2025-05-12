@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Ward;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ward\Ward;
+use App\Models\Ward\WardPrice;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -17,12 +18,12 @@ class WardController extends Controller
     {
         $hospital_id = Auth::user()->hospital_id;
 
-        return Ward::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
+        return Ward::with('prices')->where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
     }
 
     public function show(string $id)
     {
-        return Ward::find($id);
+        return Ward::with('prices')->find($id);
     }
 
     /**
@@ -41,6 +42,16 @@ class WardController extends Controller
         $createdWard = Ward::create($data);
 
         if($createdWard){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                if($price) {
+                    WardPrice::create([
+                        'ward_id' => $createdWard->id,
+                        'insurance_id' => $insuranceId,
+                        'price' => $price
+                    ]);
+                }
+            }
+
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -59,6 +70,28 @@ class WardController extends Controller
         $updatedWard = $ward->update($data);
 
         if($updatedWard){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                $existingPrice = WardPrice::where('ward_id', $ward->id)->where('insurance_id', $insuranceId)->first();
+                if ($existingPrice) {
+                    if($price) {
+                        $existingPrice->price = $price;
+                        $existingPrice->save();
+                    }
+                    else {
+                        $existingPrice->delete();
+                    }
+                }
+                else {
+                    if($price) {
+                        WardPrice::create([
+                            'ward_id' => $ward->id,
+                            'insurance_id' => $insuranceId,
+                            'price' => $price
+                        ]);
+                    }
+                }
+            }
+
             return response(null, Response::HTTP_OK);
         }
         else {

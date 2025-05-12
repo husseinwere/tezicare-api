@@ -192,6 +192,7 @@ Route::group(['middleware' => ['api', 'auth:sanctum']], function() {
 
     //CONSULTATION TYPES
     Route::resource('consultation-types', ConsultationTypeController::class);
+    Route::post('/consultation-types/save-prices/{id}', [ConsultationTypeController::class, 'savePrices']);
 
     //PAYMENT REQUESTS
     Route::resource('payment-requests', PaymentRequestController::class);

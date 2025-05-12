@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Hospital;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hospital\ConsultationPrice;
 use App\Models\Hospital\ConsultationType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -17,7 +18,7 @@ class ConsultationTypeController extends Controller
     {
         $hospital_id = Auth::user()->hospital_id;
 
-        return ConsultationType::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
+        return ConsultationType::with('prices')->where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
     }
 
     /**
@@ -59,6 +60,38 @@ class ConsultationTypeController extends Controller
         else {
             return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function savePrices(Request $request, string $id)
+    {
+        $data = $request->all();
+
+        $type = ConsultationType::find($id);
+
+        foreach ($data['prices'] as $insuranceId => $price) {
+            $existingPrice = ConsultationPrice::where('consultation_id', $type->id)->where('insurance_id', $insuranceId)->first();
+            if ($existingPrice) {
+                if($price) {
+                    $existingPrice[$data['field']] = $price;
+                }
+                else {
+                    $existingPrice[$data['field']] = null;
+                }
+
+                $existingPrice->save();
+            }
+            else {
+                if($price) {
+                    ConsultationPrice::create([
+                        'consultation_id' => $type->id,
+                        'insurance_id' => $insuranceId,
+                        $data['field'] => $price
+                    ]);
+                }
+            }
+        }
+
+        return response(null, Response::HTTP_OK);
     }
 
     /**
