@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\Auth;
 class InventoryBaseController extends Controller
 {
     protected $model;
+    protected $pricesModel;
 
-    public function __construct(Model $model)
+    public function __construct(Model $model, Model $pricesModel)
     {
+        $this->pricesModel = $pricesModel;
         $this->model = $model;
     }
 
@@ -28,7 +30,7 @@ class InventoryBaseController extends Controller
         $search = $request->query('search');
         $shouldPaginate = $request->query('paginate', 'true');
 
-        $query = $this->model::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
+        $query = $this->model::with(['prices'])->where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if($search) {
             $query->where('name', 'like', '%' . $search . '%');
@@ -60,6 +62,17 @@ class InventoryBaseController extends Controller
         $createdItem = $this->model::create($data);
 
         if($createdItem){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                if($price) {
+                    $foreignKey = $this->model::foreignKey();
+                    $this->pricesModel::create([
+                        $foreignKey => $createdItem->id,
+                        'insurance_id' => $insuranceId,
+                        'price' => $price
+                    ]);
+                }
+            }
+
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -78,6 +91,29 @@ class InventoryBaseController extends Controller
         $updatedItem = $item->update($data);
 
         if($updatedItem){
+            $foreignKey = $this->model::foreignKey();
+            foreach ($data['prices'] as $insuranceId => $price) {
+                $existingPrice = $this->pricesModel::where($foreignKey, $item->id)->where('insurance_id', $insuranceId)->first();
+                if ($existingPrice) {
+                    if($price) {
+                        $existingPrice->price = $price;
+                        $existingPrice->save();
+                    }
+                    else {
+                        $existingPrice->delete();
+                    }
+                }
+                else {
+                    if($price) {
+                        $this->pricesModel::create([
+                            $foreignKey => $item->id,
+                            'insurance_id' => $insuranceId,
+                            'price' => $price
+                        ]);
+                    }
+                }
+            }
+
             return response(null, Response::HTTP_OK);
         }
         else {

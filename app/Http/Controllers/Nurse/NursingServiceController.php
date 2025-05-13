@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Nurse;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nurse\NursingService;
+use App\Models\Nurse\NursingServicePrice;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ class NursingServiceController extends Controller
         $hospital_id = Auth::user()->hospital_id;
         $service = $request->query('name');
 
-        $query = NursingService::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
+        $query = NursingService::with(['prices'])->where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if ($service) {
             $query->where('service', 'LIKE', '%' . $service . '%');
@@ -45,6 +46,16 @@ class NursingServiceController extends Controller
         $createdService = NursingService::create($data);
 
         if($createdService){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                if($price) {
+                    NursingServicePrice::create([
+                        'nursing_service_id' => $createdService->id,
+                        'insurance_id' => $insuranceId,
+                        'price' => $price
+                    ]);
+                }
+            }
+
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -63,6 +74,28 @@ class NursingServiceController extends Controller
         $updatedService = $service->update($data);
 
         if($updatedService){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                $existingPrice = NursingServicePrice::where('nursing_service_id', $service->id)->where('insurance_id', $insuranceId)->first();
+                if ($existingPrice) {
+                    if($price) {
+                        $existingPrice->price = $price;
+                        $existingPrice->save();
+                    }
+                    else {
+                        $existingPrice->delete();
+                    }
+                }
+                else {
+                    if($price) {
+                        NursingServicePrice::create([
+                            'nursing_service_id' => $service->id,
+                            'insurance_id' => $insuranceId,
+                            'price' => $price
+                        ]);
+                    }
+                }
+            }
+
             return response(null, Response::HTTP_OK);
         }
         else {
