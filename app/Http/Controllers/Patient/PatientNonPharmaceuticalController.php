@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Inventory\NonPharmaceutical;
 use App\Models\Patient\PatientNonPharmaceutical;
+use App\Models\Patient\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -35,11 +36,20 @@ class PatientNonPharmaceuticalController extends Controller
 
         $data = $request->all();
 
-        $nonPharmaceutical = NonPharmaceutical::find($data['non_pharmaceutical_id']);
+        $session = PatientSession::find($data['session_id']);
+        $nonPharmaceutical = NonPharmaceutical::with('prices')->find($data['non_pharmaceutical_id']);
 
         $data['non_pharmaceutical_name'] = $nonPharmaceutical['name'];
         $data['unit_price'] = $nonPharmaceutical['price'];
         $data['created_by'] = Auth::id();
+
+        $prices = $nonPharmaceutical->prices;
+        if($session->insurance_id) {
+            $insurancePrice = $prices->where('insurance_id', $session->insurance_id)->first();
+            if($insurancePrice) {
+                $data['unit_price'] = $insurancePrice['price'];
+            }
+        }
 
         if($data['quantity'] > $nonPharmaceutical->quantity) {
             return response(['message' => 'Not enough stock to use this non pharmaceutical item.'], Response::HTTP_UNPROCESSABLE_ENTITY);

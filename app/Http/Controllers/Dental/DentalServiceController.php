@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dental;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dental\DentalService;
+use App\Models\Dental\DentalServicePrice;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ class DentalServiceController extends Controller
         $hospital_id = Auth::user()->hospital_id;
         $name = $request->query('name');
 
-        $query = DentalService::where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
+        $query = DentalService::with(['prices'])->where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if($name) {
             $query->where('name', 'like', '%' . $name . '%');
@@ -45,6 +46,16 @@ class DentalServiceController extends Controller
         $createdService = DentalService::create($data);
 
         if($createdService){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                if($price) {
+                    DentalServicePrice::create([
+                        'dental_service_id' => $createdService->id,
+                        'insurance_id' => $insuranceId,
+                        'price' => $price
+                    ]);
+                }
+            }
+
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -63,6 +74,28 @@ class DentalServiceController extends Controller
         $updatedService = $service->update($data);
 
         if($updatedService){
+            foreach ($data['prices'] as $insuranceId => $price) {
+                $existingPrice = DentalServicePrice::where('dental_service_id', $service->id)->where('insurance_id', $insuranceId)->first();
+                if ($existingPrice) {
+                    if($price) {
+                        $existingPrice->price = $price;
+                        $existingPrice->save();
+                    }
+                    else {
+                        $existingPrice->delete();
+                    }
+                }
+                else {
+                    if($price) {
+                        DentalServicePrice::create([
+                            'dental_service_id' => $service->id,
+                            'insurance_id' => $insuranceId,
+                            'price' => $price
+                        ]);
+                    }
+                }
+            }
+
             return response(null, Response::HTTP_OK);
         }
         else {

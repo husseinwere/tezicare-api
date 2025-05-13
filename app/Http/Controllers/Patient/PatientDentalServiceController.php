@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Dental\DentalService;
 use App\Models\Patient\PatientDentalService;
+use App\Models\Patient\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -28,16 +29,24 @@ class PatientDentalServiceController extends Controller
     {
         $request->validate([
             'session_id' => 'required',
-            'service_id' => 'required',
-            'price' => 'required'
+            'service_id' => 'required'
         ]);
 
         $data = $request->all();
 
-        $service = DentalService::find($data['service_id']);
+        $session = PatientSession::find($data['session_id']);
+        $service = DentalService::with('prices')->find($data['service_id']);
 
         $data['service_name'] = $service['name'];
         $data['created_by'] = Auth::id();
+
+        $prices = $service->prices;
+        if($session->insurance_id) {
+            $insurancePrice = $prices->where('insurance_id', $session->insurance_id)->first();
+            if($insurancePrice) {
+                $data['price'] = $insurancePrice['price'];
+            }
+        }
 
         $createdService = PatientDentalService::create($data);
 

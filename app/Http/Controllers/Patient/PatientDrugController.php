@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Inventory\Pharmaceutical;
 use App\Models\Patient\PatientDrug;
+use App\Models\Patient\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -36,11 +37,20 @@ class PatientDrugController extends Controller
 
         $data = $request->all();
 
-        $drug = Pharmaceutical::find($data['drug_id']);
+        $session = PatientSession::find($data['session_id']);
+        $drug = Pharmaceutical::with('prices')->find($data['drug_id']);
 
         $data['drug_name'] = $drug['name'];
         $data['unit_price'] = $drug['price'];
         $data['created_by'] = Auth::id();
+
+        $prices = $drug->prices;
+        if($session->insurance_id) {
+            $insurancePrice = $prices->where('insurance_id', $session->insurance_id)->first();
+            if($insurancePrice) {
+                $data['unit_price'] = $insurancePrice['price'];
+            }
+        }
 
         if($data['quantity'] > $drug->quantity) {
             return response(['message' => 'Not enough stock to dispense this drug.'], Response::HTTP_UNPROCESSABLE_ENTITY);

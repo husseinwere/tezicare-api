@@ -19,6 +19,11 @@ class DentalService extends Model
         'created_by'
     ];
 
+    public function prices()
+    {
+        return $this->hasMany(DentalServicePrice::class);
+    }
+
     public function created_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

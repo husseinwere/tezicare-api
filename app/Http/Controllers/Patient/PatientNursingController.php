@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Nurse\NursingService;
 use App\Models\Patient\PatientNursing;
+use App\Models\Patient\PatientSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -33,11 +34,20 @@ class PatientNursingController extends Controller
 
         $data = $request->all();
 
-        $service = NursingService::find($data['service_id']);
+        $session = PatientSession::find($data['session_id']);
+        $service = NursingService::with('prices')->find($data['service_id']);
 
         $data['service_name'] = $service['service'];
         $data['price'] = $service['price'];
         $data['created_by'] = Auth::id();
+
+        $prices = $service->prices;
+        if($session->insurance_id) {
+            $insurancePrice = $prices->where('insurance_id', $session->insurance_id)->first();
+            if($insurancePrice) {
+                $data['price'] = $insurancePrice['price'];
+            }
+        }
 
         $createdService = PatientNursing::create($data);
 
