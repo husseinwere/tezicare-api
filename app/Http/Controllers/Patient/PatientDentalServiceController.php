@@ -38,6 +38,7 @@ class PatientDentalServiceController extends Controller
         $service = DentalService::with('prices')->find($data['service_id']);
 
         $data['service_name'] = $service['name'];
+        $data['price'] = $service['price'];
         $data['created_by'] = Auth::id();
 
         $prices = $service->prices;
