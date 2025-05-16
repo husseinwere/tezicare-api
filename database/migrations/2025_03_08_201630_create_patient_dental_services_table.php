@@ -18,7 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('service_id');
             $table->foreign('service_id')->references('id')->on('dental_services');
             $table->string('service_name');
-            $table->decimal('price', 10, 2);
+            $table->decimal('unit_price', 10, 2);
+            $table->integer('quantity')->unsigned();
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->string('payment_status')->default('NOT_PAID');

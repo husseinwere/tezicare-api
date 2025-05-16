@@ -29,7 +29,8 @@ class PatientDentalServiceController extends Controller
     {
         $request->validate([
             'session_id' => 'required',
-            'service_id' => 'required'
+            'service_id' => 'required',
+            'quantity' => 'required'
         ]);
 
         $data = $request->all();
@@ -38,14 +39,14 @@ class PatientDentalServiceController extends Controller
         $service = DentalService::with('prices')->find($data['service_id']);
 
         $data['service_name'] = $service['name'];
-        $data['price'] = $service['price'];
+        $data['unit_price'] = $service['price'];
         $data['created_by'] = Auth::id();
 
         $prices = $service->prices;
         if($session->insurance_id) {
             $insurancePrice = $prices->where('insurance_id', $session->insurance_id)->first();
             if($insurancePrice) {
-                $data['price'] = $insurancePrice['price'];
+                $data['unit_price'] = $insurancePrice['price'];
             }
         }
 

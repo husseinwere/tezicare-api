@@ -560,16 +560,18 @@ class PatientSessionController extends Controller
             //DENTAL FEES
             $items = PatientDentalService::where('session_id', $id)->where('status', 'ACTIVE')->get();
             foreach($items as $item) {
-                $totalInvoiceAmount += $item->price;
+                $totalPrice = $item->quantity * $item->unit_price;
+                $totalInvoiceAmount += $totalPrice;
 
-                $price = number_format($item->price, 2);
+                $rate = number_format($item->unit_price, 2);
+                $totalPrice = number_format($totalPrice, 2);
 
                 $itemsHTML .= "
                     <tr class='item'>
                         <td style='width:35%;'>$item->service_name</td>
-                        <td style='width:20%; text-align:center;'>1</td>
-                        <td style='width:25%; text-align:right;'>$price</td>
-                        <td style='width:20%; text-align:right;'>$price</td>
+                        <td style='width:20%; text-align:center;'>$item->quantity</td>
+                        <td style='width:25%; text-align:right;'>$rate</td>
+                        <td style='width:20%; text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
