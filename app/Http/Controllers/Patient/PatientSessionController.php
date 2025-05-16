@@ -728,25 +728,26 @@ class PatientSessionController extends Controller
 
             $totalInvoiceAmount = number_format($totalInvoiceAmount, 2);
 
-            //CLINICAL SUMMARY
-            $summary = ClinicalSummaryRecord::where('session_id', $id)->pluck('summary')->toArray();
-            $summaryString = "<ul>";
-            foreach($summary as $record) {
-                $summaryString .= "
-                    <li>$record</li>
+            //PATIENT DIAGNOSIS
+            $diagnosis = PatientDiagnosis::where('session_id', $id)->pluck('diagnosis')->toArray();
+            $diagnosisString = "<ul>";
+            foreach($diagnosis as $d) {
+                $diagnosisString .= "
+                    <li>$d</li>
                 ";
             }
-            $summaryString .= "</ul>";
-            if(count($summary) == 0) {
-                $summaryString = "";
+            $diagnosisString .= "</ul>";
+            if(count($diagnosis) == 0) {
+                $diagnosisString = "";
             }
-
-            $summaryString = "
-                <p>
-                    <b>CLINICAL SUMMARY: </b> <br>
-                    $summaryString
-                </p>
-            ";
+            else {
+                $diagnosisString = "
+                    <p>
+                        <b>DIAGNOSIS: </b> <br>
+                        $diagnosisString
+                    </p>
+                ";
+            }
 
             $content = "
                 <table cellspacing='0px' cellpadding='2px'>
@@ -805,7 +806,7 @@ class PatientSessionController extends Controller
                 'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : Carbon::now()->format('d M Y, h:i A'),
                 'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
                 'invoice_grid' => $content,
-                'clinical_summary' => $summaryString
+                'diagnosis' => $diagnosisString
             ];
 
             $template = DocumentTemplate::where('hospital_id', $hospital_id)->where('title', 'INVOICE')->first();

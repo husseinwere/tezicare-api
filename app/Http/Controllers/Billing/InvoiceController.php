@@ -59,9 +59,10 @@ class InvoiceController extends Controller
             }
 
             //DENTAL FEES
-            $dental = PatientDentalService::with('dental_service')->where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
+            $dental = PatientDentalService::where('session_id', $sessionId)->where('status', 'ACTIVE')->get();
             foreach($dental as $item) {
-                $totalInvoiceAmount += $item->price;
+                $totalPrice = $item->quantity * $item->unit_price;
+                $totalInvoiceAmount += $totalPrice;
             }
 
             $bedRecords = array();
@@ -199,7 +200,7 @@ class InvoiceController extends Controller
 
         if($data['source'] == 'Dental') {
             $service = PatientDentalService::where('id', $data['item_id'])->where('status', 'ACTIVE')->first();
-            $service->price = $data['amount'];
+            $service->unit_price = $data['amount'];
             $this->sendResponse($service->save());
         }
 
