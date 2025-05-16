@@ -995,6 +995,59 @@ class PatientSessionController extends Controller
                 ";
             }
 
+            $dentalServices = PatientDentalService::where('session_id', $patientSession->id)->where('status', 'ACTIVE')->get();
+            $grouped = [];
+
+            // Group names by date
+            foreach ($summary as $entry) {
+                $date = date('Y-m-d', strtotime($entry['created_at']));
+                $grouped[$date]['history'][] = $entry['summary'];
+            }
+
+            // Group types by date
+            foreach ($dentalServices as $entry) {
+                $date = date('Y-m-d', strtotime($entry['created_at']));
+                $grouped[$date]['treatment'][] = $entry['service_name'];
+            }
+
+            // Sort by date
+            ksort($grouped);
+
+            $summaryHTML = "";
+            foreach ($grouped as $date => $data) {
+                $historyStr = isset($data['history']) ? implode('<br>', $data['history']) : '-';
+                $treatmentStr = isset($data['treatment']) ? implode('<br>', $data['treatment']) : '-';
+
+                $summaryHTML .= "
+                    <tr>
+                        <td>{$date}</td>
+                        <td>{$historyStr}</td>
+                        <td>{$treatmentStr}</td>
+                    </tr>
+                ";
+            }
+
+            $tabulatedSummary = "
+                <table cellspacing='0px' cellpadding='2px'>
+                    <thead>
+                        <tr class='heading'>
+                            <th style='width:35%;'>
+                                DATE
+                            </th>
+                            <th style='width:20%; text-align:center;'>
+                                HISTORY
+                            </th>
+                            <th style='width:25%; text-align:right;'>
+                                TREATMENT
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        $summaryHTML
+                    </tbody>
+                </table>
+            ";
+
             $relativePathLogo = str_replace('http://tezicare-api.tezi.co.ke/storage/', '', $patientSession->hospital->logo);
             $logo = '/var/www/tezicare-api.tezi.co.ke/storage/app/public/' . $relativePathLogo;
 
@@ -1026,7 +1079,8 @@ class PatientSessionController extends Controller
                 'lab_report' => $testsString,
                 'treatment' => $treatmentString,
                 'discharge_treatment' => $drugsString,
-                'recommendation' => $recommendationsString
+                'recommendation' => $recommendationsString,
+                'tabulated_summary' => $tabulatedSummary
             ];
 
             $template = DocumentTemplate::where('hospital_id', $hospital_id)->where('title', 'DISCHARGE SUMMARY')->first();
