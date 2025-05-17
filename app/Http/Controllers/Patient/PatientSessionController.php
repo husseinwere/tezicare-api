@@ -996,6 +996,7 @@ class PatientSessionController extends Controller
             }
 
             $dentalServices = PatientDentalService::where('session_id', $patientSession->id)->where('status', 'ACTIVE')->get();
+            $summary = ClinicalSummaryRecord::where('session_id', $patientSession->id)->get();
             $grouped = [];
 
             // Group names by date
