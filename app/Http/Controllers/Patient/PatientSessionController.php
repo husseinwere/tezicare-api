@@ -1021,7 +1021,7 @@ class PatientSessionController extends Controller
 
                 $summaryHTML .= "
                     <tr>
-                        <td>{$date}</td>
+                        <td style='width: 150px;'>{$date}</td>
                         <td>{$historyStr}</td>
                         <td>{$treatmentStr}</td>
                     </tr>
@@ -1032,13 +1032,13 @@ class PatientSessionController extends Controller
                 <table cellspacing='0px' cellpadding='2px'>
                     <thead>
                         <tr class='heading'>
-                            <th style='width:35%;'>
+                            <th style='width: 150px;'>
                                 DATE
                             </th>
-                            <th style='width:20%; text-align:center;'>
+                            <th>
                                 HISTORY
                             </th>
-                            <th style='width:25%; text-align:right;'>
+                            <th>
                                 TREATMENT
                             </th>
                         </tr>
