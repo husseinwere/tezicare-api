@@ -404,10 +404,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $consultationDate
-                        <td style='width:35%;'>Registration</td>
-                        <td style='width:20%; text-align:center;'>1</td>
-                        <td style='width:25%; text-align:right;'>$registration_fee</td>
-                        <td style='width:20%; text-align:right;'>$registration_fee</td>
+                        <td style='text-align: left;'>Registration</td>
+                        <td style='width: 100px; text-align:center;'>1</td>
+                        <td style='text-align:right;'>$registration_fee</td>
+                        <td style='text-align:right;'>$registration_fee</td>
                     </tr>
                 ";
             }
@@ -415,10 +415,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $consultationDate
-                        <td style='width:35%;'>Consultation - $consultation->name</td>
-                        <td style='width:20%; text-align:center;'>1</td>
-                        <td style='width:25%; text-align:right;'>$consultation_fee</td>
-                        <td style='width:20%; text-align:right;'>$consultation_fee</td>
+                        <td style='text-align: left;'>Consultation - $consultation->name</td>
+                        <td style='width: 100px; text-align:center;'>1</td>
+                        <td style='text-align:right;'>$consultation_fee</td>
+                        <td style='text-align:right;'>$consultation_fee</td>
                     </tr>
                 ";
             }
@@ -438,10 +438,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -463,10 +463,10 @@ class PatientSessionController extends Controller
                     $itemsHTML .= "
                         <tr class='item'>
                             <td style='width: 120px;'>$item->quantity Day(s)</td>
-                            <td style='width:35%;'>Bed Charges ($ward->name)</td>
-                            <td style='width:20%; text-align:center;'>$item->quantity</td>
-                            <td style='width:25%; text-align:right;'>$rate</td>
-                            <td style='width:20%; text-align:right;'>$total</td>
+                            <td style='text-align: left;'>Bed Charges ($ward->name)</td>
+                            <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                            <td style='text-align:right;'>$rate</td>
+                            <td style='text-align:right;'>$total</td>
                         </tr>
                     ";
                 }
@@ -485,10 +485,10 @@ class PatientSessionController extends Controller
                     $itemsHTML .= "
                         <tr class='item'>
                             <td style='width: 120px;'>$item->quantity Day(s)</td>
-                            <td style='width:35%;'>Ward Rounds (Doctor)</td>
-                            <td style='width:20%; text-align:center;'>$item->quantity</td>
-                            <td style='width:25%; text-align:right;'>$rate</td>
-                            <td style='width:20%; text-align:right;'>$total</td>
+                            <td style='text-align: left;'>Ward Rounds (Doctor)</td>
+                            <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                            <td style='text-align:right;'>$rate</td>
+                            <td style='text-align:right;'>$total</td>
                         </tr>
                     ";
                 }
@@ -507,10 +507,10 @@ class PatientSessionController extends Controller
                     $itemsHTML .= "
                         <tr class='item'>
                             <td style='width: 120px;'>$item->quantity Day(s)</td>
-                            <td style='width:35%;'>Ward Rounds (Nurse)</td>
-                            <td style='width:20%; text-align:center;'>$item->quantity</td>
-                            <td style='width:25%; text-align:right;'>$rate</td>
-                            <td style='width:20%; text-align:right;'>$total</td>
+                            <td style='text-align: left;'>Ward Rounds (Nurse)</td>
+                            <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                            <td style='text-align:right;'>$rate</td>
+                            <td style='text-align:right;'>$total</td>
                         </tr>
                     ";
                 }
@@ -529,10 +529,10 @@ class PatientSessionController extends Controller
                     $itemsHTML .= "
                         <tr class='item'>
                             <td>$itemDate</td>
-                            <td style='width:35%;'>$item->name</td>
-                            <td style='width:20%; text-align:center;'>$item->quantity</td>
-                            <td style='width:25%; text-align:right;'>$rate</td>
-                            <td style='width:20%; text-align:right;'>$totalPrice</td>
+                            <td style='text-align: left;'>$item->name</td>
+                            <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                            <td style='text-align:right;'>$rate</td>
+                            <td style='text-align:right;'>$totalPrice</td>
                         </tr>
                     ";
                 }
@@ -551,10 +551,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->service_name</td>
-                        <td style='width:20%; text-align:center;'>1</td>
-                        <td style='width:25%; text-align:right;'>$price</td>
-                        <td style='width:20%; text-align:right;'>$price</td>
+                        <td style='text-align: left;'>$item->service_name</td>
+                        <td style='width: 100px; text-align:center;'>1</td>
+                        <td style='text-align:right;'>$price</td>
+                        <td style='text-align:right;'>$price</td>
                     </tr>
                 ";
             }
@@ -574,10 +574,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -597,10 +597,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->service_name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->service_name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -620,10 +620,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -643,10 +643,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->non_pharmaceutical_name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->non_pharmaceutical_name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -666,10 +666,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -687,10 +687,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->test_name</td>
-                        <td style='width:20%; text-align:center;'>1</td>
-                        <td style='width:25%; text-align:right;'>$price</td>
-                        <td style='width:20%; text-align:right;'>$price</td>
+                        <td style='text-align: left;'>$item->test_name</td>
+                        <td style='width: 100px; text-align:center;'>1</td>
+                        <td style='text-align:right;'>$price</td>
+                        <td style='text-align:right;'>$price</td>
                     </tr>
                 ";
             }
@@ -710,10 +710,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -733,10 +733,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->drug_name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->drug_name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -756,10 +756,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -779,10 +779,10 @@ class PatientSessionController extends Controller
                 $itemsHTML .= "
                     <tr class='item'>
                         $itemDate
-                        <td style='width:35%;'>$item->name</td>
-                        <td style='width:20%; text-align:center;'>$item->quantity</td>
-                        <td style='width:25%; text-align:right;'>$rate</td>
-                        <td style='width:20%; text-align:right;'>$totalPrice</td>
+                        <td style='text-align: left;'>$item->name</td>
+                        <td style='width: 100px; text-align:center;'>$item->quantity</td>
+                        <td style='text-align:right;'>$rate</td>
+                        <td style='text-align:right;'>$totalPrice</td>
                     </tr>
                 ";
             }
@@ -818,16 +818,16 @@ class PatientSessionController extends Controller
                     <thead>
                         <tr class='heading'>
                             $dateColumn
-                            <th style='width:35%;'>
+                            <th>
                                 ITEM
                             </th>
-                            <th style='width:20%; text-align:center;'>
+                            <th style='width: 100px;'>
                                 QTY.
                             </th>
-                            <th style='width:25%; text-align:right;'>
+                            <th style='text-align:right;'>
                                 PRICE
                             </th>
-                            <th style='width:20%; text-align:right;'>
+                            <th style='text-align:right;'>
                                 TOTAL
                             </th>
                         </tr>
@@ -836,10 +836,10 @@ class PatientSessionController extends Controller
                         $itemsHTML
                         <tr class='item'>
                             $dateFooter
-                            <td style='width:35%;'></td>
-                            <td style='width:20%; text-align:center;'></td>
-                            <td style='width:25%; text-align:right;'><b> Grand Total </b></td>
-                            <td style='width:20%; text-align:right;'>$totalInvoiceAmount</td>
+                            <td style='text-align: left;'></td>
+                            <td style='width: 100px;'></td>
+                            <td style='text-align:right;'><b> Grand Total </b></td>
+                            <td style='text-align:right;'>$totalInvoiceAmount</td>
                         </tr>
                     </tbody>
                 </table>
