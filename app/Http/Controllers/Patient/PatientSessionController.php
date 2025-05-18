@@ -377,10 +377,12 @@ class PatientSessionController extends Controller
 
     public function printInvoice(string $id) {
         $hospital_id = Auth::user()->hospital_id;
-        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor'])->where('hospital_id', $hospital_id)->where('id', $id)->first();
+        $patientSession = PatientSession::with(['hospital', 'patient', 'doctor', 'consultation'])->where('hospital_id', $hospital_id)->where('id', $id)->first();
 
         if($patientSession){
             $patientSession->patient->age = $this->calculateAge($patientSession->patient->dob);
+            $isInpatient = $patientSession->patient_type == 'INPATIENT';
+            $consultation = $patientSession->consultation;
 
             $totalInvoiceAmount = 0;
 
@@ -395,9 +397,13 @@ class PatientSessionController extends Controller
 
             $itemsHTML = "";
 
+            $consultationDate = date('d/m/Y', strtotime($patientSession->created_at));
+            $consultationDate = $isInpatient ? "<td>$consultationDate</td>" : "";
+
             if($registration_fee > 0) {
                 $itemsHTML .= "
                     <tr class='item'>
+                        $consultationDate
                         <td style='width:35%;'>Registration</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$registration_fee</td>
@@ -408,7 +414,8 @@ class PatientSessionController extends Controller
             if($consultation_fee > 0) {
                 $itemsHTML .= "
                     <tr class='item'>
-                        <td style='width:35%;'>Consultation</td>
+                        $consultationDate
+                        <td style='width:35%;'>Consultation - $consultation->name</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$consultation_fee</td>
                         <td style='width:20%; text-align:right;'>$consultation_fee</td>
@@ -425,8 +432,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->rate, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -435,7 +446,7 @@ class PatientSessionController extends Controller
                 ";
             }
 
-            if($patientSession->patient_type == 'INPATIENT') {
+            if($isInpatient) {
                 //BED FEES
                 $bedRecords = WardRound::with('bed.ward')
                                         ->select('bed_id', 'bed_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(bed_price) as total'))
@@ -451,6 +462,7 @@ class PatientSessionController extends Controller
 
                     $itemsHTML .= "
                         <tr class='item'>
+                            <td>$item->quantity Day(s)</td>
                             <td style='width:35%;'>Bed Charges ($ward->name)</td>
                             <td style='width:20%; text-align:center;'>$item->quantity</td>
                             <td style='width:25%; text-align:right;'>$rate</td>
@@ -472,6 +484,7 @@ class PatientSessionController extends Controller
 
                     $itemsHTML .= "
                         <tr class='item'>
+                            <td>$item->quantity Day(s)</td>
                             <td style='width:35%;'>Ward Rounds (Doctor)</td>
                             <td style='width:20%; text-align:center;'>$item->quantity</td>
                             <td style='width:25%; text-align:right;'>$rate</td>
@@ -493,6 +506,7 @@ class PatientSessionController extends Controller
 
                     $itemsHTML .= "
                         <tr class='item'>
+                            <td>$item->quantity Day(s)</td>
                             <td style='width:35%;'>Ward Rounds (Nurse)</td>
                             <td style='width:20%; text-align:center;'>$item->quantity</td>
                             <td style='width:25%; text-align:right;'>$rate</td>
@@ -510,8 +524,11 @@ class PatientSessionController extends Controller
                     $rate = number_format($item->rate, 2);
                     $totalPrice = number_format($totalPrice, 2);
 
+                    $itemDate = date('d/m/Y', strtotime($item->created_at));
+
                     $itemsHTML .= "
                         <tr class='item'>
+                            <td>$itemDate</td>
                             <td style='width:35%;'>$item->name</td>
                             <td style='width:20%; text-align:center;'>$item->quantity</td>
                             <td style='width:25%; text-align:right;'>$rate</td>
@@ -528,8 +545,12 @@ class PatientSessionController extends Controller
 
                 $price = number_format($item->price, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->service_name</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$price</td>
@@ -547,8 +568,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->rate, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -566,8 +591,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->unit_price, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->service_name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -585,8 +614,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->rate, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -604,8 +637,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->unit_price, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->non_pharmaceutical_name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -623,8 +660,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->rate, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -640,8 +681,12 @@ class PatientSessionController extends Controller
 
                 $price = number_format($item->price, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->test_name</td>
                         <td style='width:20%; text-align:center;'>1</td>
                         <td style='width:25%; text-align:right;'>$price</td>
@@ -659,8 +704,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->rate, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -678,8 +727,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->unit_price, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->drug_name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -697,8 +750,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->rate, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -716,8 +773,12 @@ class PatientSessionController extends Controller
                 $rate = number_format($item->rate, 2);
                 $totalPrice = number_format($totalPrice, 2);
 
+                $itemDate = date('d/m/Y', strtotime($item->created_at));
+                $itemDate = $isInpatient ? "<td>$itemDate</td>" : "";
+
                 $itemsHTML .= "
                     <tr class='item'>
+                        $itemDate
                         <td style='width:35%;'>$item->name</td>
                         <td style='width:20%; text-align:center;'>$item->quantity</td>
                         <td style='width:25%; text-align:right;'>$rate</td>
@@ -749,10 +810,13 @@ class PatientSessionController extends Controller
                 ";
             }
 
+            $dateColumn = $isInpatient ? "<th>DATE</th>" : "";
+
             $content = "
                 <table cellspacing='0px' cellpadding='2px'>
                     <thead>
                         <tr class='heading'>
+                            $dateColumn
                             <th style='width:35%;'>
                                 ITEM
                             </th>
@@ -999,13 +1063,13 @@ class PatientSessionController extends Controller
             $summary = ClinicalSummaryRecord::where('session_id', $patientSession->id)->get();
             $grouped = [];
 
-            // Group names by date
+            // Group history by date
             foreach ($summary as $entry) {
                 $date = date('Y-m-d', strtotime($entry['created_at']));
                 $grouped[$date]['history'][] = $entry['summary'];
             }
 
-            // Group types by date
+            // Group treatment by date
             foreach ($dentalServices as $entry) {
                 $date = date('Y-m-d', strtotime($entry['created_at']));
                 $grouped[$date]['treatment'][] = $entry['service_name'];
