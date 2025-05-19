@@ -35,7 +35,7 @@ class InsuranceCoverController extends Controller
         $createdCover = InsuranceCover::create($data);
 
         if($createdCover){
-            if($data['rebate_amount']) {
+            if($request->rebate_amount) {
                 $createdCover->sha()->create([
                     'insurance_id' => $createdCover->id,
                     'rebate_amount' => $request->rebate_amount
@@ -63,10 +63,18 @@ class InsuranceCoverController extends Controller
         $updatedCover = $cover->update($data);
 
         if($updatedCover){
-            if($data['rebate_amount']) {
-                $cover->sha()->update([
-                    'rebate_amount' => $data['rebate_amount']
-                ]);
+            if($request->rebate_amount) {
+                if($cover->sha) {
+                    $cover->sha()->update([
+                        'rebate_amount' => $data['rebate_amount']
+                    ]);
+                }
+                else {
+                    $cover->sha()->create([
+                        'insurance_id' => $cover->id,
+                        'rebate_amount' => $data['rebate_amount']
+                    ]);
+                }
             }
             else {
                 if($cover->sha) {
