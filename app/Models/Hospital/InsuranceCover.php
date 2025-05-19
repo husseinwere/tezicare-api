@@ -16,4 +16,9 @@ class InsuranceCover extends Model
         'created_by',
         'status'
     ];
+
+    public function sha()
+    {
+        return $this->hasOne(ShaInsurance::class, 'insurance_id');
+    }
 }

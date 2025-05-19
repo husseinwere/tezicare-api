@@ -131,6 +131,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
         $user->status = 'DELETED';
+        $user->email = $user->email . '_' . time() . '@deleted.com';
 
         if($user->save()) {
             return response(null, Response::HTTP_NO_CONTENT);

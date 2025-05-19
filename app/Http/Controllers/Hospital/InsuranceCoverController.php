@@ -17,7 +17,7 @@ class InsuranceCoverController extends Controller
     {
         $hospital_id = Auth::user()->hospital_id;
 
-        return InsuranceCover::where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
+        return InsuranceCover::with(['sha'])->where('hospital_id', $hospital_id)->where('status', 'ACTIVE')->get();
     }
 
     /**
@@ -35,6 +35,13 @@ class InsuranceCoverController extends Controller
         $createdCover = InsuranceCover::create($data);
 
         if($createdCover){
+            if($data['rebate_amount']) {
+                $createdCover->sha()->create([
+                    'insurance_id' => $createdCover->id,
+                    'rebate_amount' => $request->rebate_amount
+                ]);
+            }
+
             return response(null, Response::HTTP_CREATED);
         }
         else {
@@ -52,10 +59,21 @@ class InsuranceCoverController extends Controller
         ]);
         $data = $request->all();
 
-        $cover = InsuranceCover::find($id);
+        $cover = InsuranceCover::with('sha')->find($id);
         $updatedCover = $cover->update($data);
 
         if($updatedCover){
+            if($data['rebate_amount']) {
+                $cover->sha()->update([
+                    'rebate_amount' => $data['rebate_amount']
+                ]);
+            }
+            else {
+                if($cover->sha) {
+                    $cover->sha()->delete();
+                }
+            }
+
             return response(null, Response::HTTP_OK);
         }
         else {
