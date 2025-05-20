@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment\Appointment;
 use App\Models\Billing\InvoiceAddition;
+use App\Models\Billing\PaymentRecord;
 use App\Models\Billing\PaymentRequest;
 use App\Models\Hospital\DocumentTemplate;
+use App\Models\Hospital\ShaInsurance;
 use App\Models\Patient\ClinicalSummaryRecord;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientDentalService;
@@ -787,8 +789,6 @@ class PatientSessionController extends Controller
                 ";
             }
 
-            $totalInvoiceAmount = number_format($totalInvoiceAmount, 2);
-
             //PATIENT DIAGNOSIS
             $diagnosis = PatientDiagnosis::where('session_id', $id)->pluck('diagnosis')->toArray();
             $diagnosisString = "<ul>";
@@ -810,8 +810,59 @@ class PatientSessionController extends Controller
                 ";
             }
 
-            $dateColumn = $isInpatient ? "<th style='width: 120px;'>DATE</th>" : "";
-            $dateFooter = $isInpatient ? "<td style='width: 120px;'></td>" : "";
+            $dateColumn = "";
+            if($isInpatient) {
+                $dateColumn = "<th style='width: 120px;'>DATE</th>";
+                $totalCashPayments = PaymentRecord::where('session_id', $id)->whereIn('payment_method', ['Cash', 'MPESA'])
+                                                    ->where('status', '<>', 'DELETED')->sum('amount');
+                $deductions = $totalCashPayments;
+
+                $rebate = "";
+                if($patientSession->insurance_id) {
+                    $shaInsurance = ShaInsurance::where('hospital_id', $hospital_id)->first();
+                    if($shaInsurance->insurance_id != $patientSession->insurance_id) {
+                        $inpatientDays = WardRound::where('session_id', $id)->count();
+                        $totalRebate = $inpatientDays * $shaInsurance->rebate_amount;
+                        $deductions += $totalRebate;
+                        $totalRebate = number_format($totalRebate, 2);
+                        $rebate = "
+                            <tr class='total'>
+                                <td colspan='3' style='text-align: right;'><b>SHA REBATE</b></td>
+                                <td style='text-align:right;'>$totalRebate</td>
+                            </tr>
+                        ";
+                    }
+                }
+
+                $balance = $totalInvoiceAmount - $deductions;
+                $balance = number_format($balance, 2);
+                $totalCashPayments = number_format($totalCashPayments, 2);
+                $totalInvoiceAmount = number_format($totalInvoiceAmount, 2);
+                $totalsHTML = "
+                    <tr class='total'>
+                        <td colspan='4' style='text-align: right;'><b>TOTAL</b></td>
+                        <td style='text-align:right;'>$totalInvoiceAmount</td>
+                    </tr>
+                    <tr class='total'>
+                        <td colspan='4' style='text-align: right;'><b>CASH PAID</b></td>
+                        <td style='text-align:right;'>$totalCashPayments</td>
+                    </tr>
+                    $rebate
+                    <tr class='total'>
+                        <td colspan='4' style='text-align: right;'><b>BALANCE</b></td>
+                        <td style='text-align:right;'>$balance</td>
+                    </tr>
+                ";
+            }
+            else {
+                $totalInvoiceAmount = number_format($totalInvoiceAmount, 2);
+                $totalsHTML = "
+                    <tr class='total'>
+                        <td colspan='3' style='text-align: right;'><b>TOTAL</b></td>
+                        <td style='text-align:right;'>$totalInvoiceAmount</td>
+                    </tr>
+                ";
+            }
 
             $content = "
                 <table cellspacing='0px' cellpadding='2px'>
@@ -834,13 +885,7 @@ class PatientSessionController extends Controller
                     </thead>
                     <tbody>
                         $itemsHTML
-                        <tr class='item'>
-                            $dateFooter
-                            <td style='text-align: left;'></td>
-                            <td style='width: 100px;'></td>
-                            <td style='text-align:right;'><b> Grand Total </b></td>
-                            <td style='text-align:right;'>$totalInvoiceAmount</td>
-                        </tr>
+                        $totalsHTML
                     </tbody>
                 </table>
             ";
