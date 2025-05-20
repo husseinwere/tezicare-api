@@ -828,7 +828,7 @@ class PatientSessionController extends Controller
                         $totalRebate = number_format($totalRebate, 2);
                         $rebate = "
                             <tr class='total'>
-                                <td colspan='3' style='text-align: right;'><b>SHA REBATE</b></td>
+                                <td colspan='4' style='text-align: right;'><b>SHA REBATE</b></td>
                                 <td style='text-align:right;'>$totalRebate</td>
                             </tr>
                         ";
