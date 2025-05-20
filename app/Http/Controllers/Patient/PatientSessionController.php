@@ -8,7 +8,7 @@ use App\Models\Billing\InvoiceAddition;
 use App\Models\Billing\PaymentRecord;
 use App\Models\Billing\PaymentRequest;
 use App\Models\Hospital\DocumentTemplate;
-use App\Models\Hospital\ShaInsurance;
+use App\Models\Hospital\InsuranceCover;
 use App\Models\Patient\ClinicalSummaryRecord;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientDentalService;
@@ -819,7 +819,8 @@ class PatientSessionController extends Controller
 
                 $rebate = "";
                 if($patientSession->insurance_id) {
-                    $shaInsurance = ShaInsurance::where('hospital_id', $hospital_id)->first();
+                    $shaInsurance = InsuranceCover::with('sha')->where('hospital_id', $hospital_id)->whereHas('sha')->first();
+                    $shaInsurance = $shaInsurance->sha;
                     if($shaInsurance->insurance_id != $patientSession->insurance_id) {
                         $inpatientDays = WardRound::where('session_id', $id)->count();
                         $totalRebate = $inpatientDays * $shaInsurance->rebate_amount;
