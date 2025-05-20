@@ -25,6 +25,7 @@ class PatientVisitController extends Controller
             return response(['message' => 'A visit has already been started in this session.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $data['hospital_id'] = Auth::user()->hospital_id;
         $data['created_by'] = Auth::id();
 
         $createdVisit = PatientVisit::create($data);
