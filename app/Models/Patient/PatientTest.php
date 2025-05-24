@@ -24,6 +24,10 @@ class PatientTest extends Model
         'status'
     ];
 
+    public function session() {
+        return $this->belongsTo(PatientSession::class, 'session_id');
+    }
+
     public function lab_test() {
         return $this->belongsTo(LabTest::class, 'test_id');
     }

@@ -21,7 +21,7 @@ class LabTestController extends Controller
         $hospital_id = Auth::user()->hospital_id;
         $lab = ucfirst($request->query('lab'));
         
-        $query = LabTest::with(['prices'])->where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
+        $query = LabTest::with(['prices', 'parameters'])->where('hospital_id', $hospital_id)->where('status', 'ACTIVE');
 
         if($lab) {
             $query->where('lab', $lab);
@@ -29,6 +29,11 @@ class LabTestController extends Controller
 
         return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
+
+    public function show(string $id)
+    {
+        return LabTest::with(['prices', 'parameters'])->find($id);
+    }   
 
     /**
      * Store a newly created resource in storage.

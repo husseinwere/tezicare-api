@@ -101,7 +101,7 @@ class PaymentRecordController extends Controller
 
         $paymentRequest = PaymentRequest::find($data['request_id']);
         if($paymentRequest->status == 'PAID') {
-            return response(['message' => 'Payment request has already been paid'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response(['message' => 'Payment already recorded for this request'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
             $payments = $data['payments'];

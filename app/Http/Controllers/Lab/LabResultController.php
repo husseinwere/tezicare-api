@@ -27,19 +27,19 @@ class LabResultController extends Controller
         $createdResult = LabResult::create($data);        
 
         if($createdResult){
-            if($request->hasFile('files')) {
-                foreach($request->file('files') as $file) {
-                    $path = $file->store('public/lab-results');
-                    $url = asset(str_replace('public', 'storage', $path));
+            // if($request->hasFile('files')) {
+            //     foreach($request->file('files') as $file) {
+            //         $path = $file->store('public/lab-results');
+            //         $url = asset(str_replace('public', 'storage', $path));
 
-                    $fileUpload = [
-                        'result_id' => $createdResult->id,
-                        'url' => $url
-                    ];
+            //         $fileUpload = [
+            //             'result_id' => $createdResult->id,
+            //             'url' => $url
+            //         ];
                     
-                    LabResultUpload::create($fileUpload);
-                }
-            }
+            //         LabResultUpload::create($fileUpload);
+            //     }
+            // }
 
             return response(null, Response::HTTP_CREATED);
         }
@@ -59,19 +59,19 @@ class LabResultController extends Controller
         $updatedResult = $result->update($data);
 
         if($updatedResult){
-            if($request->hasFile('files')) {
-                foreach($request->file('files') as $file) {
-                    $path = $file->store('public/lab-results');
-                    $url = asset(str_replace('public', 'storage', $path));
+            // if($request->hasFile('files')) {
+            //     foreach($request->file('files') as $file) {
+            //         $path = $file->store('public/lab-results');
+            //         $url = asset(str_replace('public', 'storage', $path));
 
-                    $fileUpload = [
-                        'result_id' => $id,
-                        'url' => $url
-                    ];
+            //         $fileUpload = [
+            //             'result_id' => $id,
+            //             'url' => $url
+            //         ];
                     
-                    LabResultUpload::create($fileUpload);
-                }
-            }
+            //         LabResultUpload::create($fileUpload);
+            //     }
+            // }
 
             return response(null, Response::HTTP_OK);
         }

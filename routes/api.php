@@ -6,7 +6,6 @@ use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentRecordController;
 use App\Http\Controllers\Billing\PaymentRequestController;
 use App\Http\Controllers\Dental\DentalServiceController;
-use App\Http\Controllers\Doctor\DoctorConsultationController;
 use App\Http\Controllers\Hospital\ConsultationTypeController;
 use App\Http\Controllers\Hospital\DocumentTemplateController;
 use App\Http\Controllers\Hospital\HospitalController;
@@ -15,6 +14,7 @@ use App\Http\Controllers\Inventory\NonPharmaceuticalController;
 use App\Http\Controllers\Inventory\PharmaceuticalController;
 use App\Http\Controllers\Lab\LabResultController;
 use App\Http\Controllers\Lab\LabTestController;
+use App\Http\Controllers\Lab\LabTestParameterController;
 use App\Http\Controllers\Nurse\NursingServiceController;
 use App\Http\Controllers\Patient\ClinicalSummaryRecordController;
 use App\Http\Controllers\Patient\NurseInstructionController;
@@ -32,6 +32,7 @@ use App\Http\Controllers\Patient\PatientRecommendationController;
 use App\Http\Controllers\Patient\PatientSessionController;
 use App\Http\Controllers\Patient\PatientSymptomController;
 use App\Http\Controllers\Patient\PatientTestController;
+use App\Http\Controllers\Patient\PatientTestParameterController;
 use App\Http\Controllers\Patient\PatientVisitController;
 use App\Http\Controllers\Patient\PatientVitalsController;
 use App\Http\Controllers\Patient\WardRoundController;
@@ -94,9 +95,6 @@ Route::group(['middleware' => ['api', 'auth:sanctum']], function() {
     Route::resource('queue/doctor', DoctorQueueController::class);
     Route::get('/queue/doctor/complete-session/{sessionId}', [DoctorQueueController::class, 'completeSession']);
 
-    //DOCTOR CONSULTATION
-    Route::resource('doctor-consultations', DoctorConsultationController::class);
-
     //NURSE QUEUE
     Route::resource('queue/nurse', NurseQueueController::class);
     Route::get('/queue/nurse/complete-session/{sessionId}', [NurseQueueController::class, 'completeSession']);
@@ -155,6 +153,7 @@ Route::group(['middleware' => ['api', 'auth:sanctum']], function() {
     //PATIENT TESTS
     Route::resource('patient-tests', PatientTestController::class);
     Route::resource('lab-results', LabResultController::class);
+    Route::resource('patient-test-parameters', PatientTestParameterController::class);
 
     //PATIENT PRESCRIPTION
     Route::resource('patient-prescription', PatientPrescriptionController::class);
@@ -173,6 +172,7 @@ Route::group(['middleware' => ['api', 'auth:sanctum']], function() {
 
     //LAB TESTS
     Route::resource('lab-tests', LabTestController::class);
+    Route::resource('lab-test-parameters', LabTestParameterController::class);
 
     //NURSING SERVICES
     Route::resource('nursing-services', NursingServiceController::class);

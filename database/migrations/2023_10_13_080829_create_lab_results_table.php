@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('patient_test_id');
             $table->foreign('patient_test_id')->references('id')->on('patient_tests');
-            $table->string('result');
-            $table->string('description')->nullable();
+            $table->string('summary')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();

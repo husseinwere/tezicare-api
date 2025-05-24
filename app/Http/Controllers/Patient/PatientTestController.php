@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Models\Lab\LabResult;
 use App\Models\Lab\LabTest;
 use App\Models\Patient\PatientSession;
 use App\Models\Patient\PatientTest;
@@ -21,6 +22,12 @@ class PatientTestController extends Controller
 
         return PatientTest::with(['lab_test', 'lab_result.lab_result_uploads', 'lab_result.created_by', 'created_by'])
                             ->where('patient_tests.session_id', $sessionId)->get();
+    }
+
+    public function show(string $id)
+    {
+        return PatientTest::with(['session.patient', 'lab_test.parameters', 'lab_result.parameters', 'lab_result.lab_result_uploads', 'lab_result.created_by', 'created_by'])
+                            ->where('patient_tests.id', $id)->first();
     }
 
     /**
@@ -53,6 +60,11 @@ class PatientTestController extends Controller
         $createdTest = PatientTest::create($data);
 
         if($createdTest){
+            LabResult::create([
+                'patient_test_id' => $createdTest->id,
+                'created_by' => $data['created_by']
+            ]);
+
             return response(null, Response::HTTP_CREATED);
         }
         else {

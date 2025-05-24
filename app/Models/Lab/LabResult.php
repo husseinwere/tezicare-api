@@ -3,6 +3,7 @@
 namespace App\Models\Lab;
 
 use App\Models\Patient\PatientTest;
+use App\Models\Patient\PatientTestParameter;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,13 +15,16 @@ class LabResult extends Model
 
     protected $fillable = [
         'patient_test_id',
-        'result',
-        'description',
+        'summary',
         'created_by'
     ];
 
     public function patient_test() {
         return $this->belongsTo(PatientTest::class);
+    }
+
+    public function parameters() {
+        return $this->hasMany(PatientTestParameter::class);
     }
 
     public function lab_result_uploads(): HasMany {

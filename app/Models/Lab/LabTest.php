@@ -24,6 +24,11 @@ class LabTest extends Model
         return $this->hasMany(LabTestPrice::class);
     }
 
+    public function parameters()
+    {
+        return $this->hasMany(LabTestParameter::class);
+    }
+
     public function created_by()
     {
         return $this->belongsTo(User::class, 'created_by');
