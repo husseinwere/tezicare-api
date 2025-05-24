@@ -1345,14 +1345,13 @@ class PatientSessionController extends Controller
             $testsString = "<ul>";
             foreach($tests as $test) {
                 $testResult = "Not Done";
-                $lab_test = $test->lab_test;
                 $lab_result = $test->lab_result;
                 if($lab_result) {
                     $testResult = "<i>$lab_result->summary</i>";
                 }
 
                 $testsString .= "
-                    <li><b>$lab_test->test_name: </b>$testResult</li>
+                    <li><b>$test->test_name: </b>$testResult</li>
                 ";
             }
             $testsString .= "</ul>";
