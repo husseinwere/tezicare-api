@@ -1348,12 +1348,11 @@ class PatientSessionController extends Controller
                 $lab_test = $test->lab_test;
                 $lab_result = $test->lab_result;
                 if($lab_result) {
-                    $description = $lab_result->description ? $lab_result->description : "";
-                    $testResult = "<i>$lab_result->result</i> <div>$description</div>";
+                    $testResult = "<i>$lab_result->summary</i>";
                 }
 
                 $testsString .= "
-                    <li><b>$lab_test->test: </b>$testResult</li>
+                    <li><b>$lab_test->test_name: </b>$testResult</li>
                 ";
             }
             $testsString .= "</ul>";
