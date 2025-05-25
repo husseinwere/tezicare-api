@@ -102,6 +102,7 @@ class PatientTestController extends Controller
             return response(['message' => 'You cannot delete paid for or cleared tests.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         else {
+            LabResult::where('patient_test_id', $id)->delete();
             if(PatientTest::destroy($id)) {
                 return response(null, Response::HTTP_NO_CONTENT);
             }
