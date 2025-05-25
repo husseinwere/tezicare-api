@@ -377,7 +377,8 @@ class PatientSessionController extends Controller
         ];
     }
 
-    public function printInvoice(string $id) {
+    public function printInvoice(Request $request, string $id) {
+        $printSha = $request->query('sha');
         $hospital_id = Auth::user()->hospital_id;
         $patientSession = PatientSession::with(['hospital', 'patient', 'doctor', 'consultation'])->where('hospital_id', $hospital_id)->where('id', $id)->first();
 
@@ -821,7 +822,7 @@ class PatientSessionController extends Controller
                 if($patientSession->insurance_id) {
                     $shaInsurance = InsuranceCover::with('sha')->where('hospital_id', $hospital_id)->whereHas('sha')->first();
                     $shaInsurance = $shaInsurance->sha;
-                    if($shaInsurance->insurance_id != $patientSession->insurance_id) {
+                    if($shaInsurance->insurance_id != $patientSession->insurance_id && !$printSha) {
                         $inpatientDays = WardRound::where('session_id', $id)->count();
                         $totalRebate = $inpatientDays * $shaInsurance->rebate_amount;
                         $deductions += $totalRebate;
