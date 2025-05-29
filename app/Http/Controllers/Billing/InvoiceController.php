@@ -70,32 +70,52 @@ class InvoiceController extends Controller
             $nurseRecords = array();
             
             if($patientSession->patient_type == 'INPATIENT') {
-                //BED FEES
-                $bedRecords = WardRound::with('bed.ward')
-                                        ->select('bed_id', 'bed_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(bed_price) as total'))
-                                        ->where('session_id', $sessionId)
-                                        ->groupBy('bed_id', 'bed_price')
-                                        ->get();
-                foreach($bedRecords as $item) {
-                    $totalInvoiceAmount += $item->total;
+                $wardRounds = WardRound::with('bed.ward')
+                    ->where('session_id', $sessionId)
+                    ->get();
+
+                if ($wardRounds->count() > 1) {
+                    $wardRounds->pop();
                 }
 
-                //DOCTOR ROUND FEES
-                $doctorRecords = WardRound::select('doctor_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(doctor_price) as total'))
-                                        ->where('session_id', $sessionId)
-                                        ->groupBy('doctor_price')
-                                        ->get();
-                foreach($doctorRecords as $item) {
-                    $totalInvoiceAmount += $item->total;
+                $bedRecords = $wardRounds->groupBy(function ($item) {
+                    return $item->bed_id . '-' . $item->bed_price;
+                })->map(function ($group) {
+                    return [
+                        'bed_id' => $group->first()->bed_id,
+                        'bed_price' => $group->first()->bed_price,
+                        'quantity' => $group->count(),
+                        'total' => $group->sum('bed_price'),
+                        'bed' => $group->first()->bed ?? null,
+                    ];
+                })->values()->all();
+
+                foreach ($bedRecords as $item) {
+                    $totalInvoiceAmount += $item['total'];
                 }
 
-                //NURSE ROUND FEES
-                $nurseRecords = WardRound::select('nurse_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(nurse_price) as total'))
-                                        ->where('session_id', $sessionId)
-                                        ->groupBy('nurse_price')
-                                        ->get();
-                foreach($nurseRecords as $item) {
-                    $totalInvoiceAmount += $item->total;
+                $doctorRecords = $wardRounds->groupBy('doctor_price')->map(function ($group, $price) {
+                    return [
+                        'doctor_price' => $price,
+                        'quantity' => $group->count(),
+                        'total' => $group->sum('doctor_price'),
+                    ];
+                })->values()->all();
+
+                foreach ($doctorRecords as $item) {
+                    $totalInvoiceAmount += $item['total'];
+                }
+
+                $nurseRecords = $wardRounds->groupBy('nurse_price')->map(function ($group, $price) {
+                    return [
+                        'nurse_price' => $price,
+                        'quantity' => $group->count(),
+                        'total' => $group->sum('nurse_price'),
+                    ];
+                })->values()->all();
+
+                foreach ($nurseRecords as $item) {
+                    $totalInvoiceAmount += $item['total'];
                 }
             }
 

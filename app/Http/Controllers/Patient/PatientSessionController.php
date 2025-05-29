@@ -449,71 +449,70 @@ class PatientSessionController extends Controller
                 ";
             }
 
-            if($isInpatient) {
-                //BED FEES
-                $bedRecords = WardRound::with('bed.ward')
-                                        ->select('bed_id', 'bed_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(bed_price) as total'))
-                                        ->where('session_id', $id)
-                                        ->groupBy('bed_id', 'bed_price')
-                                        ->get();
-                foreach($bedRecords as $item) {
-                    $ward = $item->bed->ward;
-                    $totalInvoiceAmount += $item->total;
+            if ($isInpatient) {
+                $wardRounds = WardRound::with('bed.ward')->where('session_id', $id)->get();
 
-                    $rate = number_format($item->bed_price, 2);
-                    $total = number_format($item->total, 2);
+                if ($wardRounds->count() > 1) {
+                    $wardRounds->pop();
+                }
+
+                // BED FEES
+                $bedRecords = $wardRounds->groupBy(function ($item) {
+                    return $item->bed_id . '-' . $item->bed_price;
+                });
+
+                foreach ($bedRecords as $group) {
+                    $first = $group->first();
+                    $ward = $first->bed->ward;
+                    $quantity = $group->count();
+                    $rate = $first->bed_price;
+                    $total = $group->sum('bed_price');
+
+                    $totalInvoiceAmount += $total;
 
                     $itemsHTML .= "
                         <tr class='item'>
-                            <td style='width: 120px;'>$item->quantity Day(s)</td>
-                            <td style='text-align: left;'>Bed Charges ($ward->name)</td>
-                            <td style='width: 100px; text-align:center;'>$item->quantity</td>
-                            <td style='text-align:right;'>$rate</td>
-                            <td style='text-align:right;'>$total</td>
+                            <td style='width: 120px;'>{$quantity} Day(s)</td>
+                            <td style='text-align: left;'>Bed Charges ({$ward->name})</td>
+                            <td style='width: 100px; text-align:center;'>{$quantity}</td>
+                            <td style='text-align:right;'>" . number_format($rate, 2) . "</td>
+                            <td style='text-align:right;'>" . number_format($total, 2) . "</td>
                         </tr>
                     ";
                 }
 
-                //DOCTOR ROUND FEES
-                $doctorRecords = WardRound::select('doctor_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(doctor_price) as total'))
-                                        ->where('session_id', $id)
-                                        ->groupBy('doctor_price')
-                                        ->get();
-                foreach($doctorRecords as $item) {
-                    $totalInvoiceAmount += $item->total;
-
-                    $rate = number_format($item->doctor_price, 2);
-                    $total = number_format($item->total, 2);
+                // DOCTOR FEES
+                $doctorGroups = $wardRounds->groupBy('doctor_price');
+                foreach ($doctorGroups as $price => $group) {
+                    $quantity = $group->count();
+                    $total = $group->sum('doctor_price');
+                    $totalInvoiceAmount += $total;
 
                     $itemsHTML .= "
                         <tr class='item'>
-                            <td style='width: 120px;'>$item->quantity Day(s)</td>
+                            <td style='width: 120px;'>{$quantity} Day(s)</td>
                             <td style='text-align: left;'>Ward Rounds (Doctor)</td>
-                            <td style='width: 100px; text-align:center;'>$item->quantity</td>
-                            <td style='text-align:right;'>$rate</td>
-                            <td style='text-align:right;'>$total</td>
+                            <td style='width: 100px; text-align:center;'>{$quantity}</td>
+                            <td style='text-align:right;'>" . number_format($price, 2) . "</td>
+                            <td style='text-align:right;'>" . number_format($total, 2) . "</td>
                         </tr>
                     ";
                 }
 
-                //NURSE ROUND FEES
-                $nurseRecords = WardRound::select('nurse_price', DB::raw('COUNT(*) as quantity'), DB::raw('SUM(nurse_price) as total'))
-                                        ->where('session_id', $id)
-                                        ->groupBy('nurse_price')
-                                        ->get();
-                foreach($nurseRecords as $item) {
-                    $totalInvoiceAmount += $item->total;
-
-                    $rate = number_format($item->nurse_price, 2);
-                    $total = number_format($item->total, 2);
+                // NURSE FEES
+                $nurseGroups = $wardRounds->groupBy('nurse_price');
+                foreach ($nurseGroups as $price => $group) {
+                    $quantity = $group->count();
+                    $total = $group->sum('nurse_price');
+                    $totalInvoiceAmount += $total;
 
                     $itemsHTML .= "
                         <tr class='item'>
-                            <td style='width: 120px;'>$item->quantity Day(s)</td>
+                            <td style='width: 120px;'>{$quantity} Day(s)</td>
                             <td style='text-align: left;'>Ward Rounds (Nurse)</td>
-                            <td style='width: 100px; text-align:center;'>$item->quantity</td>
-                            <td style='text-align:right;'>$rate</td>
-                            <td style='text-align:right;'>$total</td>
+                            <td style='width: 100px; text-align:center;'>{$quantity}</td>
+                            <td style='text-align:right;'>" . number_format($price, 2) . "</td>
+                            <td style='text-align:right;'>" . number_format($total, 2) . "</td>
                         </tr>
                     ";
                 }
@@ -823,8 +822,7 @@ class PatientSessionController extends Controller
                     $shaInsurance = InsuranceCover::with('sha')->where('hospital_id', $hospital_id)->whereHas('sha')->first();
                     $shaInsurance = $shaInsurance->sha;
                     if($shaInsurance->insurance_id != $patientSession->insurance_id && !$printSha) {
-                        $inpatientDays = WardRound::where('session_id', $id)->count();
-                        $totalRebate = $inpatientDays * $shaInsurance->rebate_amount;
+                        $totalRebate = $wardRounds->count() * $shaInsurance->rebate_amount;
                         $deductions += $totalRebate;
                         $totalRebate = number_format($totalRebate, 2);
                         $rebate = "
