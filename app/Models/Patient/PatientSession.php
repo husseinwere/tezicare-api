@@ -28,7 +28,8 @@ class PatientSession extends Model
         'doctor_id',
         'discharged',
         'created_by',
-        'status'
+        'status',
+        'created_at'
     ];
 
     protected static function boot()
