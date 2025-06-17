@@ -11,6 +11,7 @@ class LabResultUpload extends Model
 
     protected $fillable = [
         'result_id',
+        'name',
         'url'
     ];
 }

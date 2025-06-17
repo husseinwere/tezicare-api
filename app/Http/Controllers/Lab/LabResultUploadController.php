@@ -19,12 +19,45 @@ class LabResultUploadController extends Controller
         return LabResultUpload::where('result_id', $result_id)->get();
     }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'result_id' => 'required',
+            'name' => 'required',
+            'file' => 'file|mimes:jpg,jpeg,png,pdf|max:10240'
+        ]);
+
+        $data = $request->all();
+
+        if($request->hasFile('file')) {
+            $file = $request->file('file');
+            $path = $file->store('public/lab_uploads');
+            $data['url'] = asset(str_replace('public', 'storage', $path));
+        }
+
+        $createdUpload = LabResultUpload::create($data);
+
+        if($createdUpload){
+            return response(null, Response::HTTP_CREATED);
+        }
+        else {
+            return response(['message' => 'An unexpected error has occurred. Please try again'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        // add delete file logic
+        $upload = LabResultUpload::find($id);
+        if($upload->url) {
+            $filePath = str_replace(asset('storage'), 'public', $upload->url);
+            if(file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
         if(LabResultUpload::destroy($id)) {
             return response(null, Response::HTTP_NO_CONTENT);
         }

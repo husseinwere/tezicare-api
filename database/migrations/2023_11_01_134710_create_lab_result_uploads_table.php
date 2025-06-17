@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('result_id');
             $table->foreign('result_id')->references('id')->on('lab_results');
+            $table->string('name');
             $table->string('url');
             $table->timestamps();
         });

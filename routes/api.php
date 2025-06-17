@@ -13,6 +13,7 @@ use App\Http\Controllers\Hospital\InsuranceCoverController;
 use App\Http\Controllers\Inventory\NonPharmaceuticalController;
 use App\Http\Controllers\Inventory\PharmaceuticalController;
 use App\Http\Controllers\Lab\LabResultController;
+use App\Http\Controllers\Lab\LabResultUploadController;
 use App\Http\Controllers\Lab\LabTestController;
 use App\Http\Controllers\Lab\LabTestParameterController;
 use App\Http\Controllers\Nurse\NursingServiceController;
@@ -153,6 +154,7 @@ Route::group(['middleware' => ['api', 'auth:sanctum']], function() {
     //PATIENT TESTS
     Route::resource('patient-tests', PatientTestController::class);
     Route::resource('lab-results', LabResultController::class);
+    Route::resource('lab-result-uploads', LabResultUploadController::class);
     Route::resource('patient-test-parameters', PatientTestParameterController::class);
 
     //PATIENT PRESCRIPTION
