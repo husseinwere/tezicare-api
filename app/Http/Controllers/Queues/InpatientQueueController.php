@@ -22,12 +22,20 @@ class InpatientQueueController extends QueueBaseController
     {
         $pageSize = $request->query('page_size', 20);
         $pageIndex = $request->query('page_index', 1);
+        $consultation_type = $request->query('consultation_type');
         $hospital_id = Auth::user()->hospital_id;
 
-        return InpatientQueue::with(['session.patient', 'session.doctor', 'bed.ward', 'created_by'])
+        $query = InpatientQueue::with(['session.patient', 'session.doctor', 'bed.ward', 'created_by'])
                             ->where('hospital_id', $hospital_id)
-                            ->whereIn('status', ['ACTIVE', 'CLEARANCE'])
-                            ->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
+                            ->whereIn('status', ['ACTIVE', 'CLEARANCE']);
+                            
+        if($consultation_type) {
+            $query->whereHas('session', function($q) use ($consultation_type) {
+                $q->where('consultation_type', $consultation_type);
+            });
+        }
+
+        return $query->latest()->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     public function show(string $id) {
