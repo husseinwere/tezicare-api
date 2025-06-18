@@ -27,7 +27,7 @@ class PaymentRequestController extends Controller
             $query->where('status', $status);
         }
 
-        return $query ->paginate($pageSize, ['*'], 'page', $pageIndex);
+        return $query->paginate($pageSize, ['*'], 'page', $pageIndex);
     }
 
     /**
