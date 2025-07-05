@@ -66,6 +66,8 @@ Route::get('/test', function() {
     return response()->json(['message' => 'API working']);
 });
 
+Route::get('/data-fix-lab-results', [PatientTestController::class, 'dataFixLabResults']);
+
 Route::post('/auth/login', [UserController::class, 'login']);
 
 Route::group(['middleware' => ['api', 'auth:sanctum']], function() {

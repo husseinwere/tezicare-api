@@ -111,4 +111,20 @@ class PatientTestController extends Controller
             }
         }
     }
+
+    public function dataFixLabResults()
+    {
+        // get patient tests that do not have a lab result
+        $patientTests = PatientTest::doesntHave('lab_result')->get();
+
+        foreach ($patientTests as $test) {
+            LabResult::create([
+                'patient_test_id' => $test->id,
+                'created_by' => $test->created_by
+            ]);
+        }
+
+        return response()->json(['message' => 'Lab results fixed.']);
+    }
+
 }
