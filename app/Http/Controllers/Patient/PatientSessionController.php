@@ -347,9 +347,8 @@ class PatientSessionController extends Controller
             //DIAGNOSIS
             $year = Carbon::parse($startAt)->year;
             $month = Carbon::parse($startAt)->month;
-            
-            $query = PatientDiagnosis::where('hospital_id', $hospital_id)->whereYear('created_at', $year)->whereMonth('created_at', $month);
-            if ($date) { $query->whereDate('created_at', $date); }
+
+            $query = PatientDiagnosis::where('hospital_id', $hospital_id)->whereBetween('created_at', [$startAt, $endAt]);
             
             $diagnosisCounts = $query->select('diagnosis', DB::raw('COUNT(*) as count'))
                                     ->groupBy('diagnosis')
