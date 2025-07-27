@@ -345,6 +345,9 @@ class PatientSessionController extends Controller
             $revisitInpatientCount = $totalInpatientCount - $newInpatientCount;
 
             //DIAGNOSIS
+            $year = Carbon::parse($startAt)->year;
+            $month = Carbon::parse($startAt)->month;
+            
             $query = PatientDiagnosis::where('hospital_id', $hospital_id)->whereYear('created_at', $year)->whereMonth('created_at', $month);
             if ($date) { $query->whereDate('created_at', $date); }
             
