@@ -307,7 +307,7 @@ class PatientSessionController extends Controller
                                     ->where('patient_sessions.patient_type', 'OUTPATIENT')
                                     ->where('patient_sessions.status', 'CLEARED')
                                     ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
-                                    ->where('patients.created_at', '>', $startDate)
+                                    ->where('patients.created_at', '>', $startAt)
                                     ->whereBetween('patient_sessions.created_at', [$startAt, $endAt]);
             $newOutpatientCount = $query->count();
 
@@ -338,7 +338,7 @@ class PatientSessionController extends Controller
                                     ->where('patient_sessions.patient_type', 'INPATIENT')
                                     ->where('patient_sessions.status', 'CLEARED')
                                     ->join('patients', 'patients.id', '=', 'patient_sessions.patient_id')
-                                    ->where('patients.created_at', '>', $startDate)
+                                    ->where('patients.created_at', '>', $startAt)
                                     ->whereBetween('patient_sessions.created_at', [$startAt, $endAt]);
             $newInpatientCount = $query->count();
 
