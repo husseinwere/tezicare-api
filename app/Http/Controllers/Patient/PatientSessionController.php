@@ -914,7 +914,7 @@ class PatientSessionController extends Controller
                 'patient_gender' => $patientSession->patient->gender,
                 'patient_type' => $patientSession->patient_type,
                 'invoice_id' => $patientSession->invoice_number,
-                'invoice_date' => Carbon::now()->format('d/m/Y'),
+                'invoice_date' => Carbon::parse($patientSession->created_at)->format('d/m/Y'),
                 'time_in' => Carbon::parse($patientSession->created_at)->format('d M Y, h:i A'),
                 'time_out' => $patientSession->discharged ? Carbon::parse($patientSession->discharged)->format('d M Y, h:i A') : Carbon::now()->format('d M Y, h:i A'),
                 'officer_in_charge' => $patientSession->doctor ? $patientSession->doctor->first_name . ' ' . $patientSession->doctor->last_name : 'N/A',
