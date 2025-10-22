@@ -1426,8 +1426,7 @@ class PatientSessionController extends Controller
         }
     }
 
-    public function calculateAge($dob)
-    {
+    public function calculateAge($dob) {
         $dob = new DateTime($dob);
         $today = new DateTime('today');
         $age = $dob->diff($today)->y;
