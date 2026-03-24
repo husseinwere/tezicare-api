@@ -31,6 +31,8 @@ WORKDIR /var/www/tezicare-api.tezi.co.ke
 # Copy custom php.ini configuration file
 COPY ./docker/php/php.ini /usr/local/etc/php/php.ini
 
+# Copy custom PHP-FPM pool configuration
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
 
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
