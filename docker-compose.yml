@@ -6,16 +6,15 @@ services:
     container_name: tezicare-app
     working_dir: /var/www/tezicare-api.tezi.co.ke
     user: "${UID}:${GID}"
-    ports:
-      - "9000:9000"
     volumes:
       - .:/var/www/tezicare-api.tezi.co.ke
     depends_on:
       - db
     networks:
       - tezicare
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000"]
+      test: ["CMD", "php", "-v"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -33,8 +32,9 @@ services:
       - app
     networks:
       - tezicare
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:8080"]
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost/nginx-health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -51,15 +51,14 @@ services:
       MYSQL_PASSWORD: s)|]wTB,**
     volumes:
       - dbdata:/var/lib/mysql
-    ports:
-      - "3306:3306"
     networks:
       - tezicare
+    command: --default-authentication-plugin=mysql_native_password
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: tezicare-phpmyadmin
-    restart: always
+    restart: unless-stopped
     ports:
       - "8768:80"
     environment:
@@ -86,3 +85,4 @@ volumes:
 
 networks:
   tezicare:
+    driver: bridge
